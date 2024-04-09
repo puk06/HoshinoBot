@@ -1,0 +1,10 @@
+node_modules/
+ServerDatas/
+Pictures/
+Backups/
+eroaru.mp4
+eronai.mp4
+nigaru.mp4
+nignai.mp4
+package-lock.json
+.env
