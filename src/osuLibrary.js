@@ -354,6 +354,7 @@ class CalculatePPSR {
                 const difficultyObject = {
                     mods: this.mods
                 };
+
                 if (passedObjects) difficultyObject.passedObjects = passedObjects;
                 const difficulty = new rosu.Difficulty(difficultyObject).calculate(map);
                 const PP = new rosu.Performance(params).calculate(difficulty).pp;
