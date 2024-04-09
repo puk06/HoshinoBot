@@ -200,6 +200,10 @@ class CalculatePPSR {
         this.acc = 100;
     }
 
+    setMods(mods) {
+        this._mods = mods;
+    }
+
     /**
      * Retrieves the map data from the specified URL.
      * @returns {Promise<void>} A promise that resolves when the map data is successfully retrieved.
@@ -334,7 +338,7 @@ class CalculatePPSR {
      * @returns {Promise<number>} - A promise that resolves with the calculated PP.
      * @throws {Error} - If an error occurs during the calculation.
      */
-    calculateScorePP(params, mods = this.mods) {
+    calculateScorePP(params, passedObjects) {
         return new Promise(async (resolve, reject) => {
             try {
                 if (this.beatmapData === null) {
@@ -347,9 +351,11 @@ class CalculatePPSR {
                 const map = new rosu.Beatmap(new Uint8Array(Buffer.from(this.beatmapData)));
                 map.convert(this.mode);
 
-                const difficulty = new rosu.Difficulty({
-                    mods: mods
-                }).calculate(map);
+                const difficultyObject = {
+                    mods: this.mods
+                };
+                if (passedObjects) difficultyObject.passedObjects = passedObjects;
+                const difficulty = new rosu.Difficulty(difficultyObject).calculate(map);
                 const PP = new rosu.Performance(params).calculate(difficulty).pp;
 
                 resolve(PP);

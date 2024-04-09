@@ -999,7 +999,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 						nKatu: Number(resulttop5[i].countkatu),
 						combo: Number(resulttop5[i].maxcombo)
 					};
-					const pp = await srData.calculateScorePP(score, mods.calc);
+					const pp = await srData.calculateScorePP(score);
 					rankingdata.push({ name: `\`#${i + 1}\``, value: `**Rank**: ${Utils.rankconverter(resulttop5[i].rank)}　Player: **${resulttop5[i].username}**　Score: **${Number(resulttop5[i].score).toLocaleString()}** \n Combo: **${resulttop5[i].maxcombo}**　**Acc**: **${acc}**%　PP: **${pp.toFixed(2)}**pp　Miss:${resulttop5[i].countmiss}`, inline: false });
 				}
 				embed.addFields(rankingdata);
@@ -1325,9 +1325,10 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				};
 
 				const calculator = new osuLibrary.CalculatePPSR(maplink, modsBefore.calc, mode);
-				const PPbefore = await calculator.calculateScorePP(score, modsBefore.calc);
+				const PPbefore = await calculator.calculateScorePP(score);
 				const SSPPbefore = await calculator.calculateSR();
-				const PPafter = await calculator.calculateScorePP(score, mods.calc);
+				calculator.setMods(mods.calc);
+				const PPafter = await calculator.calculateScorePP(score);
 				const SSPPafter = await calculator.calculateSR();
 				const response = await axios.get(
 					`https://osu.ppy.sh/api/get_user_best?k=${apikey}&type=string&m=${mode}&u=${playername}&limit=100`
@@ -2665,7 +2666,7 @@ client.on(Events.MessageCreate, async (message) =>
 					combo: Number(userRecentData.maxcombo),
 				};
 				const ssPp = await recentPpData.calculateSR();
-				let recentPp = await recentPpData.calculateScorePP(recentScore, mods.calc);
+				let recentPp = await recentPpData.calculateScorePP(recentScore, passedObjects, mods.calc);
 				recentPp = Math.round(recentPp * 100) / 100;
 				const beatmap = await recentPpData.getMap();
 				const map = new rosu.Beatmap(new Uint8Array(Buffer.from(beatmap)));
