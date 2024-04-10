@@ -994,7 +994,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 						n300: Number(resulttop5[i].count300),
 						n100: Number(resulttop5[i].count100),
 						n50: Number(resulttop5[i].count50),
-						nMisses: Number(resulttop5[i].countmiss),
+						misses: Number(resulttop5[i].countmiss),
 						nGeki: Number(resulttop5[i].countgeki),
 						nKatu: Number(resulttop5[i].countkatu),
 						combo: Number(resulttop5[i].maxcombo)
@@ -1318,7 +1318,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					n300: Number(playersScore.count300),
 					n100: Number(playersScore.count100),
 					n50: Number(playersScore.count50),
-					nMisses: Number(playersScore.countmiss),
+					misses: Number(playersScore.countmiss),
 					nGeki: Number(playersScore.countgeki),
 					nKatu: Number(playersScore.countkatu),
 					combo: Number(playersScore.maxcombo)
@@ -2666,7 +2666,7 @@ client.on(Events.MessageCreate, async (message) =>
 					n300: Number(userRecentData.count300),
 					n100: Number(userRecentData.count100),
 					n50: Number(userRecentData.count50),
-					nMisses: Number(userRecentData.countmiss),
+					misses: Number(userRecentData.countmiss),
 					nGeki: Number(userRecentData.countgeki),
 					nKatu: Number(userRecentData.countkatu),
 					combo: Number(userRecentData.maxcombo),
@@ -3293,7 +3293,7 @@ client.on(Events.MessageCreate, async (message) =>
 					n300: Number(userPlays[0].count300),
 					n100: Number(userPlays[0].count100),
 					n50: Number(userPlays[0].count50),
-					nMisses: Number(userPlays[0].countmiss),
+					misses: Number(userPlays[0].countmiss),
 					nGeki: Number(userPlays[0].countgeki),
 					nKatu: Number(userPlays[0].countkatu)
 				};

@@ -1069,7 +1069,7 @@ class CalculateIfFC {
             n300: 0,
             n100: 0,
             n50: 0,
-            nMisses: 0
+            misses: 0
         };
     
         const objects = map.nObjects;
@@ -1081,17 +1081,17 @@ class CalculateIfFC {
                 }).calculate(map);
 
                 let n300 = score.n300 + Math.max(0, objects - passedObjects);
-                const countHits = objects - score.nMisses;
+                const countHits = objects - score.misses;
                 const ratio = 1.0 - (n300 / countHits);
-                const new100s = Math.ceil(ratio * score.nMisses);
-                n300 += Math.max(0, score.nMisses - new100s);
+                const new100s = Math.ceil(ratio * score.misses);
+                n300 += Math.max(0, score.misses - new100s);
                 const n100 = score.n100 + new100s;
                 const n50 = score.n50;
                 const calcScore = {
                     n300: n300,
                     n100: n100,
                     n50: n50,
-                    nMisses: 0,
+                    misses: 0,
                     combo: difficulty.maxCombo,
                     mods: calcmods
                 };
@@ -1113,15 +1113,15 @@ class CalculateIfFC {
                 }).calculate(map);
 
                 let n300 = score.n300 + Math.max(0, objects - passedObjects);
-                const countHits = objects - score.nMisses;
+                const countHits = objects - score.misses;
                 const ratio = 1.0 - (n300 / countHits);
-                const new100s = Math.ceil(ratio * score.nMisses);
-                n300 += Math.max(0, score.nMisses - new100s);
+                const new100s = Math.ceil(ratio * score.misses);
+                n300 += Math.max(0, score.misses - new100s);
                 const n100 = score.n100 + new100s;
                 const calcScore = {
                     n300: n300,
                     n100: n100,
-                    nMisses: 0,
+                    misses: 0,
                     mods: calcmods
                 };
     
@@ -1140,7 +1140,7 @@ class CalculateIfFC {
                     mods: calcmods
                 }).calculate(map);
 
-                const passedObjectsforCatch = score.n300 + score.n100 + score.nMisses;
+                const passedObjectsforCatch = score.n300 + score.n100 + score.misses;
                 const missing = objects - passedObjectsforCatch;
                 const missingFruits = Math.max(0, missing - Math.max(0, difficulty.nDroplets - score.n100));
                 const missingDroplets = missing - missingFruits;
@@ -1154,7 +1154,7 @@ class CalculateIfFC {
                     n50: nTinyDroplets,
                     nGeki: score.nGeki,
                     nKatu: score.nKatu,
-                    nMisses: 0,
+                    misses: 0,
                     combo: difficulty.maxCombo,
                     mods: calcmods
                 };
