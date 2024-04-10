@@ -238,7 +238,7 @@ class CalculatePPSR {
 
     /**
      * Calculates the object based on the beatmap data and mode.
-     * @returns {Promise<Object>} A promise that resolves to the calculated object.
+     * @returns {Promise<Number>} A promise that resolves to the calculated object.
      * @throws {Error} If there is an error during the calculation process.
      */
     async calcObject() {

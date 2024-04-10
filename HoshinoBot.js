@@ -1201,7 +1201,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					let allUser = fs.readJsonSync("./ServerDatas/PlayerData.json");
 					const username = allUser["Bancho"][interaction.user.id]?.name;
 					if (username == undefined) {
-						await interaction.reply("ユーザー名が登録されていません。/osuregで登録するか、ユーザー名を入力してください。");
+						await interaction.reply("ユーザー名が登録されていません。/osureg、!osuregで登録するか、ユーザー名を入力してください。");
 						allUser = null;
 						return;
 					}
@@ -2565,7 +2565,7 @@ client.on(Events.MessageCreate, async (message) =>
 					let allUser = fs.readJsonSync("./ServerDatas/PlayerData.json");
 					const username = allUser["Bancho"][message.author.id]?.name;
 					if (username == undefined) {
-						await message.reply("ユーザー名が登録されていません。/osuregで登録するか、ユーザー名を入力してください。");
+						await message.reply("ユーザー名が登録されていません。/osureg、!osuregで登録するか、ユーザー名を入力してください。");
 						allUser = null;
 						return;
 					}
@@ -2577,7 +2577,7 @@ client.on(Events.MessageCreate, async (message) =>
 						let allUser = fs.readJsonSync("./ServerDatas/PlayerData.json");
 						const userId = RegExp(/^<@(\d+)>$/).exec(playername)[1];
 						if (!allUser["Bancho"][userId]?.name) {
-							await message.reply("このDiscordのユーザーは登録されていません。/osuregで登録してもらうか、osuのユーザー名を入力してください。");
+							await message.reply("このDiscordのユーザーは登録されていません。/osureg、!osuregで登録してもらうか、osuのユーザー名を入力してください。");
 							allUser = null;
 							return;
 						}
@@ -3058,7 +3058,7 @@ client.on(Events.MessageCreate, async (message) =>
 						let allUser = fs.readJsonSync("./ServerDatas/PlayerData.json");
 						const username = allUser["Bancho"][message.author.id]?.name;
 						if (username == undefined) {
-							await message.reply("ユーザー名が登録されていません。/osuregで登録するか、ユーザー名を入力してください。");
+							await message.reply("ユーザー名が登録されていません。/osureg、!osuregで登録するか、ユーザー名を入力してください。");
 							allUser = null;
 							return;
 						}
@@ -3070,7 +3070,7 @@ client.on(Events.MessageCreate, async (message) =>
 							let allUser = fs.readJsonSync("./ServerDatas/PlayerData.json");
 							const userId = RegExp(/^<@(\d+)>$/).exec(playername)[1];
 							if (!allUser["Bancho"][userId]?.name) {
-								await message.reply("このDiscordのユーザーは登録されていません。/osuregで登録してもらうか、osuのユーザー名を入力してください。");
+								await message.reply("このDiscordのユーザーは登録されていません。/osureg、!osuregで登録してもらうか、osuのユーザー名を入力してください。");
 								allUser = null;
 								return;
 							}
@@ -3082,7 +3082,7 @@ client.on(Events.MessageCreate, async (message) =>
 					let allUser = fs.readJsonSync("./ServerDatas/PlayerData.json");
 					const username = allUser["Bancho"][message.author.id]?.name;
 					if (username == undefined) {
-						await message.reply("ユーザー名が登録されていません。/osuregで登録するか、ユーザー名を入力してください。");
+						await message.reply("ユーザー名が登録されていません。/osureg、!osuregで登録するか、ユーザー名を入力してください。");
 						allUser = null;
 						return;
 					}
@@ -3127,7 +3127,7 @@ client.on(Events.MessageCreate, async (message) =>
 						let allUser = fs.readJsonSync("./ServerDatas/PlayerData.json");
 						const userId = RegExp(/^<@(\d+)>$/).exec(playername)[1];
 						if (!allUser["Bancho"][userId]?.name) {
-							await message.reply("このDiscordのユーザーは登録されていません。/osuregで登録してもらうか、osuのユーザー名を入力してください。");
+							await message.reply("このDiscordのユーザーは登録されていません。/osureg、!osuregで登録してもらうか、osuのユーザー名を入力してください。");
 							allUser = null;
 							return;
 						}
@@ -3338,6 +3338,41 @@ client.on(Events.MessageCreate, async (message) =>
 				await message.channel.send({ embeds: [embed] });
 			}
 
+			if (message.content.split(" ")[0] == "!osureg") {
+				const username = message.author.id;
+				const osuid = message.content.split(" ")?.slice(1)?.join(" ");
+				if (osuid == "") {
+					await message.reply("osu!のユーザー名の前の空白が１つ多い可能性があります。");
+					return;
+				}
+				
+				if (osuid == undefined) {
+					await message.reply("使い方: !osureg [osu! Username]");
+					return;
+				}
+
+				const userData = await new osuLibrary.GetUserData(osuid, apikey).getDataWithoutMode();
+				if (!userData) {
+					await message.reply("ユーザーが見つかりませんでした。");
+					return;
+				}
+				let allUser = fs.readJsonSync("./ServerDatas/PlayerData.json");
+				if (!allUser["Bancho"][username]) {
+					allUser["Bancho"][username] = {
+						"name": osuid
+					};
+					message.reply(`${osuid}が登録されました!!`);
+				} else {
+					const previousName = allUser["Bancho"][username].name;
+					allUser["Bancho"][username].name = osuid;
+					message.reply(`ユーザー名が "${previousName}" から "${osuid}" に更新されました!`);
+				}
+				fs.writeJsonSync("./ServerDatas/PlayerData.json", allUser, { spaces: 4, replacer: null });
+				await interaction.reply(`${interaction.user.displayName}さんは${osuid}として保存されました!`);
+				allUser = null;
+				return;
+			}
+
 			if (message.content.split(" ")[0].startsWith("!wi")) {
 				if (message.content == "!wi") {
 					await message.reply("使い方: !wi[o, t, c, m] [PP] (osu!ユーザーネーム)");
@@ -3368,7 +3403,7 @@ client.on(Events.MessageCreate, async (message) =>
 					let allUser = fs.readJsonSync("./ServerDatas/PlayerData.json");
 					const username = allUser["Bancho"][message.author.id]?.name;
 					if (username == undefined) {
-						await message.reply("ユーザー名が登録されていません。/osuregで登録するか、ユーザー名を入力してください。");
+						await message.reply("ユーザー名が登録されていません。/osureg、!osuregで登録するか、ユーザー名を入力してください。");
 						allUser = null;
 						return;
 					}
@@ -3380,7 +3415,7 @@ client.on(Events.MessageCreate, async (message) =>
 						let allUser = fs.readJsonSync("./ServerDatas/PlayerData.json");
 						const userId = RegExp(/^<@(\d+)>$/).exec(playername)[1];
 						if (!allUser["Bancho"][userId]?.name) {
-							await message.reply("このDiscordのユーザーは登録されていません。/osuregで登録してもらうか、osuのユーザー名を入力してください。");
+							await message.reply("このDiscordのユーザーは登録されていません。/osureg、!osuregで登録してもらうか、osuのユーザー名を入力してください。");
 							allUser = null;
 							return;
 						}
@@ -3739,6 +3774,7 @@ client.on(Events.MessageCreate, async (message) =>
 				commandLogs(message, "ヘルプ", 1);
 				const commandInfo = {
 					"h!help": "コマンドのヘルプを表示します。",
+					"!osureg [osu! Username]": "osu!のユーザー名を登録します。コマンドでユーザー名を省略することができるようになります！",
 					"!map [maplink] (mods) (acc)": "指定した譜面の情報を表示します。modsとaccは省略可能です。",
 					"!c (maplink) (username)": "ユーザーのそのマップでの記録(最大5個)を表示します。usernameは登録していれば省略可能です。マップリンクも省略可です。",
 					"!r(o, t, c, m) (username)": "ユーザーの最新のosu!std、taiko、catch、maniaの記録を表示します。usernameは登録していれば省略可能です。stdは!rでも!roでも実行可能です。",
