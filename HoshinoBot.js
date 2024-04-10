@@ -3358,9 +3358,7 @@ client.on(Events.MessageCreate, async (message) =>
 						"name": osuid
 					};
 				} else {
-					const previousName = allUser["Bancho"][username].name;
 					allUser["Bancho"][username].name = osuid;
-					message.reply(`ユーザー名が "${previousName}" から "${osuid}" に更新されました!`);
 				}
 				fs.writeJsonSync("./ServerDatas/PlayerData.json", allUser, { spaces: 4, replacer: null });
 				await message.reply(`${message.author.username}さんは${osuid}として保存されました!`);
