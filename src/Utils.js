@@ -98,19 +98,19 @@ class Tools {
     static formatHits(score, mode) {
         switch (mode) {
             case 0:
-                return `{${score.n300}/${score.n100}/${score.n50}/${score.nMisses}}`;
+                return `{${score.n300}/${score.n100}/${score.n50}/${score.misses}}`;
     
             case 1:
-                return `{${score.n300}/${score.n100}/${score.nMisses}}`;
+                return `{${score.n300}/${score.n100}/${score.misses}}`;
     
             case 2:
-                return `{${score.n300}/${score.n100}/${score.n50}/${score.nMisses}}`;
+                return `{${score.n300}/${score.n100}/${score.n50}/${score.misses}}`;
     
             case 3:
-                return `{${score.nGeki}/${score.n300}/${score.nKatu}/${score.n100}/${score.n50}/${score.nMisses}}`;
+                return `{${score.nGeki}/${score.n300}/${score.nKatu}/${score.n100}/${score.n50}/${score.misses}}`;
 
             default:
-                return `{${score.n300}/${score.n100}/${score.n50}/${score.nMisses}}`;
+                return `{${score.n300}/${score.n100}/${score.n50}/${score.misses}}`;
         }
     }
 
