@@ -1571,23 +1571,29 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					}).calculate(map);
 
 					const PP98 = ppDigits(new rosu.Performance({
-						accuracy: 98
+						accuracy: 98,
+						mods: mod.calc
 					}).calculate(difficulty).pp.toFixed(2));
 
 					const PP99 = ppDigits(new rosu.Performance({
-						accuracy: 99
+						accuracy: 99,
+						mods: mod.calc
 					}).calculate(difficulty).pp.toFixed(2));
 
 					const PP995 = ppDigits(new rosu.Performance({
-						accuracy: 99.5
+						accuracy: 99.5,
+						mods: mod.calc
 					}).calculate(difficulty).pp.toFixed(2));
 
 					const PP100 = ppDigits(new rosu.Performance({
-						accuracy: 100
+						accuracy: 100,
+						mods: mod.calc
 					})
 					.calculate(difficulty).pp.toFixed(2));
 
-					const maxcombo = new rosu.Difficulty().calculate(map).maxCombo;
+					const maxcombo = new rosu.Difficulty({
+						mods: mod.calc
+					}).calculate(map).maxCombo;
 					Mapinfo.BPM = Math.max(...BPM) == Math.min(...BPM) ? Math.max(...BPM).toString() : `${Math.min(...BPM)} - ${Math.max(...BPM)}`;
 					function ppDigits(ppstring) {
 						switch (ppstring.length) {
@@ -2664,9 +2670,10 @@ client.on(Events.MessageCreate, async (message) =>
 					nGeki: Number(userRecentData.countgeki),
 					nKatu: Number(userRecentData.countkatu),
 					combo: Number(userRecentData.maxcombo),
+					mods: mods.calc
 				};
 				const ssPp = await recentPpData.calculateSR();
-				let recentPp = await recentPpData.calculateScorePP(recentScore, passedObjects, mods.calc);
+				let recentPp = await recentPpData.calculateScorePP(recentScore, passedObjects);
 				recentPp = Math.round(recentPp * 100) / 100;
 				const beatmap = await recentPpData.getMap();
 				const map = new rosu.Beatmap(new Uint8Array(Buffer.from(beatmap)));

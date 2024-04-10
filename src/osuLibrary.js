@@ -281,7 +281,8 @@ class CalculatePPSR {
                 }).calculate(map);
 
                 const PP = new rosu.Performance({
-                    accuracy: this.acc
+                    accuracy: this.acc,
+                    mods: this.mods
                 }).calculate(Difficulty).pp;
 
                 const param = {
@@ -318,7 +319,9 @@ class CalculatePPSR {
                 }).calculate(map);
 
                 const SR = Difficulty.stars;
-                const PP = new rosu.Performance().calculate(Difficulty).pp;
+                const PP = new rosu.Performance({
+                    mods: 64
+                }).calculate(Difficulty).pp;
 
                 const param = {
                     sr: SR,
@@ -354,6 +357,8 @@ class CalculatePPSR {
                 const difficultyObject = {
                     mods: this.mods
                 };
+
+                params.mods = this.mods;
 
                 if (passedObjects) difficultyObject.passedObjects = passedObjects;
                 const difficulty = new rosu.Difficulty(difficultyObject).calculate(map);
@@ -1087,7 +1092,8 @@ class CalculateIfFC {
                     n100: n100,
                     n50: n50,
                     nMisses: 0,
-                    combo: difficulty.maxCombo
+                    combo: difficulty.maxCombo,
+                    mods: calcmods
                 };
     
                 ifFCHits.n300 = n300;
@@ -1115,7 +1121,8 @@ class CalculateIfFC {
                 const calcScore = {
                     n300: n300,
                     n100: n100,
-                    nMisses: 0
+                    nMisses: 0,
+                    mods: calcmods
                 };
     
                 ifFCHits.n300 = n300;
@@ -1148,7 +1155,8 @@ class CalculateIfFC {
                     nGeki: score.nGeki,
                     nKatu: score.nKatu,
                     nMisses: 0,
-                    combo: map
+                    combo: difficulty.maxCombo,
+                    mods: calcmods
                 };
     
                 ifFCHits.n300 = nFruits;
