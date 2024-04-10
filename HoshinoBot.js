@@ -3341,12 +3341,8 @@ client.on(Events.MessageCreate, async (message) =>
 			if (message.content.split(" ")[0] == "!osureg") {
 				const username = message.author.id;
 				const osuid = message.content.split(" ")?.slice(1)?.join(" ");
-				if (osuid == "") {
-					await message.reply("osu!のユーザー名の前の空白が１つ多い可能性があります。");
-					return;
-				}
-				
-				if (osuid == undefined) {
+
+				if (osuid == "" || osuid == undefined) {
 					await message.reply("使い方: !osureg [osu! Username]");
 					return;
 				}
