@@ -3363,7 +3363,7 @@ client.on(Events.MessageCreate, async (message) =>
 					message.reply(`ユーザー名が "${previousName}" から "${osuid}" に更新されました!`);
 				}
 				fs.writeJsonSync("./ServerDatas/PlayerData.json", allUser, { spaces: 4, replacer: null });
-				await message.reply(`${interaction.user.displayName}さんは${osuid}として保存されました!`);
+				await message.reply(`${message.author.username}さんは${osuid}として保存されました!`);
 				allUser = null;
 				return;
 			}
