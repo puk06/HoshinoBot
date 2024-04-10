@@ -3341,12 +3341,8 @@ client.on(Events.MessageCreate, async (message) =>
 			if (message.content.split(" ")[0] == "!osureg") {
 				const username = message.author.id;
 				const osuid = message.content.split(" ")?.slice(1)?.join(" ");
-				if (osuid == "") {
-					await message.reply("osu!のユーザー名の前の空白が１つ多い可能性があります。");
-					return;
-				}
-				
-				if (osuid == undefined) {
+
+				if (osuid == "" || osuid == undefined) {
 					await message.reply("使い方: !osureg [osu! Username]");
 					return;
 				}
@@ -3361,14 +3357,13 @@ client.on(Events.MessageCreate, async (message) =>
 					allUser["Bancho"][username] = {
 						"name": osuid
 					};
-					message.reply(`${osuid}が登録されました!!`);
 				} else {
 					const previousName = allUser["Bancho"][username].name;
 					allUser["Bancho"][username].name = osuid;
 					message.reply(`ユーザー名が "${previousName}" から "${osuid}" に更新されました!`);
 				}
 				fs.writeJsonSync("./ServerDatas/PlayerData.json", allUser, { spaces: 4, replacer: null });
-				await interaction.reply(`${interaction.user.displayName}さんは${osuid}として保存されました!`);
+				await message.reply(`${interaction.user.displayName}さんは${osuid}として保存されました!`);
 				allUser = null;
 				return;
 			}
