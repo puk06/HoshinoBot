@@ -28,11 +28,6 @@ const client = new Client({
 	]
 });
 
-//おふざけ
-let again = false;
-let last = false;
-//おふざけ
-
 client.on(Events.ClientReady, async () =>
 	{
 		await asciify("Hoshino Bot", { font: "larry3d" })
@@ -510,39 +505,6 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			}
 
 			if (interaction.commandName == "pic") {
-				//おふざけ
-				if (interaction.user.id == "953878610035499069") {
-					if (!again && !last) {
-						await interaction.reply("うーん...コマンドが送られたっぽいけど、なんかエラーが発生したみたいだよ。");
-						setTimeout(async () => {
-							await interaction.channel.send("いや冗談だよ！こんな優秀なBotにエラーなんて発生するわけないでしょ？？そんな真に受けないでよー");
-							setTimeout(async () => {
-								await interaction.channel.send("もう一回送ってみて！");
-								again = true;
-							}, 2000);
-						}, 3000);
-						return;
-					} else if (again && !last){
-						await interaction.reply("本当にもう一回送ってきたの？");
-						setTimeout(async () => {
-							await interaction.channel.send(`え、${interaction.options.get("tag").value}の写真が見たいんだ！私はあんまり興味はないんだけど...`);
-							setTimeout(async () => {
-								await interaction.channel.send("もう、仕方ないな～...ちょっと待っててね！用意してくる！");
-								setTimeout(async () => {
-									await interaction.channel.send("今回が本当の最後だからね！！！もう一回送ってみて！！");
-									last = true;
-								}, 2000);
-							}, 2000);
-						}, 3000);
-						return;
-					} else if (last) {
-						setTimeout(async () => {
-							await interaction.channel.send("ほら！！ちゃんと送ってあげたでしょ？また使ってね！");
-						}, 2500);
-					}
-				}
-				//おふざけ
-
 				const tag = interaction.options.get("tag").value;
 				if (!fs.existsSync(path.join("./Pictures/tag", tag, "DataBase.json"))) {
 					await interaction.reply("このタグは存在しません。");

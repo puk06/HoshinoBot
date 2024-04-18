@@ -201,7 +201,7 @@ class CalculatePPSR {
     }
 
     setMods(mods) {
-        this._mods = mods;
+        this.mods = mods;
     }
 
     /**
