@@ -1283,7 +1283,7 @@ function calculateStarRating(beatmap, Mode) {
         try {
             let srdata = [];
             beatmap.convert(Mode);
-            let gradualDiff = new rosu.Difficulty().gradualDifficulty(map);
+            let gradualDiff = new rosu.Difficulty().gradualDifficulty(beatmap);
             let i = 1;
 
             while (gradualDiff.nRemaining > 0) {
