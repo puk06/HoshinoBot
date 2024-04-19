@@ -1283,12 +1283,13 @@ function calculateStarRating(beatmap, Mode) {
         try {
             let srdata = [];
             beatmap.convert(Mode);
-            let gradualDiff = new rosu.Difficulty().gradualDifficulty(map);
+            let gradualDiff = new rosu.Difficulty().gradualDifficulty(beatmap);
             let i = 1;
 
             while (gradualDiff.nRemaining > 0) {
-                if (gradualDiff.next() == undefined) continue;
-                srdata.push(gradualDiff.next().stars);
+                let gradual_diff = gradualDiff.next();
+                if (gradual_diff == undefined) continue;
+                srdata.push(gradual_diff.stars);
                 i += 1;
             }
 
