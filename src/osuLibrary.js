@@ -381,27 +381,9 @@ class CheckMapData {
     check() {
         return new Promise(async (resolve, reject) => {
             try {
-                const mapdata = await axios.get(`https://osu.ppy.sh/osu/${this.beatmapID}`, { responseType: "stream" });
-                const lineReader = require('readline').createInterface({
-                    input: mapdata.data
-                });
+                const MAP_DATA = await axios.get(`https://osu.ppy.sh/osu/${this.beatmapID}`);
+
                 let BPMarray = [];
-                let prevValue = null;
-                let currentBPM = 0;
-                let stream = 0;
-                let eightStream = 0;
-                let sixStream = 0;
-                let threeStream = 0;
-                let timingpointflag = false;
-                let hitobjects = false;
-                let lastEight = false;
-                let lastSix = false;
-                let lastThree = false;
-                let lastStream = false;
-                let isTechStream = false;
-                let tempTechStream = 0;
-                let streamArray = [];
-                let techStreamArray = [];
                 let mapData = {
                     "BPMarray": [],
                     "maxStream": 0,
@@ -436,334 +418,174 @@ class CheckMapData {
                     return BPMarray[maxIntervalIndex][1];
                 }
 
-                lineReader.on('line', (line) => {
-                    if (timingpointflag) {
-                        const timingpoint = line.split(",");
-                        if (timingpoint[6] == 1) {
-                            const BPM = 1 / Number(line.split(",")[1]) * 60000;
-                            BPMarray.push([Number(timingpoint[2]), BPM]);
-                            mapData.BPMarray.push(BPM);
-                        }
-                    }
-    
-                    if (hitobjects) {
-                        const timing = Number(line.split(",")[2]);
-                        for (const element of BPMarray) {
-                            if (element && timing >= element[0] && timing < element[0]) {
-                                currentBPM = element[1];
-                                break;
-                            }
-                        }
+                function parse(data) {
+                    const TIMINGPOINTS_SECTION = "[TimingPoints]";
+                    const HITOBJECTS_SECTION = "[HitObjects]";
 
-                        for (let i = 0; i < BPMarray.length; i++) {
-                            if (!BPMarray[i + 1]) {
-                                currentBPM = BPMarray[i][1];
-                                break;
-                            }
-
-                            if (BPMarray[i] && timing >= BPMarray[i][0] && timing < BPMarray[i + 1][0]) {
-                                currentBPM = BPMarray[i][1];
-                            }
-                        }
-
-                        let eightInterval = (( 60 / currentBPM ) * 1000 * 1 / 8) + 1;
-                        let sixInterval = (( 60 / currentBPM ) * 1000 * 1 / 6) + 1;
-                        let fourInterval = (( 60 / currentBPM ) * 1000 * 1 / 4) + 1;
-                        let threeInterval = (( 60 / currentBPM ) * 1000 * 1 / 3) + 1;
-                        const value = Number(line.split(',')[2]);
-
-                        if (prevValue !== null && Math.abs(value - prevValue) <= eightInterval) {
-                            if (!lastEight) eightStream = 1;
-                            if ((lastSix || lastStream || lastThree) && !isTechStream) {
-                                isTechStream = true;
-                                tempTechStream = 1;
-                            }
-
-                            if (isTechStream) tempTechStream++;
-
-                            if (tempTechStream > 30 && tempTechStream > mapData["techStream"] && isTechStream) {
-                                mapData["techStream"] = tempTechStream;
-                            }
-
-                            if (lastSix) mapData["1/6 times"]++;
-                            if (sixStream > mapData["max1/6Length"]) {
-                                mapData["max1/6Length"] = sixStream + 1;
-                            }
-                            lastSix = false;
-                            sixStream = 0;
-                            
-                            if (lastStream && stream >= 100) {
-                                mapData["streamCount"]++;
-                                if (stream > mapData["maxStream"]) {
-                                    mapData["maxStream"] = stream + 1;
-                                }
-                            } else {
-                                mapData["1/4 times"]++;
-                            }
-                            if (stream > mapData["max1/4Length"]) {
-                                mapData["max1/4Length"] = stream + 1;
-                            }
-                            if (stream >= 100) streamArray.push(stream);
-                            lastStream = false;
-                            stream = 0;
-
-                            if (lastThree) mapData["1/3 times"]++;
-                            if (threeStream > mapData["max1/3Length"]) {
-                                mapData["max1/3Length"] = threeStream + 1;
-                            }
-                            lastThree = false;
-                            threeStream = 0;
-
-                            lastEight = true;
-                            eightStream++;
-                            if (eightStream > mapData["max1/8Length"]) {
-                                mapData["max1/8Length"] = eightStream;
-                            }
-                        } else if (prevValue !== null && Math.abs(value - prevValue) <= sixInterval) {
-                            if (!lastSix) sixStream = 1;
-                            if ((lastEight || lastStream || lastThree) && !isTechStream) {
-                                isTechStream = true;
-                                tempTechStream = 1;
-                            }
-
-                            if (isTechStream) tempTechStream++;
-
-                            if (tempTechStream > 30 && tempTechStream > mapData["techStream"] && isTechStream) {
-                                mapData["techStream"] = tempTechStream;
-                            }
-
-                            if (lastEight) mapData["1/8 times"]++;
-                            if (eightStream > mapData["max1/8Length"]) {
-                                mapData["max1/8Length"] = eightStream + 1;
-                            }
-                            lastEight = false;
-                            eightStream = 0;
-                            
-                            if (lastStream && stream >= 100) {
-                                mapData["streamCount"]++;
-                                if (stream > mapData["maxStream"]) {
-                                    mapData["maxStream"] = stream + 1;
-                                }
-                            } else {
-                                mapData["1/4 times"]++;
-                            }
-                            if (stream > mapData["max1/4Length"]) {
-                                mapData["max1/4Length"] = stream + 1;
-                            }
-                            if (stream >= 100) streamArray.push(stream);
-                            lastStream = false;
-                            stream = 0;
-
-                            if (lastThree) mapData["1/3 times"]++;
-                            if (threeStream > mapData["max1/3Length"]) {
-                                mapData["max1/3Length"] = threeStream + 1;
-                            }
-                            lastThree = false;
-                            threeStream = 0;
-
-                            lastSix = true;
-                            sixStream++;
-                            if (sixStream > mapData["max1/6Length"]) {
-                                mapData["max1/6Length"] = sixStream;
-                            }
-                        } else if (prevValue !== null && Math.abs(value - prevValue) <= fourInterval) {
-                            if (!lastStream) stream = 1;
-                            if ((lastEight || lastSix || lastThree) && !isTechStream) {
-                                isTechStream = true;
-                                tempTechStream = 1;
-                            }
-
-                            if (isTechStream) tempTechStream++;
-
-                            if (tempTechStream > 30 && tempTechStream > mapData["techStream"] && isTechStream) {
-                                mapData["techStream"] = tempTechStream;
-                            }
-
-                            if (lastEight) mapData["1/8 times"]++;
-                            if (eightStream > mapData["max1/8Length"]) {
-                                mapData["max1/8Length"] = eightStream + 1;
-                            }
-                            lastEight = false;
-                            eightStream = 0;
-                            
-                            if (lastSix) mapData["1/6 times"]++;
-                            if (sixStream > mapData["max1/6Length"]) {
-                                mapData["max1/6Length"] = sixStream + 1;
-                            }
-                            lastSix = false;
-                            sixStream = 0;
-
-                            if (lastThree) mapData["1/3 times"]++;
-                            if (threeStream > mapData["max1/3Length"]) {
-                                mapData["max1/3Length"] = threeStream + 1;
-                            }
-                            lastThree = false;
-                            threeStream = 0;
-
-                            lastStream = true;
-                            stream++;
-                            if (stream > mapData["max1/4Length"]) {
-                                mapData["max1/4Length"] = stream;
-                            }
-                        } else if (prevValue !== null && Math.abs(value - prevValue) <= threeInterval) {
-                            if (!lastThree) threeStream = 1;
-                            if ((lastEight || lastSix || lastStream) && !isTechStream) {
-                                isTechStream = true;
-                                tempTechStream = 1;
-                            }
-
-                            if (isTechStream) tempTechStream++;
-
-                            if (tempTechStream > 30 && tempTechStream > mapData["techStream"] && isTechStream) {
-                                mapData["techStream"] = tempTechStream;
-                            }
-
-                            if (lastEight) mapData["1/8 times"]++;
-                            if (eightStream > mapData["max1/8Length"]) {
-                                mapData["max1/8Length"] = eightStream + 1;
-                            }
-                            lastEight = false;
-                            eightStream = 0;
-
-                            if (lastSix) mapData["1/6 times"]++;
-                            if (sixStream > mapData["max1/6Length"]) {
-                                mapData["max1/6Length"] = sixStream + 1;
-                            }
-                            lastSix = false;
-                            sixStream = 0;
-                            
-                            if (lastStream && stream >= 100) {
-                                mapData["streamCount"]++;
-                                if (stream > mapData["maxStream"]) {
-                                    mapData["maxStream"] = stream + 1;
-                                }
-                            } else {
-                                mapData["1/4 times"]++;
-                            }
-                            if (stream > mapData["max1/4Length"]) {
-                                mapData["max1/4Length"] = stream + 1;
-                            }
-                            if (stream >= 100) streamArray.push(stream);
-                            lastStream = false;
-                            stream = 0;
-
-                            lastThree = true;
-                            threeStream++;
-                            if (threeStream > mapData["max1/3Length"]) {
-                                mapData["max1/3Length"] = threeStream;
-                            }
-                        } else {
-                            if (isTechStream && tempTechStream > 30) {
-                                mapData["techStreamCount"]++;
-                                techStreamArray.push(tempTechStream);
-                            }
-                            isTechStream = false;
-                            tempTechStream = 0;
-                            if (lastEight) mapData["1/8 times"]++;
-                            if (eightStream > mapData["max1/8Length"]) {
-                                mapData["max1/8Length"] = eightStream + 1;
-                            }
-                            lastEight = false;
-                            eightStream = 0;
-                            
-                            if (lastSix) mapData["1/6 times"]++;
-                            if (sixStream > mapData["max1/6Length"]) {
-                                mapData["max1/6Length"] = sixStream + 1;
-                            }
-                            lastSix = false;
-                            sixStream = 0;
-
-                            if (lastThree) mapData["1/3 times"]++;
-                            if (threeStream > mapData["max1/3Length"]) {
-                                mapData["max1/3Length"] = threeStream + 1;
-                            }
-                            lastThree = false;
-                            threeStream = 0;
-                            
-                            if (lastStream && stream >= 100) {
-                                mapData["streamCount"]++;
-                                if (stream > mapData["maxStream"]) {
-                                    mapData["maxStream"] = stream + 1;
-                                }
-                            } else {
-                                mapData["1/4 times"]++;
-                            }
-                            if (stream > mapData["max1/4Length"]) {
-                                mapData["max1/4Length"] = stream + 1;
-                            }
-                            if (stream >= 100) streamArray.push(stream);
-                            lastStream = false;
-                            stream = 0;
-                        }
-                        prevValue = value;
-                    }
-    
-                    if (line.startsWith("[HitObjects]")) {
-                        timingpointflag = false;
-                        hitobjects = true;
-                    }
-
-                    if (line.startsWith("[Colors]")) {
-                        timingpointflag = false;
-                    }
-    
-                    if (line.startsWith("[TimingPoints]")) {
-                        timingpointflag = true;
-                    }
-                });
-    
-                lineReader.on('close', () => {
-                    if (isTechStream && tempTechStream > 30) {
-                        mapData["techStreamCount"]++;
-                    }
-
-                    if (lastEight) mapData["1/8 times"]++;
-                    if (eightStream > mapData["max1/8Length"]) {
-                        mapData["max1/8Length"] = eightStream + 1;
-                    }
+                    const beatmap = data
+                        .match(/.+\r?\n/gm)
+                        .map(line => line.replace(/\r?\n/, ""));
+            
+                    const timingPointsIndex = beatmap.indexOf(TIMINGPOINTS_SECTION);
+                    const hitObjectsIndex = beatmap.indexOf(HITOBJECTS_SECTION);
                     
-                    if (lastSix) mapData["1/6 times"]++;
-                    if (sixStream > mapData["max1/6Length"]) {
-                        mapData["max1/6Length"] = sixStream + 1;
-                    }
+                    const timing_points = beatmap
+                        .slice(timingPointsIndex + 1, hitObjectsIndex)
+                        .filter(line => line !== "")
+                        .map(line => {
+                            const hit_objects = line.split(",");
+                            return {
+                                time: Number(hit_objects[0]),
+                                beatLength: Number(hit_objects[1]),
+                                meter: Number(hit_objects[2]),
+                                sampleSet: Number(hit_objects[3]),
+                                sampleIndex: Number(hit_objects[4]),
+                                volume: Number(hit_objects[5]),
+                                uninherited: Number(hit_objects[6]),
+                                effects: Number(hit_objects[7])
+                            }
+                        });
+            
+                    const hit_objects = beatmap
+                        .slice(hitObjectsIndex + 1)
+                        .filter(line => line !== "")
+                        .map(line => {
+                            const hit_objects = line.split(",");
+                            return Number(hit_objects[2]);
+                        });
 
-                    if (lastThree) mapData["1/3 times"]++;
-                    if (threeStream > mapData["max1/3Length"]) {
-                        mapData["max1/3Length"] = threeStream + 1;
+                    return {
+                        timing_points,
+                        hit_objects
+                    };
+                }
+
+                const map = parse(MAP_DATA.data);
+
+                for (const element of map.timing_points) {
+                    if (element.uninherited == 1) {
+                        const BPM = 1 / element.beatLength * 60000;
+                        BPMarray.push([element.time, BPM]);
+                        mapData.BPMarray.push(BPM);
                     }
+                }
+
+                const snapArray = [8, 6, 4, 3];
+                const getSnapInterval = (snap, currentBPM) => (( 60 / currentBPM ) * 1000 * 1 / snap) + 1;
+
+                let mapdataTemp = {
+                    "prevValue": null,
+                    "lastSnap": 0,
+
+                    "max1/8Length": 0,
+                    "max1/6Length": 0,
+                    "max1/4Length": 0,
+                    "max1/3Length": 0,
+
+                    "current1/8Length": 0,
+                    "current1/6Length": 0,
+                    "current1/4Length": 0,
+                    "current1/3Length": 0,
+
+                    "1/8Times": 0,
+                    "1/6Times": 0,
+                    "1/4Times": 0,
+                    "1/3Times": 0,
+
+                    "maxStream": 0,
+                    "maxTechStream": 0,
                     
-                    if (lastStream && stream >= 100) {
-                        mapData["streamCount"]++;
-                        if (stream > mapData["maxStream"]) {
-                            mapData["maxStream"] = stream + 1;
+                    "currentStreamLength": 0,
+                    "currentTechStreamLength": 0,
+
+                    "streamCount": 0,
+                    "techStreamCount": 0,
+
+                    "streamLength": [],
+                    "techStreamLength": [],
+
+                    "over100ComboAverageStreamLength": 0,
+                    "over100ComboAverageTechStreamLength": 0
+                }
+
+                for (const element of map.hit_objects) {
+                    const timing = element;
+                    let currentBPM = 0;
+                    for (let i = 0; i < BPMarray.length; i++) {
+                        if (!BPMarray[i + 1]) {
+                            currentBPM = BPMarray[i][1];
+                            break;
                         }
-                    } else {
-                        mapData["1/4 times"]++;
-                    }
-                    if (stream > mapData["max1/4Length"]) {
-                        mapData["max1/4Length"] = stream + 1;
-                    }
-                    if (stream >= 100) streamArray.push(stream);
 
-                    lastEight = false;
-                    lastSix = false;
-                    lastStream = false;
-                    lastThree = false;
-                    isTechStream = false;
-                    eightStream = 0;
-                    sixStream = 0;
-                    stream = 0;
-                    threeStream = 0;
-                    tempTechStream = 0;
-                    mapData.BPMMode = mode(BPMarray);
-                    mapData["over100ComboAverageStreamLength"] = streamArray.length == 0 ? 0 : streamArray.reduce((acc, cur) => acc + cur, 0) / streamArray.length;
-                    mapData["over100ComboAverageTechStreamLength"] = techStreamArray.length == 0 ? 0 : techStreamArray.reduce((acc, cur) => acc + cur, 0) / techStreamArray.length;
-                    resolve(mapData);
-                })
+                        if (BPMarray[i] && timing >= BPMarray[i][0] && timing < BPMarray[i + 1][0]) {
+                            currentBPM = BPMarray[i][1];
+                        }
+                    }
 
-                lineReader.on('error', (error) => {
-                    reject(error);
-                });
+                    let foundFlag = false;
+                    for (const snap of snapArray) {
+                        const snapInterval = getSnapInterval(snap, currentBPM);
+                        if (mapdataTemp.prevValue !== null && Math.abs(timing - mapdataTemp.prevValue) <= snapInterval) {
+                            foundFlag = true;
+                            if (mapdataTemp.lastSnap == 8) mapdataTemp["current1/8Length"]++;
+                            if (mapdataTemp.lastSnap == 6) mapdataTemp["current1/6Length"]++;
+                            if (mapdataTemp.lastSnap == 4) mapdataTemp["current1/4Length"]++;
+                            if (mapdataTemp.lastSnap == 3) mapdataTemp["current1/3Length"]++;
+
+                            if (mapdataTemp["current1/8Length"] > mapdataTemp["max1/8Length"]) mapdataTemp["max1/8Length"] = mapdataTemp["current1/8Length"];
+                            if (mapdataTemp["current1/6Length"] > mapdataTemp["max1/6Length"]) mapdataTemp["max1/6Length"] = mapdataTemp["current1/6Length"];
+                            if (mapdataTemp["current1/4Length"] > mapdataTemp["max1/4Length"]) mapdataTemp["max1/4Length"] = mapdataTemp["current1/4Length"];
+                            if (mapdataTemp["current1/3Length"] > mapdataTemp["max1/3Length"]) mapdataTemp["max1/3Length"] = mapdataTemp["current1/3Length"];
+
+                            if (lastSnap != snap) {
+                                if (lastSnap == 0) {
+                                    mapdataTemp["currentStreamLength"] = 0;
+                                    mapdataTemp["currentTechStreamLength"] = 0;
+                                }
+
+
+
+                                if (lastSnap == 8) mapdataTemp["1/8Times"]++;
+                                if (lastSnap == 6) mapdataTemp["1/6Times"]++;
+                                if (lastSnap == 4) mapdataTemp["1/4Times"]++;
+                                if (lastSnap == 3) mapdataTemp["1/3Times"]++;
+                                mapdataTemp["current1/8Length"] = 0;
+                                mapdataTemp["current1/6Length"] = 0;
+                                mapdataTemp["current1/4Length"] = 0;
+                                mapdataTemp["current1/3Length"] = 0;
+                            }
+
+                            if (mapdataTemp.currentObjectCount >= 100) {
+                                if (lastSnap != snap) {
+                                    mapdataTemp["currentTechStreamLength"]++;
+                                } else {
+                                    mapdataTemp["currentStreamLength"]++;
+                                }
+                            }
+
+                            mapdataTemp.lastSnap = snap;
+                            mapdataTemp.currentObjectCount++;
+                        }
+
+                        mapdataTemp.prevValue = timing;
+                    }
+
+                    if (!foundFlag) {
+                        mapdataTemp["current1/8Length"] = 0;
+                        mapdataTemp["current1/6Length"] = 0;
+                        mapdataTemp["current1/4Length"] = 0;
+                        mapdataTemp["current1/3Length"] = 0;
+                        if (mapdataTemp["currentStreamLength"] > mapdataTemp["maxStream"]) mapdataTemp["maxStream"] = mapdataTemp["currentStreamLength"];
+                        if (mapdataTemp["currentTechStreamLength"] > mapdataTemp["maxTechStream"]) mapdataTemp["maxTechStream"] = mapdataTemp["currentTechStreamLength"];
+                        mapdataTemp["streamLength"].push(mapdataTemp["currentStreamLength"]);
+                        mapdataTemp["techStreamLength"].push(mapdataTemp["currentTechStreamLength"]);
+                        mapdataTemp["currentStreamLength"] = 0;
+                        mapdataTemp["currentTechStreamLength"] = 0;
+                        mapdataTemp.lastSnap = 0;
+                        mapdataTemp.currentObjectCount = 0;
+
+                    }
+                }
             } catch (error) {
                 reject(error);
             }
