@@ -943,14 +943,14 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					.setImage(backgroundURL);
 				const rankingdata = [];
 				for (let i = 0; i < Math.min(resulttop5.length, 5); i++) {
-					const acc = tools.accuracy({
+					const acc = tools.calculate_accuracy({
 						300: resulttop5[i].count300,
 						100: resulttop5[i].count100,
 						50: resulttop5[i].count50,
 						0: resulttop5[i].countmiss,
 						geki:  resulttop5[i].countgeki,
 						katu: resulttop5[i].countkatu
-					},  Utils.modeConvertAcc(mode));
+					}, mode);
 
 					const score = {
 						n300: Number(resulttop5[i].count300),
@@ -990,7 +990,8 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					case "deqf": {
 						if (allchannels["Qualified"][mode].includes(channelid)) {
 							const newchannels = allchannels["Qualified"][mode].filter(item => item !== channelid);
-							fs.writeJsonSync(`./ServerDatas/MapcheckChannels.json`, newchannels, { spaces: 4, replacer: null });
+							allchannels["Qualified"][mode] = newchannels;
+							fs.writeJsonSync(`./ServerDatas/MapcheckChannels.json`, allchannels, { spaces: 4, replacer: null });
 							await interaction.reply(`このチャンネルを${mode}のQualified、Rankedチェックチャンネルから削除しました。`);
 						} else {
 							await interaction.reply("このチャンネルはQualified、Rankedチェックチャンネルとして登録されていません。");
@@ -1015,7 +1016,8 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					case "deloved": {
 						if (allchannels["Loved"][mode].includes(channelid)) {
 							const newchannels = allchannels["Loved"][mode].filter(item => item !== channelid);
-							fs.writeJsonSync(`./ServerDatas/MapcheckChannels.json`, newchannels, { spaces: 4, replacer: null });
+							allchannels["Loved"][mode] = newchannels;
+							fs.writeJsonSync(`./ServerDatas/MapcheckChannels.json`, allchannels, { spaces: 4, replacer: null });
 							await interaction.reply(`このチャンネルを${mode}のLovedチェックチャンネルから削除しました。`);
 						} else {
 							await interaction.reply("このチャンネルはLovedチェックチャンネルとして登録されていません。");
@@ -1265,14 +1267,14 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const playersInfo = await new osuLibrary.GetUserData(playername, apikey, mode).getData();
 				const mappersInfo = await new osuLibrary.GetUserData(mapInfo.creator, apikey, mode).getData();
 
-				const acc = tools.accuracy({
+				const acc = tools.calculate_accuracy({
 					300: playersScore.count300,
 					100: playersScore.count100,
 					50: playersScore.count50,
 					0: playersScore.countmiss,
 					geki : playersScore.countgeki,
 					katu: playersScore.countkatu
-				}, Utils.modeConvertAcc(mode));
+				}, mode);
 
 				const modsBefore = new osuLibrary.Mod(playersScore.enabled_mods).get();
 
@@ -1654,7 +1656,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					return;
 				}
 
-				await interaction.reply("クイズを開始します。問題は10問です。");
+				await interaction.reply("クイズを開始します。問題は10問です。\n!skipでスキップ、!hintでヒントを表示します。");
 
 				const randomnumber = [];
 				while (randomnumber.length < 10) {
@@ -1732,7 +1734,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					return;
 				}
 
-				await interaction.reply("クイズを開始します。問題は10問です。");
+				await interaction.reply("クイズを開始します。問題は10問です。\n!skipでスキップ、!hintでヒントを表示します。");
 
 				const randomnumber = [];
 				while (randomnumber.length < 10) {
@@ -2613,14 +2615,14 @@ client.on(Events.MessageCreate, async (message) =>
 				const playersdata = await new osuLibrary.GetUserData(playername, apikey, currentMode).getData();
 				const mappersdata = await new osuLibrary.GetUserData(mapData.creator, apikey, currentMode).getData();
 				const mods = new osuLibrary.Mod(userRecentData.enabled_mods).get();
-				const recentAcc = tools.accuracy({
+				const recentAcc = tools.calculate_accuracy({
 					300: userRecentData.count300,
 					100: userRecentData.count100,
 					50: userRecentData.count50,
 					0: userRecentData.countmiss,
 					geki: userRecentData.countgeki,
 					katu: userRecentData.countkatu
-				}, Utils.modeConvertAcc(currentMode));
+				}, currentMode);
 				const recentPpData = new osuLibrary.CalculatePPSR(userRecentData.beatmap_id, mods.calc, currentMode);
 				await recentPpData.getMapData();
 				const passedObjects = calcPassedObject(userRecentData, currentMode);
@@ -3259,14 +3261,14 @@ client.on(Events.MessageCreate, async (message) =>
 					nGeki: Number(userPlays[0].countgeki),
 					nKatu: Number(userPlays[0].countkatu)
 				};
-				const recentAcc = tools.accuracy({
+				const recentAcc = tools.calculate_accuracy({
 					300: userPlays[0].count300,
 					100: userPlays[0].count100,
 					50: userPlays[0].count50,
 					0: userPlays[0].countmiss,
 					geki : userPlays[0].countgeki,
 					katu: userPlays[0].countgeki
-				}, Utils.modeConvertAcc(mode));
+				}, mode);
 				const userPlaysHit = Utils.formatHits(userBestPlays, mode);
 				const embed = new EmbedBuilder()
 					.setColor("Blue")
@@ -3281,14 +3283,14 @@ client.on(Events.MessageCreate, async (message) =>
 						const Mods = new osuLibrary.Mod(userPlays[i].enabled_mods).get();
 						calculator.mods = Mods.calc;
 						const srppData = await calculator.calculateSR();
-						const acc = tools.accuracy({
+						const acc = tools.calculate_accuracy({
 							300: userPlays[i].count300,
 							100: userPlays[i].count100,
 							50: userPlays[i].count50,
 							0: userPlays[i].countmiss,
 							geki : userPlays[i].countgeki,
 							katu: userPlays[i].countgeki
-						}, Utils.modeConvertAcc(mode));
+						}, mode);
 						valueString += `${Utils.rankconverter(userPlays[i].rank)} + **${Mods.str}** [${srppData.sr.toFixed(2)}★] ${Number(userPlays[i].pp).toFixed(2)}pp (${acc}%) ${userPlays[i].maxcombo}x Miss: ${userPlays[i].countmiss}\n`;
 					}
 					embed
