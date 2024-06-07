@@ -990,7 +990,8 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					case "deqf": {
 						if (allchannels["Qualified"][mode].includes(channelid)) {
 							const newchannels = allchannels["Qualified"][mode].filter(item => item !== channelid);
-							fs.writeJsonSync(`./ServerDatas/MapcheckChannels.json`, newchannels, { spaces: 4, replacer: null });
+							allchannels["Qualified"][mode] = newchannels;
+							fs.writeJsonSync(`./ServerDatas/MapcheckChannels.json`, allchannels, { spaces: 4, replacer: null });
 							await interaction.reply(`このチャンネルを${mode}のQualified、Rankedチェックチャンネルから削除しました。`);
 						} else {
 							await interaction.reply("このチャンネルはQualified、Rankedチェックチャンネルとして登録されていません。");
@@ -1015,7 +1016,8 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					case "deloved": {
 						if (allchannels["Loved"][mode].includes(channelid)) {
 							const newchannels = allchannels["Loved"][mode].filter(item => item !== channelid);
-							fs.writeJsonSync(`./ServerDatas/MapcheckChannels.json`, newchannels, { spaces: 4, replacer: null });
+							allchannels["Loved"][mode] = newchannels;
+							fs.writeJsonSync(`./ServerDatas/MapcheckChannels.json`, allchannels, { spaces: 4, replacer: null });
 							await interaction.reply(`このチャンネルを${mode}のLovedチェックチャンネルから削除しました。`);
 						} else {
 							await interaction.reply("このチャンネルはLovedチェックチャンネルとして登録されていません。");
