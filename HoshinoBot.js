@@ -2,7 +2,7 @@
 const { Client, EmbedBuilder, Events, GatewayIntentBits, ActivityType, WebhookClient } = require("./node_modules/discord.js");
 require("./node_modules/dotenv").config();
 const fs = require("./node_modules/fs-extra");
-const { tools, auth, v2, mods } = require("./node_modules/osu-api-extended");
+const { tools, auth, v2 } = require("./node_modules/osu-api-extended");
 const rosu = require("./node_modules/rosu-pp-js");
 const { Readable } = require("node:stream");
 const path = require("node:path");
@@ -1843,7 +1843,6 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 			if (interaction.commandName == "osusearch") {
 				await interaction.reply("検索中です...");
-				await auth.login(osuclientid, osuclientsecret, ["public", "identify"]);
 				let seracheddata = await v2.beatmaps.search({
 					query: interaction.options.get("query").value,
 					mode: Utils.modeConvertSearch(interaction.options.get("mode").value)
@@ -4023,7 +4022,6 @@ async function checkMap() {
 function checkqualified() {
 	return new Promise (async resolve => {
 		const modeArray = ["osu", "taiko", "catch", "mania"];
-		await auth.login(osuclientid, osuclientsecret, ["public", "identify"]);
 		for (const mode of modeArray) {
 			try {
 				
@@ -4067,7 +4065,7 @@ function checkqualified() {
 
 					let QFBeatmapsMaxSrId;
 					let QFBeatmapsMinSrId;
-					await v2.beatmaps.set.details(differentQF).then(res => {
+					await v2.beatmap.set.details(differentQF).then(res => {
 						const array = res.beatmaps
 						array.sort((a, b) => a.difficulty_rating - b.difficulty_rating);
 						const maxRatingObj = array[array.length - 1];
@@ -4177,7 +4175,6 @@ function checkqualified() {
 function checkranked() {
 	return new Promise (async resolve => {
 		const modeArray = ["osu", "taiko", "catch", "mania"];
-		await auth.login(osuclientid, osuclientsecret, ["public", "identify"]);
 		for (const mode of modeArray) {
 			const rankeddatalist = await v2.beatmaps.search({
 				mode: Utils.modeConvertSearch(mode),
@@ -4315,7 +4312,6 @@ function checkranked() {
 function checkloved() {
 	return new Promise(async resolve => {
 		const modeArray = ["osu", "taiko", "catch", "mania"];
-		await auth.login(osuclientid, osuclientsecret, ["public", "identify"]);
 		for (const mode of modeArray) {
 			const loveddatalist = await v2.beatmaps.search({
 				mode: Utils.modeConvertSearch(mode),
@@ -4420,7 +4416,6 @@ function checkloved() {
 
 async function rankedintheday() {
 	const modeArray = ["osu", "taiko", "catch", "mania"];
-	await auth.login(osuclientid, osuclientsecret, ["public", "identify"]);
 	for (const mode of modeArray) {
 		let qfparsedjson = fs.readJsonSync(`./ServerDatas/Beatmaps/${mode}.json`);
 		const now = new Date();
@@ -4507,5 +4502,14 @@ async function makeBackup() {
 	fs.mkdirSync(`./Backups/${dateString}`);
 	fs.copySync("./ServerDatas", `./Backups/${dateString}`);
 }
+
+const login = async () => await auth.login(osuclientid, osuclientsecret, ["public", "identify"]);
+
+(async () => {
+	await login();
+	setInterval(async () => {
+		await login();
+	}, 600000);
+})();
 
 client.login(token);
