@@ -3337,8 +3337,8 @@ client.on(Events.MessageCreate, async (message) =>
 
 				let ifFCMessage = `(**${ifFCPP.toFixed(2)}**pp for ${ifFCAcc}% FC)`;
 				if (mode == 3) ifFCMessage = "";
-				if (userplays[0].maxcombo == mapData.max_combo) ifFCMessage = "**Full Combo!! Congrats!!**";
-				if (userplays[0].pp.toString().replace(".", "").includes("727")) ifFCMessage = "**WYSI!! WYFSI!!!!!**";
+				if (userPlays[0].maxcombo == mapData.max_combo) ifFCMessage = "**Full Combo!! Congrats!!**";
+				if (userPlays[0].pp.toString().replace(".", "").includes("727")) ifFCMessage = "**WYSI!! WYFSI!!!!!**";
 
 				const embed = new EmbedBuilder()
 					.setColor("Blue")
