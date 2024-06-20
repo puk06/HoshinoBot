@@ -3347,7 +3347,7 @@ client.on(Events.MessageCreate, async (message) =>
 					.setThumbnail(osuLibrary.URLBuilder.thumbnailURL(mapData.beatmapset_id))
 					.setURL(mapUrl)
 					.setAuthor({ name: `${playersdata.username}: ${Number(playersdata.pp_raw).toLocaleString()}pp (#${Number(playersdata.pp_rank).toLocaleString()} ${playersdata.country}${Number(playersdata.pp_country_rank).toLocaleString()})`, iconURL: playerIconUrl, url: playerUrl })
-					.addFields({ name: rankingString, value: `${Utils.rankconverter(userPlays[0].rank)} **+ ${bestMods.str}** [${srppData.sr.toFixed(2)}★] **Score**: ${Number(userPlays[0].score).toLocaleString()} **Acc**: ${recentAcc}% \n **PP**: **${Number(userPlays[0].pp).toFixed(2)}** / ${srppData.pp.toFixed(2)}PP　${ifFCMessage} \n **Combo**: **${userPlays[0].maxcombo}x** / ${mapData.max_combo}x ${userPlaysHit}`, inline: false })
+					.addFields({ name: rankingString, value: `${Utils.rankconverter(userPlays[0].rank)} **+ ${bestMods.str}** [${srppData.sr.toFixed(2)}★] **Score**: ${Number(userPlays[0].score).toLocaleString()} **Acc**: ${recentAcc}% \n **PP**: **${Number(userPlays[0].pp).toFixed(2)}** / ${srppData.pp.toFixed(2)}PP ${ifFCMessage} \n **Combo**: **${userPlays[0].maxcombo}x** / ${mapData.max_combo}x ${userPlaysHit}`, inline: false })
 				if (userPlays.length > 1) {
 					let valueString = "";
 					for (let i = 1; i < Math.min(userPlays.length, 5); i++) {
