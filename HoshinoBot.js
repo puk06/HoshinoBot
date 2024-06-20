@@ -96,21 +96,19 @@ client.on(Events.ClientReady, async () =>
 				if (webHookData.lastDate == new Date().getDate()) return;
 				await webHookClient.send({
 					content: "daily bread"
-				})
-					.then(() => {
-						let now = new Date();
-						console.log(`[${now.toLocaleString()}] WebHookの送信に成功しました。`);
-						webHookData.lastDate = now.getDate();
-						fs.writeJsonSync("./ServerDatas/WebHookData.json", webHookData, { spaces: 4, replacer: null });
-						webHookData = null;
-						now = null;
-					})
-					.catch(() => {
-						let now = new Date();
-						console.log(`[${now.toLocaleString()}] WebHookの送信に失敗しました。`);
-						webHookData = null;
-						now = null;
-					});
+				}).then(() => {
+					let now = new Date();
+					console.log(`[${now.toLocaleString()}] WebHookの送信に成功しました。`);
+					webHookData.lastDate = now.getDate();
+					fs.writeJsonSync("./ServerDatas/WebHookData.json", webHookData, { spaces: 4, replacer: null });
+					webHookData = null;
+					now = null;
+				}).catch(() => {
+					let now = new Date();
+					console.log(`[${now.toLocaleString()}] WebHookの送信に失敗しました。`);
+					webHookData = null;
+					now = null;
+				});
 			}, timeUntilNextExecution);
 		})();
 	}
@@ -302,22 +300,44 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					return;
 				}
 
+				let times = interaction.options.get("times")?.value;
+				if (!times) times = 1;
+				if (times > 1000) times = 1000;
+				
 				if (balance <= 0n) {
 					await interaction.reply("賭け金額を計算できるほどのお金を持っていないようです。");
 					return;
 				}
 
-				const betAmount = balance / 15n;
-				const newBalance = balance - betAmount;
-				const result = Utils.generateSlotResult();
-				const rewardMultiplier = Utils.evaluateSlotResult(result);
-				const reward = betAmount * rewardMultiplier * 8n * 10n / 100n;
-				const resultprefix = reward - betAmount >= 0n ? "+" : "";
-				await interaction.reply(`結果: ${result.join(" ")}\n報酬: ${Utils.formatBigInt(reward)}coin (${resultprefix}${Utils.formatBigInt((reward - betAmount))})`);
-				bankData[interaction.user.id].balance = (newBalance + reward).toString();
-				fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
-				bankData = null;
-				return;
+				if (times == 1) {
+					const betAmount = balance / 15n;
+					const newBalance = balance - betAmount;
+					const result = Utils.generateSlotResult();
+					const rewardMultiplier = Utils.evaluateSlotResult(result);
+					const reward = betAmount * rewardMultiplier * 4n / 5n;
+					const resultprefix = reward - betAmount >= 0n ? "+" : "";
+					await interaction.reply(`結果: ${result.join(" ")}\n報酬: ${Utils.formatBigInt(reward)}coin (${resultprefix}${Utils.formatBigInt((reward - betAmount))})`);
+					bankData[interaction.user.id].balance = (newBalance + reward).toString();
+					fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
+					bankData = null;
+				} else {
+					let totalReward = 0n;
+					let totalBet = 0n;
+					for (let i = 0; i < times; i++) {
+						const betAmount = balance / 15n;
+						const newBalance = balance - betAmount;
+						const result = Utils.generateSlotResult();
+						const rewardMultiplier = Utils.evaluateSlotResult(result);
+						const reward = betAmount * rewardMultiplier * 4n / 5n;
+						totalReward += reward;
+						totalBet += betAmount;
+						bankData[interaction.user.id].balance = (newBalance + reward).toString();
+					}
+					const resultprefix = totalReward - totalBet >= 0n ? "+" : "";
+					await interaction.reply(`結果: ${times}回中 ${totalReward.toLocaleString()}coin (${resultprefix}${(totalReward - totalBet).toLocaleString()})`);
+					fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
+					bankData = null;
+				}
 			}
 
 			if (interaction.commandName == "reco") {
@@ -943,14 +963,14 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					.setImage(backgroundURL);
 				const rankingdata = [];
 				for (let i = 0; i < Math.min(resulttop5.length, 5); i++) {
-					const acc = tools.calculate_accuracy({
+					const acc = Math.round(tools.accuracy({
 						300: resulttop5[i].count300,
 						100: resulttop5[i].count100,
 						50: resulttop5[i].count50,
 						0: resulttop5[i].countmiss,
 						geki:  resulttop5[i].countgeki,
 						katu: resulttop5[i].countkatu
-					}, mode);
+					}, Utils.modeConvertAcc(mode)) * 100) / 100;
 
 					const score = {
 						n300: Number(resulttop5[i].count300),
@@ -1267,14 +1287,14 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const playersInfo = await new osuLibrary.GetUserData(playername, apikey, mode).getData();
 				const mappersInfo = await new osuLibrary.GetUserData(mapInfo.creator, apikey, mode).getData();
 
-				const acc = tools.calculate_accuracy({
+				const acc = Math.round(tools.accuracy({
 					300: playersScore.count300,
 					100: playersScore.count100,
 					50: playersScore.count50,
 					0: playersScore.countmiss,
 					geki : playersScore.countgeki,
 					katu: playersScore.countkatu
-				}, mode);
+				}, Utils.modeConvertAcc(mode)) * 100) / 100;
 
 				const modsBefore = new osuLibrary.Mod(playersScore.enabled_mods).get();
 
@@ -1796,22 +1816,24 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 			if (interaction.commandName == "osusearch") {
 				await interaction.reply("検索中です...");
-				await auth.login(osuclientid, osuclientsecret);
-				const seracheddata = await v2.beatmap.search({
+				await auth.login(osuclientid, osuclientsecret, ["public", "identify"]);
+				let seracheddata = await v2.beatmaps.search({
 					query: interaction.options.get("query").value,
-					mode: interaction.options.get("mode").value
+					mode: Utils.modeConvertSearch(interaction.options.get("mode").value)
 				});
-				let data = [];
+
 				if (seracheddata.beatmapsets.length == 0) {
 					await interaction.channel.send("検索結果が見つかりませんでした。");
 					return;
 				}
+
 				let embed = new EmbedBuilder()
 					.setColor("Blue")
 					.setTitle(`検索結果: ${interaction.options.get("query").value}`)
 					.setImage(`https://assets.ppy.sh/beatmaps/${seracheddata.beatmapsets[0].beatmaps[0].beatmapset_id}/covers/cover.jpg`)
 					.setTimestamp();
-				
+
+				let data = [];
 				for (let i = 0; i < Math.min(seracheddata.beatmapsets.length, 5); i++) {
 					let array = seracheddata.beatmapsets[i].beatmaps;
 					array.sort((a, b) => a.difficulty_rating - b.difficulty_rating);
@@ -1819,8 +1841,8 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					const minRatingObj = array[0];
 					let maxsrobj = maxRatingObj.id;
 					let minsrobj = minRatingObj.id;
-					const maxsrdata = new osuLibrary.CalculatePPSR(maxsrobj, 0, Utils.modeConvertMap(interaction.options.get("mode")));
-					const minsrdata = new osuLibrary.CalculatePPSR(minsrobj, 0, Utils.modeConvertMap(interaction.options.get("mode")));
+					const maxsrdata = new osuLibrary.CalculatePPSR(maxsrobj, 0, Utils.modeConvertMap(interaction.options.get("mode").value));
+					const minsrdata = new osuLibrary.CalculatePPSR(minsrobj, 0, Utils.modeConvertMap(interaction.options.get("mode").value));
 					const nmmaxppData = await maxsrdata.calculateSR();
 					const nmminppData = await minsrdata.calculateSR();
 					const dtmaxppData = await maxsrdata.calculateDT();
@@ -2615,14 +2637,14 @@ client.on(Events.MessageCreate, async (message) =>
 				const playersdata = await new osuLibrary.GetUserData(playername, apikey, currentMode).getData();
 				const mappersdata = await new osuLibrary.GetUserData(mapData.creator, apikey, currentMode).getData();
 				const mods = new osuLibrary.Mod(userRecentData.enabled_mods).get();
-				const recentAcc = tools.calculate_accuracy({
+				const recentAcc = Math.round(tools.accuracy({
 					300: userRecentData.count300,
 					100: userRecentData.count100,
 					50: userRecentData.count50,
 					0: userRecentData.countmiss,
 					geki: userRecentData.countgeki,
 					katu: userRecentData.countkatu
-				}, currentMode);
+				}, Utils.modeConvertAcc(currentMode)) * 100) / 100;
 				const recentPpData = new osuLibrary.CalculatePPSR(userRecentData.beatmap_id, mods.calc, currentMode);
 				await recentPpData.getMapData();
 				const passedObjects = calcPassedObject(userRecentData, currentMode);
@@ -3261,14 +3283,14 @@ client.on(Events.MessageCreate, async (message) =>
 					nGeki: Number(userPlays[0].countgeki),
 					nKatu: Number(userPlays[0].countkatu)
 				};
-				const recentAcc = tools.calculate_accuracy({
+				const recentAcc = Math.round(tools.accuracy({
 					300: userPlays[0].count300,
 					100: userPlays[0].count100,
 					50: userPlays[0].count50,
 					0: userPlays[0].countmiss,
 					geki : userPlays[0].countgeki,
 					katu: userPlays[0].countgeki
-				}, mode);
+				}, Utils.modeConvertAcc(mode)) * 100) / 100;
 				const userPlaysHit = Utils.formatHits(userBestPlays, mode);
 				const embed = new EmbedBuilder()
 					.setColor("Blue")
@@ -3283,14 +3305,14 @@ client.on(Events.MessageCreate, async (message) =>
 						const Mods = new osuLibrary.Mod(userPlays[i].enabled_mods).get();
 						calculator.mods = Mods.calc;
 						const srppData = await calculator.calculateSR();
-						const acc = tools.calculate_accuracy({
+						const acc = Math.round(tools.accuracy({
 							300: userPlays[i].count300,
 							100: userPlays[i].count100,
 							50: userPlays[i].count50,
 							0: userPlays[i].countmiss,
 							geki : userPlays[i].countgeki,
 							katu: userPlays[i].countgeki
-						}, mode);
+						}, Utils.modeConvertAcc(mode)) * 100) / 100;
 						valueString += `${Utils.rankconverter(userPlays[i].rank)} + **${Mods.str}** [${srppData.sr.toFixed(2)}★] ${Number(userPlays[i].pp).toFixed(2)}pp (${acc}%) ${userPlays[i].maxcombo}x Miss: ${userPlays[i].countmiss}\n`;
 					}
 					embed
@@ -3955,13 +3977,13 @@ async function checkMap() {
 
 function checkqualified() {
 	return new Promise (async resolve => {
-		const modeconvertforSearch = (mode) => mode == "catch" ? "fruits" : mode;
 		const modeArray = ["osu", "taiko", "catch", "mania"];
-		await auth.login(osuclientid, osuclientsecret);
+		await auth.login(osuclientid, osuclientsecret, ["public", "identify"]);
 		for (const mode of modeArray) {
 			try {
-				const qfdatalist = await v2.beatmap.search({
-					mode: modeconvertforSearch(mode),
+				
+				const qfdatalist = await v2.beatmaps.search({
+					mode: Utils.modeConvertSearch(mode),
 					section: "qualified"
 				});
 				if (qfdatalist.beatmapsets == undefined) continue;
@@ -4000,7 +4022,7 @@ function checkqualified() {
 
 					let QFBeatmapsMaxSrId;
 					let QFBeatmapsMinSrId;
-					await v2.beatmap.set(differentQF).then((res) => {
+					await v2.beatmap.set.lookup(differentQF).then((res) => {
 						const array = res.beatmaps;
 						array.sort((a, b) => a.difficulty_rating - b.difficulty_rating);
 						const maxRatingObj = array[array.length - 1];
@@ -4109,12 +4131,11 @@ function checkqualified() {
 
 function checkranked() {
 	return new Promise (async resolve => {
-		const modeconvertforSearch = (mode) => mode == "catch" ? "fruits" : mode;
 		const modeArray = ["osu", "taiko", "catch", "mania"];
-		await auth.login(osuclientid, osuclientsecret);
+		await auth.login(osuclientid, osuclientsecret, ["public", "identify"]);
 		for (const mode of modeArray) {
-			const rankeddatalist = await v2.beatmap.search({
-				mode: modeconvertforSearch(mode),
+			const rankeddatalist = await v2.beatmaps.search({
+				mode: Utils.modeConvertSearch(mode),
 				section: "ranked"
 			});
 			if (rankeddatalist.beatmapsets == undefined) continue;
@@ -4163,7 +4184,7 @@ function checkranked() {
 		
 					let rankedBeatmapsMaxSrId;
 					let rankedBeatmapsMinSrId;
-					await v2.beatmap.set(differentranked).then((res) => {
+					await v2.beatmap.set.lookup(differentranked).then((res) => {
 						const array = res.beatmaps;
 						array.sort((a, b) => a.difficulty_rating - b.difficulty_rating);
 						const maxRatingObj = array[array.length - 1];
@@ -4248,12 +4269,11 @@ function checkranked() {
 
 function checkloved() {
 	return new Promise(async resolve => {
-		const modeconvertforSearch = (mode) => mode == "catch" ? "fruits" : mode;
 		const modeArray = ["osu", "taiko", "catch", "mania"];
-		await auth.login(osuclientid, osuclientsecret);
+		await auth.login(osuclientid, osuclientsecret, ["public", "identify"]);
 		for (const mode of modeArray) {
-			const loveddatalist = await v2.beatmap.search({
-				mode: modeconvertforSearch(mode),
+			const loveddatalist = await v2.beatmaps.search({
+				mode: Utils.modeConvertSearch(mode),
 				section: "loved"
 			});
 			if (loveddatalist.beatmapsets == undefined) continue;
@@ -4271,7 +4291,7 @@ function checkloved() {
 				try {
 					let lovedBeatmapsMaxSrId;
 					let lovedBeatmapsMinSrId;
-					await v2.beatmap.set(differentloved).then(async (res) => {
+					await v2.beatmap.set.lookup(differentloved).then(async (res) => {
 						const array = res.beatmaps;
 						array.sort((a, b) => a.difficulty_rating - b.difficulty_rating);
 						const maxRatingObj = array[array.length - 1];
@@ -4355,7 +4375,7 @@ function checkloved() {
 
 async function rankedintheday() {
 	const modeArray = ["osu", "taiko", "catch", "mania"];
-	await auth.login(osuclientid, osuclientsecret);
+	await auth.login(osuclientid, osuclientsecret, ["public", "identify"]);
 	for (const mode of modeArray) {
 		let qfparsedjson = fs.readJsonSync(`./ServerDatas/Beatmaps/${mode}.json`);
 		const now = new Date();
@@ -4381,7 +4401,7 @@ async function rankedintheday() {
 
 					let QFBeatmapsMaxSrId;
 					let QFBeatmapsMinSrId;
-					await v2.beatmap.set(element.id).then(async (res) => {
+					await v2.beatmap.set.lookup(element.id).then(async (res) => {
 						const array = res.beatmaps;
 						array.sort((a, b) => a.difficulty_rating - b.difficulty_rating);
 						const maxRatingObj = array[array.length - 1];

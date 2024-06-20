@@ -224,6 +224,16 @@ class Tools {
     }
 
     /**
+     * Converts a mode string to its corresponding search string.
+     * @param {string} str - The mode string to be converted.
+     * @returns {string} The search string representing the mode.
+     */
+    static modeConvertSearch(str) {
+        if (str == "catch") return "fruits";
+        return str;
+    }
+
+    /**
      * Converts a number representing a game mode to its corresponding string representation.
      * @param {number} num - The number representing the game mode.
      * @returns {string} The string representation of the game mode.

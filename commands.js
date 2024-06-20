@@ -38,6 +38,12 @@ module.exports = [
         data: new SlashCommandBuilder()
             .setName("recoshot")
             .setDescription("recoコマンドで出る金額を自動で賭け金額に設定します。")
+            .addNumberOption(option =>
+                option
+                    .setName("times")
+                    .setDescription("回数を指定できます。1000回まで一度に実行できます。")
+                    .setRequired(false)
+            )
     },
     {
         data: new SlashCommandBuilder()

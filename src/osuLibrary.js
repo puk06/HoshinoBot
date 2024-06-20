@@ -543,8 +543,6 @@ class CheckMapData {
                                     mapdataTemp["currentTechStreamLength"] = 0;
                                 }
 
-
-
                                 if (lastSnap == 8) mapdataTemp["1/8Times"]++;
                                 if (lastSnap == 6) mapdataTemp["1/6Times"]++;
                                 if (lastSnap == 4) mapdataTemp["1/4Times"]++;
@@ -583,9 +581,25 @@ class CheckMapData {
                         mapdataTemp["currentTechStreamLength"] = 0;
                         mapdataTemp.lastSnap = 0;
                         mapdataTemp.currentObjectCount = 0;
-
                     }
                 }
+
+                mapData["maxStream"] = mapdataTemp["maxStream"];
+                mapData["streamCount"] = mapdataTemp["streamLength"].length;
+                mapData["over100ComboAverageStreamLength"] = mapdataTemp["streamLength"].reduce((a, b) => a + b, 0) / mapdataTemp["streamLength"].length;
+                mapData["techStream"] = mapdataTemp["maxTechStream"];
+                mapData["techStreamCount"] = mapdataTemp["techStreamLength"].length;
+                mapData["over100ComboAverageTechStreamLength"] = mapdataTemp["techStreamLength"].reduce((a, b) => a + b, 0) / mapdataTemp["techStreamLength"].length;
+                mapData["1/3 times"] = mapdataTemp["1/3Times"];
+                mapData["max1/3Length"] = mapdataTemp["max1/3Length"];
+                mapData["1/4 times"] = mapdataTemp["1/4Times"];
+                mapData["max1/4Length"] = mapdataTemp["max1/4Length"];
+                mapData["1/6 times"] = mapdataTemp["1/6Times"];
+                mapData["max1/6Length"] = mapdataTemp["max1/6Length"];
+                mapData["1/8 times"] = mapdataTemp["1/8Times"];
+                mapData["max1/8Length"] = mapdataTemp["max1/8Length"];
+                mapData["BPMMode"] = mode(BPMarray);
+                resolve(mapData);
             } catch (error) {
                 reject(error);
             }
