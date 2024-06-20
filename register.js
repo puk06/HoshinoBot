@@ -1,4 +1,4 @@
-const { REST, Routes } = require('discord.js');
+const { REST, Routes } = require('./node_modules/discord.js');
 require("./node_modules/dotenv").config();
 const applicationId = process.env.APPLICATIONID;
 const token = process.env.TOKEN;
