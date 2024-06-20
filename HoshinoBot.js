@@ -3335,7 +3335,6 @@ client.on(Events.MessageCreate, async (message) =>
 				}, Utils.modeConvertAcc(mode)) * 100) / 100;
 				const userPlaysHit = Utils.formatHits(userBestPlays, mode);
 
-				console.table(userPlays[0]);
 				let ifFCMessage = `(**${ifFCPP.toFixed(2)}**pp for ${ifFCAcc}% FC)`;
 				if (mode == 3) ifFCMessage = "";
 				if (userplays[0].maxcombo == mapData.max_combo) ifFCMessage = "**Full Combo!! Congrats!!**";
