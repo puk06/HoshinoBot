@@ -798,4 +798,21 @@ module.exports = [
             .setName("talklevelranking")
             .setDescription("このサーバーでの、話した回数のレベルランキングを表示します。")
     },
+    {
+        data: new SlashCommandBuilder()
+            .setName("update")
+            .setDescription("サーバーのファイルを更新します。管理者専用です。")
+            .addStringOption(option =>
+                option
+                    .setName("file")
+                    .setDescription("ファイル名")
+                    .setRequired(true)
+                    .setAutocomplete(true)
+            )
+    },
+    {
+        data: new SlashCommandBuilder()
+            .setName("restart")
+            .setDescription("サーバーを再起動します。管理者専用です。")
+    }
 ]

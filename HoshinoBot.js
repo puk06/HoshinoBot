@@ -2,8 +2,7 @@
 const { Client, EmbedBuilder, Events, GatewayIntentBits, ActivityType, WebhookClient } = require("./node_modules/discord.js");
 require("./node_modules/dotenv").config();
 const fs = require("./node_modules/fs-extra");
-const { tools, auth, v2 } = require("./node_modules/osu-api-extended");
-const axios = require("./node_modules/axios");
+const { tools, auth, v2, mods } = require("./node_modules/osu-api-extended");
 const rosu = require("./node_modules/rosu-pp-js");
 const { Readable } = require("node:stream");
 const path = require("node:path");
@@ -27,6 +26,13 @@ const client = new Client({
 		GatewayIntentBits.MessageContent
 	]
 });
+
+const UpdateFiles = [
+	"HoshinoBot.js",
+	"./src/Utils.js",
+	"./src/osuLibrary.js",
+	"package.json"
+];
 
 client.on(Events.ClientReady, async () =>
 	{
@@ -165,6 +171,23 @@ client.on(Events.InteractionCreate, async (interaction) =>
 							for (const tag of allTags) choices.push(tag);
 							allTags = null;
 						}
+						const filtered = choices
+							.filter((choice) => choice.startsWith(focusedOption.value))
+							.slice(0, 25);
+
+						await interaction.respond(
+							filtered.map((choice) => ({ name: choice, value: choice }))
+						);
+					}
+					break;
+
+					case "update": {
+						const focusedOption = interaction.options.getFocused(true);
+						let choices = [];
+						if (focusedOption.name === "file") {
+							for (const file of UpdateFiles) choices.push(file);
+						}
+
 						const filtered = choices
 							.filter((choice) => choice.startsWith(focusedOption.value))
 							.slice(0, 25);
@@ -950,10 +973,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				}
 
 				await interaction.reply("ランキングの作成中です...");
-				const resulttop5 = await axios.get(`https://osu.ppy.sh/api/get_scores?k=${apikey}&b=${beatmapid}&m=${mode}&mods=${mods.num}&limit=5`)
-					.then(res => {
-						return res.data;
-					});
+				const resulttop5 = await Utils.getAPIResponse(`https://osu.ppy.sh/api/get_scores?k=${apikey}&b=${beatmapid}&m=${mode}&mods=${mods.num}&limit=5`);
 
 				if (resulttop5.length == 0) {
 					await interaction.channel.send("このマップ、Modsにはランキングが存在しません。");
@@ -1324,10 +1344,9 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				calculator.setMods(mods.calc);
 				const PPafter = await calculator.calculateScorePP(score);
 				const SSPPafter = await calculator.calculateSR();
-				const response = await axios.get(
+				const userplays = await Utils.getAPIResponse(
 					`https://osu.ppy.sh/api/get_user_best?k=${apikey}&type=string&m=${mode}&u=${playername}&limit=100`
 				);
-				const userplays = response.data;
 				await interaction.reply("GlobalPPの計算中です...");
 				let pp = [];
 				let ppForBonusPP = [];
@@ -1492,8 +1511,9 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					return;
 				}
 
-				const beatmapdata = await axios.get(osufile, { responseType: "arraybuffer" })
-					.then(res => res.data);
+				const beatmapdata = await Utils.getAPIResponse(osufile, {
+					responseType: "arraybuffer"
+				});
 
 				await interaction.reply("計算中です。");
 				const map = new rosu.Beatmap(new Uint8Array(Buffer.from(beatmapdata)));
@@ -1671,10 +1691,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 						break;
 				}
 
-				const quizdata = await axios.get(`https://osu.ppy.sh/api/get_user_best?k=${apikey}&u=${username}&type=string&m=${mode}&limit=100`)
-					.then(res => {
-						return res.data;
-					});
+				const quizdata = await Utils.getAPIResponse(`https://osu.ppy.sh/api/get_user_best?k=${apikey}&u=${username}&type=string&m=${mode}&limit=100`);
 
 				if (quizdata.length == 0) {
 					await interaction.reply("記録が見つかりませんでした。");
@@ -1715,9 +1732,8 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				fs.writeJsonSync(`./OsuPreviewquiz/${interaction.channel.id}.json`, randomjson, { spaces: 4, replacer: null });
 				let jsondata = fs.readJsonSync(`./OsuPreviewquiz/${interaction.channel.id}.json`);
 				await interaction.channel.send(`問題1のBGを表示します。`);
-				await axios.get(`https://assets.ppy.sh/beatmaps/${jsondata[0].id}/covers/raw.jpg`, { responseType: "arraybuffer" })
-					.then(async res => {
-						let BGdata = res.data;
+				await Utils.getAPIResponse(`https://assets.ppy.sh/beatmaps/${jsondata[0].id}/covers/raw.jpg`, { responseType: "arraybuffer" })
+					.then(async BGdata => {
 						await interaction.channel.send({ files: [{ attachment: BGdata, name: "background.jpg" }] });
 						BGdata = null;
 					});
@@ -1749,10 +1765,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 						break;
 				}
 
-				const quizdata = await axios.get(`https://osu.ppy.sh/api/get_user_best?k=${apikey}&u=${username}&type=string&m=${mode}&limit=100`)
-					.then(res => {
-						return res.data;
-					});
+				const quizdata = await Utils.getAPIResponse(`https://osu.ppy.sh/api/get_user_best?k=${apikey}&u=${username}&type=string&m=${mode}&limit=100`);
 
 				if (quizdata.length == 0) {
 					await interaction.reply("記録が見つかりませんでした。");
@@ -1793,9 +1806,8 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				fs.writeJsonSync(`./OsuPreviewquiz/${interaction.channel.id}.json`, randomjson, { spaces: 4, replacer: null });
 				let jsondata = fs.readJsonSync(`./OsuPreviewquiz/${interaction.channel.id}.json`);
 				await interaction.channel.send(`問題1のプレビューを再生します。`);
-				await axios.get(`https://b.ppy.sh/preview/${jsondata[0].id}.mp3`, { responseType: "arraybuffer" })
-					.then(async res => {
-						let audioData = res.data;
+				await Utils.getAPIResponse(`https://b.ppy.sh/preview/${jsondata[0].id}.mp3`, { responseType: "arraybuffer" })
+					.then(async audioData => {
 						await interaction.channel.send({ files: [{ attachment: audioData, name: "audio.mp3" }] });
 						audioData = null;
 					});
@@ -1898,18 +1910,18 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					return;
 				}
 
-				const useruuidresponce = await axios.get(`https://api.mojang.com/users/profiles/minecraft/${username}`);
+				const useruuidresponce = await Utils.getAPIResponse(`https://api.mojang.com/users/profiles/minecraft/${username}`);
 
-				const responce = await axios.get(
-					`https://api.hypixel.net/skyblock/profiles?key=${hypixelapikey}&uuid=${useruuidresponce.data.id}`
+				const responce = await Utils.getAPIResponse(
+					`https://api.hypixel.net/skyblock/profiles?key=${hypixelapikey}&uuid=${useruuidresponce.id}`
 				);
 
-				if (!responce.data.success) {
+				if (!responce.success) {
 					await interaction.reply("データを取得するのに失敗しました。");
 					return;
 				}
 				
-				if (responce.data.profiles == null) {
+				if (responce.profiles == null) {
 					await interaction.reply("このユーザーはSkyblockをしていないようです。");
 					return;
 				}
@@ -1962,62 +1974,62 @@ client.on(Events.InteractionCreate, async (interaction) =>
 						break;
 				}
 
-				if (responce.data.profiles[i] == undefined) {
+				if (responce.profiles[i] == undefined) {
 					await interaction.reply("このプロファイルは存在しないようです。");
 					return;
 				}
 
-				const userslayerxp = eval(`responce.data.profiles[${i}].members.${useruuidresponce.data.id}.slayer_bosses.${slayername}.xp`);
+				const userslayerxp = responce.profiles[i]?.[members.useruuidresponce.id].slayer_bosses.slayername.xp;
 
 				if (userslayerxp == undefined) {
-					await interaction.reply(`プロファイル:${responce.data.profiles[i].cute_name} | このプレイヤーは${showonlyslayername}をしていないみたいです。`);
+					await interaction.reply(`プロファイル:${responce.profiles[i].cute_name} | このプレイヤーは${showonlyslayername}をしていないみたいです。`);
 					return;
 				}
 
 				let remainxp;
 				switch (true) {
 					case userslayerxp >= 1000000:
-						await interaction.reply(`プロファイル:${responce.data.profiles[i].cute_name} | このプレイヤーの${showonlyslayername}レベルは既に**Lv9**です。`);
+						await interaction.reply(`プロファイル:${responce.profiles[i].cute_name} | このプレイヤーの${showonlyslayername}レベルは既に**Lv9**です。`);
 						break;
 					case userslayerxp >= 400000:
 						remainxp = 1000000 - userslayerxp;
-						await interaction.reply(`プロファイル:**${responce.data.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv8**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Utils.createProgressBar(userslayerxp / 1000000 * 100)}${(userslayerxp / 1000000 * 100).toFixed(1)}%`);
+						await interaction.reply(`プロファイル:**${responce.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv8**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Utils.createProgressBar(userslayerxp / 1000000 * 100)}${(userslayerxp / 1000000 * 100).toFixed(1)}%`);
 						break;
 					case userslayerxp >= 100000:
 						remainxp = 400000 - userslayerxp;
-						await interaction.reply(`プロファイル:**${responce.data.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv7**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Utils.createProgressBar(userslayerxp / 400000 * 100)}${(userslayerxp / 400000 * 100).toFixed(1)}%`);
+						await interaction.reply(`プロファイル:**${responce.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv7**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Utils.createProgressBar(userslayerxp / 400000 * 100)}${(userslayerxp / 400000 * 100).toFixed(1)}%`);
 						break;
 					case userslayerxp >= 20000:
 						remainxp = 100000 - userslayerxp;
-						await interaction.reply(`プロファイル:**${responce.data.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv6**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Utils.createProgressBar(userslayerxp / 100000 * 100)}${(userslayerxp / 100000 * 100).toFixed(1)}%`);
+						await interaction.reply(`プロファイル:**${responce.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv6**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Utils.createProgressBar(userslayerxp / 100000 * 100)}${(userslayerxp / 100000 * 100).toFixed(1)}%`);
 						break;
 					case userslayerxp >= 5000:
 						remainxp = 20000 - userslayerxp;
-						await interaction.reply(`プロファイル:**${responce.data.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv5**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Utils.createProgressBar(userslayerxp / 20000 * 100)}${(userslayerxp / 20000 * 100).toFixed(1)}%`);
+						await interaction.reply(`プロファイル:**${responce.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv5**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Utils.createProgressBar(userslayerxp / 20000 * 100)}${(userslayerxp / 20000 * 100).toFixed(1)}%`);
 						break;
 					case ((slayername == "zombie" || slayername == "spider") && userslayerxp >= 1000) || ((slayername == "wolf" || slayername == "enderman" || slayername == "blaze") && userslayerxp >= 1500):
 						remainxp = 5000 - userslayerxp;
-						await interaction.reply(`プロファイル:**${responce.data.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv4**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Utils.createProgressBar(userslayerxp / 5000 * 100)}${(userslayerxp / 5000 * 100).toFixed(1)}%`);
+						await interaction.reply(`プロファイル:**${responce.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv4**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Utils.createProgressBar(userslayerxp / 5000 * 100)}${(userslayerxp / 5000 * 100).toFixed(1)}%`);
 						break;
 					case (slayername == "zombie" || slayername == "spider") && userslayerxp >= 200:
 						remainxp = 1000 - userslayerxp;
-						await interaction.reply(`プロファイル:**${responce.data.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv3**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Utils.createProgressBar(userslayerxp / 1000 * 100)}${(userslayerxp / 1000 * 100).toFixed(1)}%`);
+						await interaction.reply(`プロファイル:**${responce.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv3**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Utils.createProgressBar(userslayerxp / 1000 * 100)}${(userslayerxp / 1000 * 100).toFixed(1)}%`);
 						break;
 					case (slayername == "wolf" || slayername == "enderman" || slayername == "blaze") && userslayerxp >= 250:
 						remainxp = 1500 - userslayerxp;
-						await interaction.reply(`プロファイル:**${responce.data.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv3**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Utils.createProgressBar(userslayerxp / 1500 * 100)}${(userslayerxp / 1500 * 100).toFixed(1)}%`);
+						await interaction.reply(`プロファイル:**${responce.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv3**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Utils.createProgressBar(userslayerxp / 1500 * 100)}${(userslayerxp / 1500 * 100).toFixed(1)}%`);
 						break;
 					case (slayername == "zombie" && userslayerxp >= 15) || (slayername == "spider" && userslayerxp >= 25):
 						remainxp = 200 - userslayerxp;
-						await interaction.reply(`プロファイル:**${responce.data.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv2**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Utils.createProgressBar(userslayerxp / 200 * 100)}${(userslayerxp / 200 * 100).toFixed(1)}%`);
+						await interaction.reply(`プロファイル:**${responce.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv2**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Utils.createProgressBar(userslayerxp / 200 * 100)}${(userslayerxp / 200 * 100).toFixed(1)}%`);
 						break;
 					case (slayername == "wolf" || slayername == "enderman" || slayername == "blaze") && userslayerxp >= 30:
 						remainxp = 250 - userslayerxp;
-						await interaction.reply(`プロファイル:**${responce.data.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv2**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Utils.createProgressBar(userslayerxp / 250 * 100)}${(userslayerxp / 250 * 100).toFixed(1)}%`);
+						await interaction.reply(`プロファイル:**${responce.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv2**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Utils.createProgressBar(userslayerxp / 250 * 100)}${(userslayerxp / 250 * 100).toFixed(1)}%`);
 						break;
 					default:
 						remainxp = 5 - userslayerxp;
-						await interaction.reply(`プロファイル:**${responce.data.profiles[i].cute_name}** | このプレイヤーの${showonlyslayername}はLv1に達していません。次のレベルまでに必要なXPは${remainxp}です。`);
+						await interaction.reply(`プロファイル:**${responce.profiles[i].cute_name}** | このプレイヤーの${showonlyslayername}はLv1に達していません。次のレベルまでに必要なXPは${remainxp}です。`);
 						break;
 				}
 				return;
@@ -2025,16 +2037,8 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 			if (interaction.commandName == "profile") {
 				const username = interaction.options.get("username").value;
-
-				const useruuidresponce = await axios.get(`https://api.mojang.com/users/profiles/minecraft/${username}`)
-					.then(res => {
-						return res.data;
-					});
-
-				const responce = await axios.get(`https://api.hypixel.net/skyblock/profiles?key=${hypixelapikey}&uuid=${useruuidresponce.id}`)
-					.then(res => {
-						return res.data;
-					});
+				const useruuidresponce = await Utils.getAPIResponse(`https://api.mojang.com/users/profiles/minecraft/${username}`);
+				const responce = await Utils.getAPIResponse(`https://api.hypixel.net/skyblock/profiles?key=${hypixelapikey}&uuid=${useruuidresponce.id}`);
 
 				if (!responce.success) {
 					await interaction.reply("データを取得するのに失敗しました。");
@@ -2061,13 +2065,10 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			}
 
 			if (interaction.commandName == "skyblockpatch") {
-				const data = await axios.get(`https://api.hypixel.net/skyblock/news?key=${hypixelapikey}`)
-					.then(res => {
-						return res.data.items[0];
-					});
+				const data = await Utils.getAPIResponse(`https://api.hypixel.net/skyblock/news?key=${hypixelapikey}`);
 				const embed = new EmbedBuilder()
 					.setColor("Blue")
-					.setTitle(`最新のパッチ: ${ data.title}`)
+					.setTitle(`最新のパッチ: ${data.title}`)
 					.setURL(data.link)
 					.setDescription(data.text)
 					.setFooter({ text: "Hypixel Skyblock News" })
@@ -2080,10 +2081,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const username = interaction.options.get("username").value;
 				const reponame = interaction.options.get("repository").value;
 				await interaction.reply("LOCの計算中です...");
-				const locdata = await axios.get(`https://api.codetabs.com/v1/loc?github=${username}/${reponame}`)
-					.then(res => {
-						return res.data;
-					});
+				const locdata = await Utils.getAPIResponse(`https://api.codetabs.com/v1/loc?github=${username}/${reponame}`);
 				for (const element of locdata) {
 					if (element.language === "Total") {
 						const totalfilecount = element.files;
@@ -2296,6 +2294,56 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				await interaction.channel.send(talkrankingmessage.join("\n"));
 				serverJSONdata = null;
 				return;
+			}
+
+			if (interaction.commandName == "update") {
+				if (interaction.user.id != BotadminId) {
+					await interaction.reply("このコマンドはBOT管理者のみ実行できます。");
+					return;
+				}
+
+				const fileName = interaction.options.get("file").value;
+
+				let url = "https://raw.githubusercontent.com/puk06/HoshinoBot/main/";
+
+				switch (fileName) {
+					case "HoshinoBot.js": {
+						const data = await Utils.getAPIResponse(url + "HoshinoBot.js");
+						fs.writeFileSync("./HoshinoBot.js", data);
+						await interaction.reply("HoshinoBot.jsのアップデートが完了しました。");
+						break;
+					}
+
+					case "./src/osuLibrary.js": {
+						const data = await Utils.getAPIResponse(url + "src/osuLibrary.js");
+						fs.writeFileSync("./src/osuLibrary.js", data);
+						await interaction.reply("osuLibrary.jsのアップデートが完了しました。");
+						break;
+					}
+
+					case "./src/Utils.js": {
+						const data = await Utils.getAPIResponse(url + "src/Utils.js");
+						fs.writeFileSync("./src/Utils.js", data);
+						await interaction.reply("Utils.jsのアップデートが完了しました。");
+						break;
+					}
+
+					case "package.json": {
+						const data = await Utils.getAPIResponse(url + "package.json");
+						fs.writeFileSync("./package.json", data);
+						await interaction.reply("package.jsonのアップデートが完了しました。");
+						break;
+					}
+				}
+			}
+
+			if (interaction.commandName == "restart") {
+				if (interaction.user.id != BotadminId) {
+					await interaction.reply("このコマンドはBOT管理者のみ実行できます。");
+					return;
+				}
+				await interaction.reply("再起動中です...");
+				process.exit(0);
 			}
 		} catch (e) {
 			if (e.message == "No data found") {
@@ -2611,32 +2659,6 @@ client.on(Events.MessageCreate, async (message) =>
 						return;
 				}
 
-				function calcPassedObject (score, mode) {
-					let passedObjects = 0;
-					switch (mode) {
-						case 0:
-							passedObjects = Number(score.count300) + Number(score.count100) + Number(score.count50) + Number(score.countmiss);
-							break;
-
-						case 1:
-							passedObjects = Number(score.count300) + Number(score.count100) + Number(score.countmiss);
-							break;
-
-						case 2:
-							passedObjects = Number(score.count300) + Number(score.count100) + Number(score.countmiss);
-							break;
-
-						case 3:
-							passedObjects = Number(score.countgeki) + Number(score.count300) + Number(score.countkatu) + Number(score.count100) + Number(score.count50) + Number(score.countmiss);
-							break;
-							
-						default:
-							passedObjects = Number(score.count300) + Number(score.count100) + Number(score.count50) + Number(score.countmiss);
-							break;
-					}
-					return passedObjects;
-				}
-
 				const userRecentData = await new osuLibrary.GetUserRecent(playername, apikey, currentMode).getData();
 				if (userRecentData == undefined) {
 					await message.reply(`${playername}さんには24時間以内にプレイした譜面がないようです。`);
@@ -2657,7 +2679,7 @@ client.on(Events.MessageCreate, async (message) =>
 				}, Utils.modeConvertAcc(currentMode)) * 100) / 100;
 				const recentPpData = new osuLibrary.CalculatePPSR(userRecentData.beatmap_id, mods.calc, currentMode);
 				await recentPpData.getMapData();
-				const passedObjects = calcPassedObject(userRecentData, currentMode);
+				const passedObjects = Utils.calcPassedObject(userRecentData, currentMode);
 				const recentScore = {
 					n300: Number(userRecentData.count300),
 					n100: Number(userRecentData.count100),
@@ -2718,9 +2740,7 @@ client.on(Events.MessageCreate, async (message) =>
 				const formattedHits = Utils.formatHits(recentScore, currentMode);
 				const formattedIfFCHits = Utils.formatHits(ifFCHits, currentMode);
 
-				const mapRankingData = await axios.get(`https://osu.ppy.sh/api/get_scores?k=${apikey}&b=${mapData.beatmap_id}&m=${currentMode}&limit=50`).then((responce) => {
-					return responce.data;
-				});
+				const mapRankingData = await Utils.getAPIResponse(`https://osu.ppy.sh/api/get_scores?k=${apikey}&b=${mapData.beatmap_id}&m=${currentMode}&limit=50`);
 
 				let mapScores = [];
 				for (const element of mapRankingData) {
@@ -2740,10 +2760,9 @@ client.on(Events.MessageCreate, async (message) =>
 					}
 				}
 
-				const response = await axios.get(
+				const userplays = await Utils.getAPIResponse(
 					`https://osu.ppy.sh/api/get_user_best?k=${apikey}&type=string&m=${currentMode}&u=${playername}&limit=100`
 				);
-				const userplays = response.data;
 				let BPranking = 1;
 				let foundFlag = false;
 				for (const element of userplays) {
@@ -2822,7 +2841,7 @@ client.on(Events.MessageCreate, async (message) =>
 				let ifFCMessage = `(**${ifFCPP.toFixed(2)}**pp for ${ifFCAcc}% FC)`;
 				if (currentMode == 3) ifFCMessage = "";
 				if (userRecentData.maxcombo == mapData.max_combo) ifFCMessage = "**Full Combo!! Congrats!!**";
-				if (recentPp.toString().replace(".", "").includes("727")) ifFCMessage = "**WYSI!! WYFSI!!!!!**"
+				if (recentPp.toString().replace(".", "").includes("727")) ifFCMessage = "**WYSI!! WYFSI!!!!!**";
 
 				await message.channel.send({ embeds: [embed] }).then((sentMessage) => {
 					setTimeout(async () => {
@@ -3209,9 +3228,7 @@ client.on(Events.MessageCreate, async (message) =>
 					return;
 				}
 
-				const mapRankingData = await axios.get(`https://osu.ppy.sh/api/get_scores?k=${apikey}&b=${mapData.beatmap_id}&m=${mode}&limit=50`).then((responce) => {
-					return responce.data;
-				});
+				const mapRankingData = await Utils.getAPIResponse(`https://osu.ppy.sh/api/get_scores?k=${apikey}&b=${mapData.beatmap_id}&m=${mode}&limit=50`);
 
 				let mapScores = [];
 				for (const element of mapRankingData) {
@@ -3231,10 +3248,9 @@ client.on(Events.MessageCreate, async (message) =>
 					}
 				}
 
-				const response = await axios.get(
+				const userplays = await Utils.getAPIResponse(
 					`https://osu.ppy.sh/api/get_user_best?k=${apikey}&type=string&m=${mode}&u=${playername}&limit=100`
 				);
-				const userplays = response.data;
 				let BPranking = 1;
 				let foundFlag = false;
 				for (const element of userplays) {
@@ -3280,19 +3296,31 @@ client.on(Events.MessageCreate, async (message) =>
 				const bestMods = new osuLibrary.Mod(userPlays[0].enabled_mods).get();
 				const calculator = new osuLibrary.CalculatePPSR(mapData.beatmap_id, bestMods.calc, mode);
 				const srppData = await calculator.calculateSR();
+
 				const playersdata = await new osuLibrary.GetUserData(playername, apikey, mode).getData();
 				const mappersdata = await new osuLibrary.GetUserData(mapData.creator, apikey, mode).getData();
 				const playerIconUrl = osuLibrary.URLBuilder.iconURL(playersdata?.user_id);
 				const playerUrl = osuLibrary.URLBuilder.userURL(playersdata?.user_id);
 				const mapperIconUrl = osuLibrary.URLBuilder.iconURL(mappersdata?.user_id);
+
+				const mods = new osuLibrary.Mod(userPlays[0].enabled_mods).get();
 				const userBestPlays = {
 					n300: Number(userPlays[0].count300),
 					n100: Number(userPlays[0].count100),
 					n50: Number(userPlays[0].count50),
 					misses: Number(userPlays[0].countmiss),
 					nGeki: Number(userPlays[0].countgeki),
-					nKatu: Number(userPlays[0].countkatu)
+					nKatu: Number(userPlays[0].countkatu),
+					combo: Number(userPlays[0].maxcombo),
+					mods: mods.calc
 				};
+
+				const beatmap = await calculator.getMap();
+				const map = new rosu.Beatmap(new Uint8Array(Buffer.from(beatmap)));
+				const passedObjects = Utils.calcPassedObject(userPlays[0], mode);
+				const { ifFCPP, ifFCAcc } = osuLibrary.CalculateIfFC.calculate(userBestPlays, mode, passedObjects, mods.calc, map);
+
+
 				const recentAcc = Math.round(tools.accuracy({
 					300: userPlays[0].count300,
 					100: userPlays[0].count100,
@@ -3302,13 +3330,20 @@ client.on(Events.MessageCreate, async (message) =>
 					katu: userPlays[0].countgeki
 				}, Utils.modeConvertAcc(mode)) * 100) / 100;
 				const userPlaysHit = Utils.formatHits(userBestPlays, mode);
+
+				console.table(userPlays[0]);
+				let ifFCMessage = `(**${ifFCPP.toFixed(2)}**pp for ${ifFCAcc}% FC)`;
+				if (mode == 3) ifFCMessage = "";
+				if (userplays[0].maxcombo == mapData.max_combo) ifFCMessage = "**Full Combo!! Congrats!!**";
+				if (userplays[0].pp.toString().replace(".", "").includes("727")) ifFCMessage = "**WYSI!! WYFSI!!!!!**";
+
 				const embed = new EmbedBuilder()
 					.setColor("Blue")
 					.setTitle(`${mapData.artist} - ${mapData.title} [${mapData.version}]`)
 					.setThumbnail(osuLibrary.URLBuilder.thumbnailURL(mapData.beatmapset_id))
 					.setURL(mapUrl)
 					.setAuthor({ name: `${playersdata.username}: ${Number(playersdata.pp_raw).toLocaleString()}pp (#${Number(playersdata.pp_rank).toLocaleString()} ${playersdata.country}${Number(playersdata.pp_country_rank).toLocaleString()})`, iconURL: playerIconUrl, url: playerUrl })
-					.addFields({ name: rankingString, value: `${Utils.rankconverter(userPlays[0].rank)} **+ ${bestMods.str}** [${srppData.sr.toFixed(2)}★] **Score**: ${Number(userPlays[0].score).toLocaleString()} **Acc**: ${recentAcc}% \n **PP**: **${Number(userPlays[0].pp).toFixed(2)}** / ${srppData.pp.toFixed(2)}PP **Combo**: **${userPlays[0].maxcombo}x** / ${mapData.max_combo}x \n${userPlaysHit}`, inline: false })
+					.addFields({ name: rankingString, value: `${Utils.rankconverter(userPlays[0].rank)} **+ ${bestMods.str}** [${srppData.sr.toFixed(2)}★] **Score**: ${Number(userPlays[0].score).toLocaleString()} **Acc**: ${recentAcc}% \n **PP**: **${Number(userPlays[0].pp).toFixed(2)}** / ${srppData.pp.toFixed(2)}PP　${ifFCMessage} \n **Combo**: **${userPlays[0].maxcombo}x** / ${mapData.max_combo}x ${userPlaysHit}`, inline: false })
 				if (userPlays.length > 1) {
 					let valueString = "";
 					for (let i = 1; i < Math.min(userPlays.length, 5); i++) {
@@ -3442,10 +3477,9 @@ client.on(Events.MessageCreate, async (message) =>
 						return;
 				}
 
-				const response = await axios.get(
+				const userplays = await Utils.getAPIResponse(
 					`https://osu.ppy.sh/api/get_user_best?k=${apikey}&type=string&m=${mode}&u=${playername}&limit=100`
 				);
-				const userplays = response.data;
 				const oldpp = [];
 				const pp = [];
 				for (const element of userplays) {
@@ -3561,9 +3595,8 @@ client.on(Events.MessageCreate, async (message) =>
 						if (element.mode == "BG") {
 							foundflagforafterjsonanswer = true;
 							await message.channel.send(`問題${element.number}のBGを表示します。`);
-							await axios.get(`https://assets.ppy.sh/beatmaps/${element.id}/covers/raw.jpg`, { responseType: "arraybuffer" })
-								.then(async res => {
-									let BGdata = res.data;
+							await Utils.getAPIResponse(`https://assets.ppy.sh/beatmaps/${element.id}/covers/raw.jpg`, { responseType: "arraybuffer" })
+								.then(async BGdata => {
 									await message.channel.send({ files: [{ attachment: BGdata, name: "background.jpg" }] });
 									BGdata = null;
 								});
@@ -3572,9 +3605,8 @@ client.on(Events.MessageCreate, async (message) =>
 						} else {
 							foundflagforafterjsonanswer = true;
 							await message.channel.send(`問題${element.number}のプレビューを再生します。`);
-							await axios.get(`https://b.ppy.sh/preview/${element.id}.mp3`, { responseType: "arraybuffer" })
-								.then(async res => {
-									let audioData = res.data;
+							await Utils.getAPIResponse(`https://b.ppy.sh/preview/${element.id}.mp3`, { responseType: "arraybuffer" })
+								.then(async audioData => {
 									await message.channel.send({ files: [{ attachment: audioData, name: "audio.mp3" }] });
 									audioData = null;
 								});
@@ -3641,9 +3673,8 @@ client.on(Events.MessageCreate, async (message) =>
 						if (element.mode == "BG") {
 							foundflagforafterjsonanswer = true;
 							await message.channel.send(`問題${element.number}のBGを表示します。`);
-							await axios.get(`https://assets.ppy.sh/beatmaps/${element.id}/covers/raw.jpg`, { responseType: "arraybuffer" })
-								.then(async res => {
-									let BGdata = res.data;
+							await Utils.getAPIResponse(`https://assets.ppy.sh/beatmaps/${element.id}/covers/raw.jpg`, { responseType: "arraybuffer" })
+								.then(async BGdata => {
 									await message.channel.send({ files: [{ attachment: BGdata, name: "background.jpg" }] });
 									BGdata = null;
 								});
@@ -3652,9 +3683,8 @@ client.on(Events.MessageCreate, async (message) =>
 						} else {
 							foundflagforafterjsonanswer = true;
 							await message.channel.send(`問題${element.number}のプレビューを再生します。`);
-							await axios.get(`https://b.ppy.sh/preview/${element.id}.mp3`, { responseType: "arraybuffer" })
-								.then(async res => {
-									let audioData = res.data;
+							await Utils.getAPIResponse(`https://b.ppy.sh/preview/${element.id}.mp3`, { responseType: "arraybuffer" })
+								.then(async audioData => {
 									await message.channel.send({ files: [{ attachment: audioData, name: "audio.mp3" }] });
 									audioData = null;
 								});
@@ -3856,7 +3886,7 @@ client.on(Events.MessageCreate, async (message) =>
 				let dataBase = fs.readJsonSync("./Pictures/Furry/DataBase.json");
 				for (const attachment of message.attachments.values()) {
 					const imageURL = attachment.url;
-					const imageFile = await axios.get(imageURL, { responseType: "arraybuffer" });
+					const imageFile = await Utils.getAPIResponse(imageURL, { responseType: "arraybuffer" });
 					const extention = imageURL.split(".")[imageURL.split(".").length - 1].split("?")[0];
 					const fileNameWithoutExtention = dataBase.PhotoDataBase.map((x) => Number(x.split(".")[0]));
 					let filename = 0;
@@ -3865,7 +3895,7 @@ client.on(Events.MessageCreate, async (message) =>
 					}
 					dataBase.PhotoDataBase.push(filename + "." + extention);
 					dataBase.FileCount++;
-					fs.writeFileSync(`./Pictures/Furry/${filename}.${extention}`, imageFile.data);
+					fs.writeFileSync(`./Pictures/Furry/${filename}.${extention}`, imageFile);
 				}
 				fs.writeJsonSync("./Pictures/Furry/DataBase.json", dataBase, { spaces: 4, replacer: null });
 				dataBase = null;
@@ -3887,7 +3917,7 @@ client.on(Events.MessageCreate, async (message) =>
 						let fileNameArray = [];
 						for (const attachment of message.attachments.values()) {
 							const imageURL = attachment.url;
-							const imageFile = await axios.get(imageURL, { responseType: "arraybuffer" });
+							const imageFile = await Utils.getAPIResponse(imageURL, { responseType: "arraybuffer" });
 							const extention = imageURL.split(".")[imageURL.split(".").length - 1].split("?")[0];
 							const fileNameWithoutExtention = dataBase.PhotoDataBase.map((x) => Number(x.split(".")[0]));
 							let filename = 0;
@@ -3897,7 +3927,7 @@ client.on(Events.MessageCreate, async (message) =>
 							dataBase.PhotoDataBase.push(filename + "." + extention);
 							fileNameArray.push(filename + "." + extention);
 							dataBase.FileCount++;
-							fs.writeFileSync(`./Pictures/tag/${folder}/${filename}.${extention}`, imageFile.data);
+							fs.writeFileSync(`./Pictures/tag/${folder}/${filename}.${extention}`, imageFile);
 						}
 						fs.writeJsonSync(`./Pictures/tag/${folder}/DataBase.json`, dataBase, { spaces: 4, replacer: null });
 						dataBase = null;
@@ -4032,8 +4062,8 @@ function checkqualified() {
 
 					let QFBeatmapsMaxSrId;
 					let QFBeatmapsMinSrId;
-					await v2.beatmap.set.lookup(differentQF).then((res) => {
-						const array = res.beatmaps;
+					await v2.beatmaps.set.details(differentQF).then(res => {
+						const array = res.beatmaps
 						array.sort((a, b) => a.difficulty_rating - b.difficulty_rating);
 						const maxRatingObj = array[array.length - 1];
 						const minRatingObj = array[0];
@@ -4194,7 +4224,7 @@ function checkranked() {
 		
 					let rankedBeatmapsMaxSrId;
 					let rankedBeatmapsMinSrId;
-					await v2.beatmap.set.lookup(differentranked).then((res) => {
+					await v2.beatmap.set.details(differentranked).then(res => {
 						const array = res.beatmaps;
 						array.sort((a, b) => a.difficulty_rating - b.difficulty_rating);
 						const maxRatingObj = array[array.length - 1];
@@ -4301,7 +4331,7 @@ function checkloved() {
 				try {
 					let lovedBeatmapsMaxSrId;
 					let lovedBeatmapsMinSrId;
-					await v2.beatmap.set.lookup(differentloved).then(async (res) => {
+					await v2.beatmap.set.details(differentloved).then(res => {
 						const array = res.beatmaps;
 						array.sort((a, b) => a.difficulty_rating - b.difficulty_rating);
 						const maxRatingObj = array[array.length - 1];
@@ -4411,7 +4441,7 @@ async function rankedintheday() {
 
 					let QFBeatmapsMaxSrId;
 					let QFBeatmapsMinSrId;
-					await v2.beatmap.set.lookup(element.id).then(async (res) => {
+					await v2.beatmap.set.details(element.id).then(res => {
 						const array = res.beatmaps;
 						array.sort((a, b) => a.difficulty_rating - b.difficulty_rating);
 						const maxRatingObj = array[array.length - 1];

@@ -1,5 +1,6 @@
 const path = require("node:path");
 const fs = require("../node_modules/fs-extra");
+const axios = require("../node_modules/axios");
 
 /**
  * A utility class that provides various helper methods.
@@ -287,6 +288,53 @@ class Tools {
             }
         }
         return matchPercentage;
+    }
+
+    /**
+     * Fetches data from the specified API endpoint.
+     * @param {string} url - The URL of the API endpoint.
+     * @param {object} options - The request options.
+     * @returns {Promise} The response data from the API.
+     */
+    static async getAPIResponse(url, options = {}) {
+        try {
+            const response = await axios.get(url, options);
+            return response.data;
+        } catch (error) {
+            throw new Error(`An error occurred while fetching data from the API: ${error}`);
+        }
+    }
+
+    /**
+     * Calculates the passed objects based on the given score and mode.
+     * @param {object} score - The score object containing hit counts.
+     * @param {number} mode - The mode to determine the calculation.
+     * @returns {number} The number of passed objects.
+     */
+    static calcPassedObject(score, mode) {
+        let passedObjects = 0;
+        switch (mode) {
+            case 0:
+                passedObjects = Number(score.count300) + Number(score.count100) + Number(score.count50) + Number(score.countmiss);
+                break;
+
+            case 1:
+                passedObjects = Number(score.count300) + Number(score.count100) + Number(score.countmiss);
+                break;
+
+            case 2:
+                passedObjects = Number(score.count300) + Number(score.count100) + Number(score.countmiss);
+                break;
+
+            case 3:
+                passedObjects = Number(score.countgeki) + Number(score.count300) + Number(score.countkatu) + Number(score.count100) + Number(score.count50) + Number(score.countmiss);
+                break;
+                
+            default:
+                passedObjects = Number(score.count300) + Number(score.count100) + Number(score.count50) + Number(score.countmiss);
+                break;
+        }
+        return passedObjects;
     }
 }
 
