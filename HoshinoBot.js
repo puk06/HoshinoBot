@@ -373,7 +373,6 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					bankData[interaction.user.id].balance = balance.toString();
 					const resultprefix = totalReward - totalBet >= 0n ? "+" : "";
 					await interaction.reply(`結果: ${times}回中 ${Utils.formatBigInt(totalReward)}coin (${resultprefix}${Utils.formatBigInt(totalReward - totalBet)})`);
-					
 					fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
 					bankData = null;
 				}
