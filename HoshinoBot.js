@@ -350,7 +350,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 					for (let i = 0; i < times; i++) {
 						if (balance <= 0n) {
-							await interaction.reply(`賭け金額を計算できるほどのお金を持っていないため中止されました。${i}回中 ${Utils.formatBigInttotalReward}coin (${Utils.formatBigInt(totalReward - totalBet)})`);
+							await interaction.reply(`賭け金額を計算できるほどのお金を持っていないため中止されました。${i}回中 ${Utils.formatBigInt(totalReward)}coin (${Utils.formatBigInt(totalReward - totalBet)})`);
 							break;
 						}
 						const betAmount = balance / 15n;
@@ -372,7 +372,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					}
 					bankData[interaction.user.id].balance = balance.toString();
 					const resultprefix = totalReward - totalBet >= 0n ? "+" : "";
-					await interaction.reply(`結果: ${times}回中 ${totalReward.toLocaleString()}coin (${resultprefix}${(totalReward - totalBet).toLocaleString()})`);
+					await interaction.reply(`結果: ${times}回中 ${Utils.formatBigInt(totalReward)}coin (${resultprefix}${Utils.formatBigInt(totalReward - totalBet)})`);
 					
 					fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
 					bankData = null;
