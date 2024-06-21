@@ -325,6 +325,10 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				}
 
 				let times = interaction.options.get("times")?.value;
+				if (times <= 0) {
+					await interaction.reply("1回以上の回数を指定してください。");
+					return;
+				}
 				if (!times) times = 1;
 				if (times > 100) times = 100;
 				
