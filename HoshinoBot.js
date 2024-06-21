@@ -326,7 +326,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 				let times = interaction.options.get("times")?.value;
 				if (!times) times = 1;
-				if (times > 1000) times = 1000;
+				if (times > 100) times = 100;
 				
 				if (balance <= 0n) {
 					await interaction.reply("賭け金額を計算できるほどのお金を持っていないようです。");
@@ -350,14 +350,14 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 					for (let i = 0; i < times; i++) {
 						if (balance <= 0n) {
-							await interaction.reply(`賭け金額を計算できるほどのお金を持っていないため中止されました。${i}回中 ${totalReward.toLocaleString()}coin (${(totalReward - totalBet).toLocaleString()})`);
+							await interaction.reply(`賭け金額を計算できるほどのお金を持っていないため中止されました。${i}回中 ${Utils.formatBigInttotalReward}coin (${Utils.formatBigInt(totalReward - totalBet)})`);
 							break;
 						}
 						const betAmount = balance / 15n;
 						if (balance - betAmount < 0n) {
 							bankData[interaction.user.id].balance = balance.toString();
 							const resultprefix = totalReward - totalBet >= 0n ? "+" : "";
-							await interaction.reply(`賭け金額を計算できるほどのお金を持っていないため中止されました。、${i}回中 ${totalReward.toLocaleString()}coin (${resultprefix}${(totalReward - totalBet).toLocaleString()})`);
+							await interaction.reply(`賭け金額を計算できるほどのお金を持っていないため中止されました。、${i}回中 ${Utils.formatBigInt(totalReward)}coin (${resultprefix}${Utils.formatBigInt(totalReward - totalBet)})`);
 							fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
 							bankData = null;
 							return;
@@ -391,7 +391,11 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					await interaction.reply("賭け金額を計算できるほどのお金を持っていないようです。");
 					return;
 				}
-				const recommend = (balance / 15n).toString();
+				const recommend = balance / 15n;
+				if (recommend >= 100000000000000000000000000000000000n) {
+					await interaction.reply("1000溝以上のお金がある場合このコマンドは必要ありません。かわりに\`/recoshot\`を使ってください。");
+					return;
+				}
 				await interaction.reply(`おすすめのslot賭け金: ${recommend}\nコマンド: /slot ${recommend}`);
 				bankData = null;
 				return;

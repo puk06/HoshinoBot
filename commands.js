@@ -41,7 +41,7 @@ module.exports = [
             .addNumberOption(option =>
                 option
                     .setName("times")
-                    .setDescription("回数を指定できます。1000回まで一度に実行できます。")
+                    .setDescription("回数を指定できます。100回まで一度に実行できます。")
                     .setRequired(false)
             )
     },
