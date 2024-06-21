@@ -395,7 +395,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					await interaction.reply("1000溝以上のお金がある場合このコマンドは必要ありません。かわりに\`/recoshot\`を使ってください。");
 					return;
 				}
-				await interaction.reply(`おすすめのslot賭け金: ${recommend.toLocaleString()}\nコマンド: /slot ${recommend.toLocaleString()}`);
+				await interaction.reply(`おすすめのslot賭け金: ${recommend.toString()}\nコマンド: /slot ${recommend.toString()}`);
 				bankData = null;
 				return;
 			}
