@@ -1,5 +1,5 @@
-const axios = require("../node_modules/axios");
 const rosu = require("../node_modules/rosu-pp-js");
+const Utils = require("../src/Utils");
 
 /**
  * Represents a class for retrieving user data.
@@ -19,9 +19,9 @@ class User {
      */
     getData() {
         return new Promise(async (resolve, reject) => {
-            await axios.get(`https://osu.ppy.sh/api/${this.endpoint}?&k=${this.apikey}&type=string&m=${this.mode}&u=${this.name}`)
+            await Utils.getAPIResponse(`https://osu.ppy.sh/api/${this.endpoint}?&k=${this.apikey}&type=string&m=${this.mode}&u=${this.name}`)
                 .then(res => {
-                    resolve(res.data[0]);
+                    resolve(res[0]);
                 })
                 .catch(error => {
                     reject(error);
@@ -35,9 +35,9 @@ class User {
      */
     getDataWithoutMode() {
         return new Promise(async (resolve, reject) => {
-            await axios.get(`https://osu.ppy.sh/api/${this.endpoint}?&k=${this.apikey}&type=string&u=${this.name}`)
+            await Utils.getAPIResponse(`https://osu.ppy.sh/api/${this.endpoint}?&k=${this.apikey}&type=string&u=${this.name}`)
                 .then(res => {
-                    resolve(res.data[0]);
+                    resolve(res[0]);
                 })
                 .catch(error => {
                     reject(error);
@@ -53,17 +53,17 @@ class User {
      */
     getScoreData(beatmapId, mods = 0) {
         return new Promise(async (resolve, reject) => {
-            await axios.get(`https://osu.ppy.sh/api/${this.endpoint}?&k=${this.apikey}&b=${beatmapId}&type=string&m=${this.mode}&u=${this.name}&mods=${mods}`)
+            await Utils.getAPIResponse(`https://osu.ppy.sh/api/${this.endpoint}?&k=${this.apikey}&b=${beatmapId}&type=string&m=${this.mode}&u=${this.name}&mods=${mods}`)
                 .then(res => {
                     let maxPP = 0;
                     let maxPPIndex = 0;
-                    for (let i = 0; i < res.data.length; i++) {
-                        if (res.data[i].pp > maxPP) {
-                            maxPP = res.data[i].pp;
+                    for (let i = 0; i < res.length; i++) {
+                        if (res[i].pp > maxPP) {
+                            maxPP = res[i].pp;
                             maxPPIndex = i;
                         }
                     }
-                    resolve(res.data[maxPPIndex]);
+                    resolve(res[maxPPIndex]);
                 })
                 .catch(error => {
                     reject(error);
@@ -78,9 +78,9 @@ class User {
      */
     getScoreDataWithoutMods(beatmapId) {
         return new Promise(async (resolve, reject) => {
-            await axios.get(`https://osu.ppy.sh/api/${this.endpoint}?&k=${this.apikey}&b=${beatmapId}&type=string&m=${this.mode}&u=${this.name}`)
+            await Utils.getAPIResponse(`https://osu.ppy.sh/api/${this.endpoint}?&k=${this.apikey}&b=${beatmapId}&type=string&m=${this.mode}&u=${this.name}`)
                 .then(res => {
-                    resolve(res.data);
+                    resolve(res);
                 })
                 .catch(error => {
                     reject(error);
@@ -146,12 +146,12 @@ class GetMapData {
      */
     getData() {
         return new Promise(async (resolve, reject) => {
-            await axios.get(`https://osu.ppy.sh/api/get_beatmaps?k=${this.apikey}&m=${this.mode}&b=${this.maplink}&a=1`)
+            await Utils.getAPIResponse(`https://osu.ppy.sh/api/get_beatmaps?k=${this.apikey}&m=${this.mode}&b=${this.maplink}&a=1`)
                 .then(res => {
-                    if (res.data.length === 0) {
+                    if (res.length === 0) {
                         reject(new Error("No data found"));
                     }
-                    resolve(res.data[0]);
+                    resolve(res[0]);
                 })
                 .catch(error => {
                     reject(error);
@@ -166,12 +166,12 @@ class GetMapData {
      */
     getDataWithoutMode() {
         return new Promise(async (resolve, reject) => {
-            await axios.get(`https://osu.ppy.sh/api/get_beatmaps?k=${this.apikey}&b=${this.maplink}`)
+            await Utils.getAPIResponse(`https://osu.ppy.sh/api/get_beatmaps?k=${this.apikey}&b=${this.maplink}`)
                 .then(res => {
-                    if (res.data.length === 0) {
+                    if (res.length === 0) {
                         reject(new Error("No data found"));
                     }
-                    resolve(res.data[0]);
+                    resolve(res[0]);
                 })
                 .catch(error => {
                     reject(error);
@@ -211,9 +211,9 @@ class CalculatePPSR {
      */
     async getMapData() {
         return new Promise(async (resolve, reject) => {
-            this.beatmapdata = await axios(`https://osu.ppy.sh/osu/${this.maplink}`, { responseType: "arrayBuffer" })
+            this.beatmapdata = await Utils.getAPIResponse(`https://osu.ppy.sh/osu/${this.maplink}`, { responseType: "arrayBuffer" })
                 .then(res => {
-                    this.beatmapData = res.data;
+                    this.beatmapData = res;
                     resolve();
                 })
                 .catch(error => {
@@ -381,7 +381,7 @@ class CheckMapData {
     check() {
         return new Promise(async (resolve, reject) => {
             try {
-                const MAP_DATA = await axios.get(`https://osu.ppy.sh/osu/${this.beatmapID}`);
+                const MAP_DATA = await Utils.getAPIResponse(`https://osu.ppy.sh/osu/${this.beatmapID}`);
 
                 let BPMarray = [];
                 let mapData = {
@@ -452,11 +452,18 @@ class CheckMapData {
                         .map(line => {
                             const hit_objects = line.split(",");
                             return Number(hit_objects[2]);
-                        });
+                        })
+                    
+                    const hit_object_interval = hit_objects.map((time, index, array) => {
+                        if (index == 0) return 0;
+                        return time - array[index - 1];
+                    });
+
 
                     return {
                         timing_points,
-                        hit_objects
+                        hit_objects,
+                        hit_object_interval
                     };
                 }
 
@@ -470,10 +477,15 @@ class CheckMapData {
                     }
                 }
 
-                const snapArray = [8, 6, 4, 3];
-                const getSnapInterval = (snap, currentBPM) => (( 60 / currentBPM ) * 1000 * 1 / snap) + 1;
+                
+                const getSnapInterval = (snap, currentBPM) => {
+                    const snapArray = [8, 6, 4, 3];
+                    const getSnap = (snap) => (( 60000 / currentBPM ) / snap) + 1;
+                    return snapArray.map(snap => getSnap(snap));
+                };
 
                 let mapdataTemp = {
+                    "BPMarray": [],
                     "prevValue": null,
                     "lastSnap": 0,
 
@@ -505,11 +517,12 @@ class CheckMapData {
                     "techStreamLength": [],
 
                     "over100ComboAverageStreamLength": 0,
-                    "over100ComboAverageTechStreamLength": 0
+                    "over100ComboAverageTechStreamLength": 0,
+
+                    "currentObjectCount": 0
                 }
 
-                for (const element of map.hit_objects) {
-                    const timing = element;
+                for (const timing of map.hit_objects) {
                     let currentBPM = 0;
                     for (let i = 0; i < BPMarray.length; i++) {
                         if (!BPMarray[i + 1]) {
@@ -537,35 +550,35 @@ class CheckMapData {
                             if (mapdataTemp["current1/4Length"] > mapdataTemp["max1/4Length"]) mapdataTemp["max1/4Length"] = mapdataTemp["current1/4Length"];
                             if (mapdataTemp["current1/3Length"] > mapdataTemp["max1/3Length"]) mapdataTemp["max1/3Length"] = mapdataTemp["current1/3Length"];
 
-                            if (lastSnap != snap) {
-                                if (lastSnap == 0) {
+                            if (mapdataTemp.lastSnap != snap) {
+                                if (mapdataTemp.lastSnap == 0) {
                                     mapdataTemp["currentStreamLength"] = 0;
                                     mapdataTemp["currentTechStreamLength"] = 0;
                                 }
 
-                                if (lastSnap == 8) mapdataTemp["1/8Times"]++;
-                                if (lastSnap == 6) mapdataTemp["1/6Times"]++;
-                                if (lastSnap == 4) mapdataTemp["1/4Times"]++;
-                                if (lastSnap == 3) mapdataTemp["1/3Times"]++;
+                                if (mapdataTemp.lastSnap == 8) mapdataTemp["1/8Times"]++;
+                                if (mapdataTemp.lastSnap == 6) mapdataTemp["1/6Times"]++;
+                                if (mapdataTemp.lastSnap == 4) mapdataTemp["1/4Times"]++;
+                                if (mapdataTemp.lastSnap == 3) mapdataTemp["1/3Times"]++;
                                 mapdataTemp["current1/8Length"] = 0;
                                 mapdataTemp["current1/6Length"] = 0;
-                                mapdataTemp["current1/4Length"] = 0;
                                 mapdataTemp["current1/3Length"] = 0;
+                                mapdataTemp["current1/4Length"] = 0;
                             }
 
-                            if (mapdataTemp.currentObjectCount >= 100) {
-                                if (lastSnap != snap) {
-                                    mapdataTemp["currentTechStreamLength"]++;
-                                } else {
-                                    mapdataTemp["currentStreamLength"]++;
-                                }
+                            if (mapdataTemp["current1/4Length"] >= 100) {
+                                mapdataTemp["currentStreamLength"]++;
+                            }
+
+                            if (mapdataTemp["current1/8Length"] >= 100 || mapdataTemp["current1/6Length"] >= 100 || mapdataTemp["current1/3Length"] >= 100) {
+                                mapdataTemp["currentTechStreamLength"]++;
                             }
 
                             mapdataTemp.lastSnap = snap;
                             mapdataTemp.currentObjectCount++;
                         }
 
-                        mapdataTemp.prevValue = timing;
+                        if (foundFlag) break;
                     }
 
                     if (!foundFlag) {
@@ -573,6 +586,10 @@ class CheckMapData {
                         mapdataTemp["current1/6Length"] = 0;
                         mapdataTemp["current1/4Length"] = 0;
                         mapdataTemp["current1/3Length"] = 0;
+                        if (mapdataTemp.lastSnap == 8) mapdataTemp["1/8Times"]++;
+                        if (mapdataTemp.lastSnap == 6) mapdataTemp["1/6Times"]++;
+                        if (mapdataTemp.lastSnap == 4) mapdataTemp["1/4Times"]++;
+                        if (mapdataTemp.lastSnap == 3) mapdataTemp["1/3Times"]++;
                         if (mapdataTemp["currentStreamLength"] > mapdataTemp["maxStream"]) mapdataTemp["maxStream"] = mapdataTemp["currentStreamLength"];
                         if (mapdataTemp["currentTechStreamLength"] > mapdataTemp["maxTechStream"]) mapdataTemp["maxTechStream"] = mapdataTemp["currentTechStreamLength"];
                         mapdataTemp["streamLength"].push(mapdataTemp["currentStreamLength"]);
@@ -582,8 +599,11 @@ class CheckMapData {
                         mapdataTemp.lastSnap = 0;
                         mapdataTemp.currentObjectCount = 0;
                     }
+
+                    mapdataTemp.prevValue = timing;
                 }
 
+                mapData["BPMarray"] = mapdataTemp["BPMarray"];
                 mapData["maxStream"] = mapdataTemp["maxStream"];
                 mapData["streamCount"] = mapdataTemp["streamLength"].length;
                 mapData["over100ComboAverageStreamLength"] = mapdataTemp["streamLength"].reduce((a, b) => a + b, 0) / mapdataTemp["streamLength"].length;
@@ -599,11 +619,12 @@ class CheckMapData {
                 mapData["1/8 times"] = mapdataTemp["1/8Times"];
                 mapData["max1/8Length"] = mapdataTemp["max1/8Length"];
                 mapData["BPMMode"] = mode(BPMarray);
+                console.table(mapData);
                 resolve(mapData);
             } catch (error) {
                 reject(error);
             }
-        })
+        });
     }
 }
 
@@ -1027,8 +1048,7 @@ class SRChart {
     static async calculate(beatmapId, mode) {
         return new Promise(async (resolve, reject) => {
             try {
-                const beatmapdata = await axios(`https://osu.ppy.sh/osu/${beatmapId}`, { responseType: "arrayBuffer" })
-                    .then(response => response.data );
+                const beatmapdata = await Utils.getAPIResponse(`https://osu.ppy.sh/osu/${beatmapId}`, { responseType: "arrayBuffer" });
                 const map = new rosu.Beatmap(new Uint8Array(Buffer.from(beatmapdata)));
                 const objectCount = map.nObjects;
     
@@ -1055,8 +1075,7 @@ class SRChart {
                         }
                     };
                     const requestURL = `${baseURL}?bkg=white&c=${JSON.stringify(chartConfig)}`;
-                    const response = await axios.get(requestURL, { responseType: 'arraybuffer' })
-                        .then(response => { return response.data; });
+                    const response = await Utils.getAPIResponse(requestURL, { responseType: "arraybuffer" });
                     resolve(response);
                 }
             } catch (error) {

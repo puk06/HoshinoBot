@@ -31,7 +31,8 @@ const UpdateFiles = [
 	"HoshinoBot.js",
 	"./src/Utils.js",
 	"./src/osuLibrary.js",
-	"package.json"
+	"package.json",
+	"All Files"
 ];
 
 client.on(Events.ClientReady, async () =>
@@ -824,6 +825,12 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			}
 
 			if (interaction.commandName == "check") {
+				
+				//作成中
+				await interaction.reply("この機能は現在作成中です。実装までお待ちください。");
+				return;
+				//作成中
+
 				const regex = /^https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+#[a-z]+\/\d+$/;
 				const regex2 = /^https:\/\/osu\.ppy\.sh\/b\/\d+$/;
 				const regex3 = /^https:\/\/osu\.ppy\.sh\/beatmaps\/\d+$/;
@@ -834,7 +841,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				}
 
 				await interaction.reply("計算中です...");
-				new osuLibrary.CheckMapData(maplink).check()
+				await new osuLibrary.CheckMapData(maplink).check()
 					.then(async data => {
 						const mapData = await new osuLibrary.GetMapData(maplink, apikey).getDataWithoutMode();
 						const mapperData = await new osuLibrary.GetUserData(mapData.creator, apikey).getData();
@@ -2336,6 +2343,19 @@ client.on(Events.InteractionCreate, async (interaction) =>
 						const data = await Utils.getAPIResponse(url + "package.json");
 						fs.writeFileSync("./package.json", data);
 						await interaction.reply("package.jsonのアップデートが完了しました。");
+						break;
+					}
+
+					case "All Files": {
+						const data1 = await Utils.getAPIResponse(url + "HoshinoBot.js");
+						fs.writeFileSync("./HoshinoBot.js", data1);
+						const data2 = await Utils.getAPIResponse(url + "src/osuLibrary.js");
+						fs.writeFileSync("./src/osuLibrary.js", data2);
+						const data3 = await Utils.getAPIResponse(url + "src/Utils.js");
+						fs.writeFileSync("./src/Utils.js", data3);
+						const data4 = await Utils.getAPIResponse(url + "package.json");
+						fs.writeFileSync("./package.json", data4);
+						await interaction.reply("全てのアップデートが完了しました。");
 						break;
 					}
 				}
