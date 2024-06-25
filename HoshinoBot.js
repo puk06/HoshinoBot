@@ -4091,8 +4091,24 @@ function checkqualified() {
 
 					let QFBeatmapsMaxSrId;
 					let QFBeatmapsMinSrId;
+					let nominators = [];
 					await v2.beatmap.set.details(differentQF).then(res => {
-						const array = res.beatmaps
+						res.current_nominations.forEach(async element => {
+							try {
+								const userId = element.user_id;
+								const userData = await v2.user.details(userId, Utils.modeConvertSearch(mode), "id");
+								nominators.push({
+									username: userData.username,
+									rank: userData.statistics.global_rank
+								});
+							} catch (e) {
+								nominators.push({
+									username: "Unknown",
+									rank: "Unknown"
+								});
+							}
+						});
+						const array = res.beatmaps;
 						array.sort((a, b) => a.difficulty_rating - b.difficulty_rating);
 						const maxRatingObj = array[array.length - 1];
 						const minRatingObj = array[0];
@@ -4153,6 +4169,10 @@ function checkqualified() {
 					let srstring = maxsrpp.sr == minsrpp.sr ? `★${maxsrpp.sr.toFixed(2)} (DT ★${maxdtpp.sr.toFixed(2)})` : `★${minsrpp.sr.toFixed(2)} ~ ${maxsrpp.sr.toFixed(2)} (DT ★${mindtpp.sr.toFixed(2)} ~ ${maxdtpp.sr.toFixed(2)})`;
 					let ppstring = maxsrpp.pp == minsrpp.pp ? `${maxsrpp.pp.toFixed(2)}pp (DT ${maxdtpp.pp.toFixed(2)}pp)` : `${minsrpp.pp.toFixed(2)} ~ ${maxsrpp.pp.toFixed(2)}pp (DT ${mindtpp.pp.toFixed(2)} ~ ${maxdtpp.pp.toFixed(2)}pp)`;
 
+					let nominatorString = "";
+					for (const nominator of nominators) {
+						nominatorString += `**${nominator.username}** (#${nominator.rank})\n`;
+					}
 					const embed = new EmbedBuilder()
 						.setColor("Blue")
 						.setAuthor({ name: `🎉New Qualified ${mode} Map🎉` })
@@ -4161,9 +4181,10 @@ function checkqualified() {
 						.setThumbnail(`https://b.ppy.sh/thumb/${mapMaxInfo.beatmapset_id}l.jpg`)
 						.setURL(`https://osu.ppy.sh/beatmapsets/${mapMaxInfo.beatmapset_id}`)
 						.addFields({ name: "`Mapinfo`", value: `BPM: **${BPM}**\nLength: **${maptimestring}**\nCombo: **${Objectstring}**`, inline: true })
+						.addFields({ name: "`Beatmap Nominator`", value: nominatorString, inline: true })
 						.addFields({ name: "`SR`", value: `**${srstring}**`, inline: false })
 						.addFields({ name: "`PP`", value: `**${ppstring}**`, inline: false })
-						.addFields({ name: "`Qualified 日時`", value: `**${dateString}**`, inline: true })
+						.addFields({ name: "`Qualified 日時`", value: `${dateString}`, inline: true })
 						.addFields({ name: "`Ranked 日時(予測)`", value: `**${rankeddateString}**`, inline: true });
 					let MapcheckChannels = fs.readJsonSync(`./ServerDatas/MapcheckChannels.json`);
 					for (const element of MapcheckChannels.Qualified[mode]) {
@@ -4252,7 +4273,23 @@ function checkranked() {
 		
 					let rankedBeatmapsMaxSrId;
 					let rankedBeatmapsMinSrId;
+					let nominators = [];
 					await v2.beatmap.set.details(differentranked).then(res => {
+						res.current_nominations.forEach(async element => {
+							try {
+								const userId = element.user_id;
+								const userData = await v2.user.details(userId, Utils.modeConvertSearch(mode), "id");
+								nominators.push({
+									username: userData.username,
+									rank: userData.statistics.global_rank
+								});
+							} catch (e) {
+								nominators.push({
+									username: "Unknown",
+									rank: "Unknown"
+								});
+							}
+						});
 						const array = res.beatmaps;
 						array.sort((a, b) => a.difficulty_rating - b.difficulty_rating);
 						const maxRatingObj = array[array.length - 1];
@@ -4291,6 +4328,12 @@ function checkranked() {
 		
 					let srstring = maxsrpp.sr == minsrpp.sr ? `★${maxsrpp.sr.toFixed(2)} (DT ★${maxdtpp.sr.toFixed(2)})` : `★${minsrpp.sr.toFixed(2)} ~ ${maxsrpp.sr.toFixed(2)} (DT ★${mindtpp.sr.toFixed(2)} ~ ${maxdtpp.sr.toFixed(2)})`;
 					let ppstring = maxsrpp.pp == minsrpp.pp ? `${maxsrpp.pp.toFixed(2)}pp (DT ${maxdtpp.pp.toFixed(2)}pp)` : `${minsrpp.pp.toFixed(2)} ~ ${maxsrpp.pp.toFixed(2)}pp (DT ${mindtpp.pp.toFixed(2)} ~ ${maxdtpp.pp.toFixed(2)}pp)`;
+					
+					let nominatorString = "";
+					for (const nominator of nominators) {
+						nominatorString += `**${nominator.username}** (#${nominator.rank})\n`;
+					}
+
 					const embed = new EmbedBuilder()
 						.setColor("Yellow")
 						.setAuthor({ name: `🎉New Ranked ${mode} Map🎉` })
@@ -4299,6 +4342,7 @@ function checkranked() {
 						.setThumbnail(`https://b.ppy.sh/thumb/${mapMaxInfo.beatmapset_id}l.jpg`)
 						.setURL(`https://osu.ppy.sh/beatmapsets/${mapMaxInfo.beatmapset_id}`)
 						.addFields({ name: "`Mapinfo`", value: `BPM: **${BPM}**\nLength: **${maptimestring}**\nCombo: **${Objectstring}**`, inline: true })
+						.addFields({ name: "`Beatmap Nominator`", value: nominatorString, inline: true })
 						.addFields({ name: "`SR`", value: `**${srstring}**`, inline: false })
 						.addFields({ name: "`PP`", value: `**${ppstring}**`, inline: false })
 						.addFields({ name: "`Ranked 日時`", value: `**${dateString}** (誤差: **${rankederrorstring}**)`, inline: true });
