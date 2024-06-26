@@ -510,7 +510,6 @@ class CheckMapData {
                             currentBPM = BPMarray[i][1];
                             break;
                         }
-
                         if (BPMarray[i] && timing >= BPMarray[i][0] && timing < BPMarray[i + 1][0]) {
                             currentBPM = BPMarray[i][1];
                         }
@@ -521,10 +520,38 @@ class CheckMapData {
                         const snapInterval = getSnapInterval(snap, currentBPM);
                         if (mapdataTemp.prevValue !== null && Math.abs(timing - mapdataTemp.prevValue) <= snapInterval) {
                             foundFlag = true;
-                            if (mapdataTemp.lastSnap == 8) mapdataTemp["current1/8Length"]++;
-                            if (mapdataTemp.lastSnap == 6) mapdataTemp["current1/6Length"]++;
-                            if (mapdataTemp.lastSnap == 4) mapdataTemp["current1/4Length"]++;
-                            if (mapdataTemp.lastSnap == 3) mapdataTemp["current1/3Length"]++;
+                            if (mapdataTemp.lastSnap == 8) {
+                                if (mapdataTemp["current1/8Length"] == 0) {
+                                    mapdataTemp["current1/8Length"] = 2;
+                                } else {
+                                    mapdataTemp["current1/8Length"]++;
+                                }
+                            }
+
+                            if (mapdataTemp.lastSnap == 6) {
+                                if (mapdataTemp["current1/6Length"] == 0) {
+                                    mapdataTemp["current1/6Length"] = 2;
+                                } else {
+                                    mapdataTemp["current1/6Length"]++;
+                                }
+                            }
+
+                            if (mapdataTemp.lastSnap == 4) {
+                                if (mapdataTemp["current1/4Length"] == 0) {
+                                    mapdataTemp["current1/4Length"] = 2;
+                                } else {
+                                    mapdataTemp["current1/4Length"]++;
+                                }
+                            }
+
+                            if (mapdataTemp.lastSnap == 3) {
+                                if (mapdataTemp["current1/3Length"] == 0) {
+                                    mapdataTemp["current1/3Length"] = 2;
+                                } else {
+                                    mapdataTemp["current1/3Length"]++;
+                                }
+                                
+                            }
 
                             if (mapdataTemp["current1/8Length"] > mapdataTemp["max1/8Length"]) mapdataTemp["max1/8Length"] = mapdataTemp["current1/8Length"];
                             if (mapdataTemp["current1/6Length"] > mapdataTemp["max1/6Length"]) mapdataTemp["max1/6Length"] = mapdataTemp["current1/6Length"];
