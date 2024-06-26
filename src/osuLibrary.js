@@ -382,6 +382,7 @@ class CheckMapData {
         return new Promise(async (resolve, reject) => {
             try {
                 const MAP_DATA = await Utils.getAPIResponse(`https://osu.ppy.sh/osu/${this.beatmapID}`);
+                const snapArray = [8, 6, 4, 3];
 
                 let BPMarray = [];
                 let mapData = {
@@ -389,9 +390,6 @@ class CheckMapData {
                     "maxStream": 0,
                     "streamCount": 0,
                     "over100ComboAverageStreamLength": 0,
-                    "techStream" : 0,
-                    "techStreamCount": 0,
-                    "over100ComboAverageTechStreamLength": 0,
                     "1/3 times": 0,
                     "max1/3Length": 0,
                     "1/4 times": 0,
@@ -467,58 +465,41 @@ class CheckMapData {
                     };
                 }
 
-                const map = parse(MAP_DATA.data);
+                const map = parse(MAP_DATA);
 
                 for (const element of map.timing_points) {
                     if (element.uninherited == 1) {
                         const BPM = 1 / element.beatLength * 60000;
                         BPMarray.push([element.time, BPM]);
-                        mapData.BPMarray.push(BPM);
                     }
                 }
 
                 
-                const getSnapInterval = (snap, currentBPM) => {
-                    const snapArray = [8, 6, 4, 3];
-                    const getSnap = (snap) => (( 60000 / currentBPM ) / snap) + 1;
-                    return snapArray.map(snap => getSnap(snap));
-                };
+                const getSnapInterval = (snap, currentBPM) => (60000 / currentBPM / snap) + 1;
 
                 let mapdataTemp = {
                     "BPMarray": [],
                     "prevValue": null,
                     "lastSnap": 0,
-
                     "max1/8Length": 0,
                     "max1/6Length": 0,
                     "max1/4Length": 0,
                     "max1/3Length": 0,
-
                     "current1/8Length": 0,
                     "current1/6Length": 0,
                     "current1/4Length": 0,
                     "current1/3Length": 0,
-
                     "1/8Times": 0,
                     "1/6Times": 0,
                     "1/4Times": 0,
                     "1/3Times": 0,
-
                     "maxStream": 0,
                     "maxTechStream": 0,
-                    
                     "currentStreamLength": 0,
-                    "currentTechStreamLength": 0,
-
                     "streamCount": 0,
-                    "techStreamCount": 0,
-
                     "streamLength": [],
                     "techStreamLength": [],
-
                     "over100ComboAverageStreamLength": 0,
-                    "over100ComboAverageTechStreamLength": 0,
-
                     "currentObjectCount": 0
                 }
 
@@ -551,11 +532,7 @@ class CheckMapData {
                             if (mapdataTemp["current1/3Length"] > mapdataTemp["max1/3Length"]) mapdataTemp["max1/3Length"] = mapdataTemp["current1/3Length"];
 
                             if (mapdataTemp.lastSnap != snap) {
-                                if (mapdataTemp.lastSnap == 0) {
-                                    mapdataTemp["currentStreamLength"] = 0;
-                                    mapdataTemp["currentTechStreamLength"] = 0;
-                                }
-
+                                if (mapdataTemp.lastSnap == 0) mapdataTemp["currentStreamLength"] = 0;
                                 if (mapdataTemp.lastSnap == 8) mapdataTemp["1/8Times"]++;
                                 if (mapdataTemp.lastSnap == 6) mapdataTemp["1/6Times"]++;
                                 if (mapdataTemp.lastSnap == 4) mapdataTemp["1/4Times"]++;
@@ -567,11 +544,7 @@ class CheckMapData {
                             }
 
                             if (mapdataTemp["current1/4Length"] >= 100) {
-                                mapdataTemp["currentStreamLength"]++;
-                            }
-
-                            if (mapdataTemp["current1/8Length"] >= 100 || mapdataTemp["current1/6Length"] >= 100 || mapdataTemp["current1/3Length"] >= 100) {
-                                mapdataTemp["currentTechStreamLength"]++;
+                                mapdataTemp["currentStreamLength"] = mapdataTemp["current1/4Length"];
                             }
 
                             mapdataTemp.lastSnap = snap;
@@ -590,12 +563,9 @@ class CheckMapData {
                         if (mapdataTemp.lastSnap == 6) mapdataTemp["1/6Times"]++;
                         if (mapdataTemp.lastSnap == 4) mapdataTemp["1/4Times"]++;
                         if (mapdataTemp.lastSnap == 3) mapdataTemp["1/3Times"]++;
-                        if (mapdataTemp["currentStreamLength"] > mapdataTemp["maxStream"]) mapdataTemp["maxStream"] = mapdataTemp["currentStreamLength"];
-                        if (mapdataTemp["currentTechStreamLength"] > mapdataTemp["maxTechStream"]) mapdataTemp["maxTechStream"] = mapdataTemp["currentTechStreamLength"];
-                        mapdataTemp["streamLength"].push(mapdataTemp["currentStreamLength"]);
-                        mapdataTemp["techStreamLength"].push(mapdataTemp["currentTechStreamLength"]);
+                        if (mapdataTemp["currentStreamLength"] > 100 && mapdataTemp["currentStreamLength"] > mapdataTemp["maxStream"]) mapdataTemp["maxStream"] = mapdataTemp["currentStreamLength"];
+                        if (mapdataTemp["currentStreamLength"] > 100) mapdataTemp["streamLength"].push(mapdataTemp["currentStreamLength"]);
                         mapdataTemp["currentStreamLength"] = 0;
-                        mapdataTemp["currentTechStreamLength"] = 0;
                         mapdataTemp.lastSnap = 0;
                         mapdataTemp.currentObjectCount = 0;
                     }
@@ -603,13 +573,10 @@ class CheckMapData {
                     mapdataTemp.prevValue = timing;
                 }
 
-                mapData["BPMarray"] = mapdataTemp["BPMarray"];
+                mapData["BPMarray"] = BPMarray.map(element => element[1]);
                 mapData["maxStream"] = mapdataTemp["maxStream"];
                 mapData["streamCount"] = mapdataTemp["streamLength"].length;
                 mapData["over100ComboAverageStreamLength"] = mapdataTemp["streamLength"].reduce((a, b) => a + b, 0) / mapdataTemp["streamLength"].length;
-                mapData["techStream"] = mapdataTemp["maxTechStream"];
-                mapData["techStreamCount"] = mapdataTemp["techStreamLength"].length;
-                mapData["over100ComboAverageTechStreamLength"] = mapdataTemp["techStreamLength"].reduce((a, b) => a + b, 0) / mapdataTemp["techStreamLength"].length;
                 mapData["1/3 times"] = mapdataTemp["1/3Times"];
                 mapData["max1/3Length"] = mapdataTemp["max1/3Length"];
                 mapData["1/4 times"] = mapdataTemp["1/4Times"];
@@ -619,7 +586,6 @@ class CheckMapData {
                 mapData["1/8 times"] = mapdataTemp["1/8Times"];
                 mapData["max1/8Length"] = mapdataTemp["max1/8Length"];
                 mapData["BPMMode"] = mode(BPMarray);
-                console.table(mapData);
                 resolve(mapData);
             } catch (error) {
                 reject(error);

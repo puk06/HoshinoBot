@@ -832,12 +832,6 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			}
 
 			if (interaction.commandName == "check") {
-				
-				//作成中
-				await interaction.reply("この機能は現在作成中です。実装までお待ちください。");
-				return;
-				//作成中
-
 				const regex = /^https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+#[a-z]+\/\d+$/;
 				const regex2 = /^https:\/\/osu\.ppy\.sh\/b\/\d+$/;
 				const regex3 = /^https:\/\/osu\.ppy\.sh\/beatmaps\/\d+$/;
@@ -859,9 +853,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 						const bpmMax = Utils.isNaNwithNumber(Math.max(...data.BPMarray));
 						const bpmStr = bpmMin == bpmMax ? bpmMax.toFixed(1) : `${bpmMin.toFixed(1)} ~ ${bpmMax.toFixed(1)}`;
 						const hitTotal = data["1/3 times"] + data["1/4 times"] + data["1/6 times"] + data["1/8 times"];
-						const streamTotal = data.streamCount + data.techStreamCount;
 						const hitPercentData = [Utils.isNaNwithNumber(Math.round(data["1/3 times"] / hitTotal * 100)), Utils.isNaNwithNumber(Math.round(data["1/4 times"] / hitTotal * 100)), Utils.isNaNwithNumber(Math.round(data["1/6 times"] / hitTotal * 100)), Utils.isNaNwithNumber(Math.round(data["1/8 times"] / hitTotal * 100))] ;
-						const streamPercentData = [Utils.isNaNwithNumber(Math.round(data.streamCount / streamTotal * 100)), Utils.isNaNwithNumber(Math.round(data.techStreamCount / streamTotal * 100))];
 						const mapUrl = osuLibrary.URLBuilder.beatmapURL(mapData.beatmapset_id, Number(mapData.mode), mapData.beatmap_id);
 						const embed = new EmbedBuilder()
 							.setColor("Blue")
@@ -869,7 +861,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 							.setURL(mapUrl)
 							.setAuthor({ name: `Mapped by ${mapData.creator}`, iconURL: mapperIconURL, url: mapperUserURL })
 							.addFields({ name: "**BPM**", value: `**${bpmStr}** (最頻値: **${data.BPMMode.toFixed(1)}**)`, inline: false })
-							.addFields({ name: "**Streams**", value: `**1/4 Streams**: **${data.streamCount}**回 [最大**${data.maxStream}**コンボ / 平均**${Math.floor(data.over100ComboAverageStreamLength)}**コンボ] (${streamPercentData[0]}%)\n**Tech Streams**: **${data.techStreamCount}**回 [最大**${data.techStream}**コンボ / 平均**${Math.floor(data.over100ComboAverageTechStreamLength)}**コンボ] (${streamPercentData[1]}%)`, inline: false })
+							.addFields({ name: "**Streams**", value: `**1/4 Streams**: **${data.streamCount}**回 [最大**${data.maxStream}**コンボ / 平均**${Math.floor(data.over100ComboAverageStreamLength)}**コンボ]`, inline: false })
 							.addFields({ name: "**Hit Objects**", value: `**1/3**: **${data["1/3 times"]}**回 [最大**${data["max1/3Length"]}**コンボ] (${hitPercentData[0]}%)\n**1/4**: **${data["1/4 times"]}**回 [最大**${data["max1/4Length"]}**コンボ] (${hitPercentData[1]}%)\n**1/6**: **${data["1/6 times"]}**回 [最大**${data["max1/6Length"]}**コンボ] (${hitPercentData[2]}%)\n**1/8**: **${data["1/8 times"]}**回 [最大**${data["max1/8Length"]}**コンボ] (${hitPercentData[3]}%)`, inline: false })
 							.setImage(backgroundURL);
 						await interaction.channel.send({ embeds: [embed] });
