@@ -4184,7 +4184,7 @@ function checkqualified() {
 						.addFields({ name: "`Beatmap Nominator`", value: nominatorString, inline: true })
 						.addFields({ name: "`SR`", value: `**${srstring}**`, inline: false })
 						.addFields({ name: "`PP`", value: `**${ppstring}**`, inline: false })
-						.addFields({ name: "`Qualified 日時`", value: `${dateString}`, inline: true })
+						.addFields({ name: "`Qualified 日時`", value: `**${dateString}**`, inline: true })
 						.addFields({ name: "`Ranked 日時(予測)`", value: `**${rankeddateString}**`, inline: true });
 					let MapcheckChannels = fs.readJsonSync(`./ServerDatas/MapcheckChannels.json`);
 					for (const element of MapcheckChannels.Qualified[mode]) {
