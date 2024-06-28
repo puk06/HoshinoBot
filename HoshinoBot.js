@@ -2370,10 +2370,9 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			}
 
 			if (interaction.commandName == "kawaii") {
-				await interaction.reply("この機能は現在開発中です...");
-				return;
 				let tag = interaction.options.get("tag").value;
-				let pictureData = await Utils.getAPIResponse(`https://t.alcy.cc/${tag}/`);
+				let pictureData = await Utils.getAPIResponse(`https://t.alcy.cc/${tag}?json`)
+					.then(data => data.url);
 				await interaction.reply({ files: [{ attachment: pictureData, name: "picture.jpg" }] });
 			}
 		} catch (e) {
