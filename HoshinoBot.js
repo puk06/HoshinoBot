@@ -2371,14 +2371,11 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 			if (interaction.commandName == "kawaii") {
 				let tag = interaction.options.get("tag").value;
-				const message = await interaction.reply("画像の取得中です...");
+				await interaction.reply("画像の取得中です...");
 				const pictureUrl = await Utils.getAPIResponse(`https://t.alcy.cc/${tag}/?json`)
-					.then(data => {
-						const jsonData = JSON.parse(data);
-						return jsonData.url
-					});
+					.then(data => data.url);
 				let pictureData = await Utils.getAPIResponse(pictureUrl, { responseType: "arraybuffer" });
-				await message.edit({ files: [{ attachment: pictureData, name: "picture.jpg" }] });
+				await interaction.channel.send({ files: [{ attachment: pictureData, name: "picture.jpg" }] });
 				pictureData = null;
 				return;
 			}
