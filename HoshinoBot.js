@@ -2371,9 +2371,10 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 			if (interaction.commandName == "kawaii") {
 				let tag = interaction.options.get("tag").value;
+				const message = await interaction.reply("画像の取得中です...");
 				let pictureData = await Utils.getAPIResponse(`https://t.alcy.cc/${tag}?json`)
 					.then(data => data.url);
-				await interaction.reply({ files: [{ attachment: pictureData, name: "picture.jpg" }] });
+				await message.edit({ files: [{ attachment: pictureData, name: "picture.jpg" }] });
 			}
 		} catch (e) {
 			if (e.message == "No data found") {
