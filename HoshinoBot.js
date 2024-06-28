@@ -2368,6 +2368,12 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				await interaction.reply("再起動中です...");
 				process.exit(0);
 			}
+
+			if (interaction.commandName == "kawaii") {
+				let tag = interaction.options.get("tag").value;
+				let pictureData = await Utils.getAPIResponse("https://api.waifu.pics/" + tag);
+				await interaction.reply({ files: [{ attachment: pictureData, name: "picture.jpg" }] });
+			}
 		} catch (e) {
 			if (e.message == "No data found") {
 				await interaction.channel.send("マップが見つかりませんでした。")

@@ -814,5 +814,35 @@ module.exports = [
         data: new SlashCommandBuilder()
             .setName("restart")
             .setDescription("サーバーを再起動します。管理者専用です。")
-    }
+    },
+    {
+        data: new SlashCommandBuilder()
+            .setName("kawaii")
+            .setDescription("いい感じの画像をAPIから取得します。タグ結構あるよ。")
+            .addStringOption(option =>
+                option
+                    .setName("tag")
+                    .setDescription("写真のタグ決めれます。色々試してみてね！")
+                    .addChoices(
+                        { name: "SECONDARY ELEMENT ADAPTIVE", value: "ycy" },
+                        { name: "CUTE VERSION ADAPTIVE", value: "moez" },
+                        { name: "AI ADAPTIVE", value: "ai" },
+                        { name: "GENSHIN IMPACT ADAPTIVE", value: "ysz" },
+                        { name: "PC HORIZONTAL MAP", value: "pc" },
+                        { name: "CUTE HORIZONTAL MAP", value: "moe"},
+                        { name: "LANDSCAPE HORIZONTAL", value: "fj"},
+                        { name: "HORIZONTAL IMAGE ON WHITE BACKGROUND", value: "bd"},
+                        { name: "ORIGINAL GOD HORIZONTAL MAP", value: "ys"},
+                        { name: "ACG ANIMATION", value: "acg"},
+                        { name: "MOVE VERTICAL IMAGE", value: "mp"},
+                        { name: "CUTE VERTICAL IMAGE", value: "moemp"},
+                        { name: "ORIGINAL GOD VERTICAL PICTURE", value: "ysmp"},
+                        { name: "AI VERTICAL PICTURE", value: "aimp"},
+                        { name: "AVATAR SQUARE PICTURE", value: "tx"},
+                        { name: "NANASE KURUMI", value: "lai"},
+                        { name: "LITTLE FOX", value: "xhl"}
+                    )
+                    .setRequired(true)
+            )
+    },
 ]
