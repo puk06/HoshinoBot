@@ -86,6 +86,36 @@ module.exports = [
     },
     {
         data: new SlashCommandBuilder()
+            .setName("slothistory")
+            .setDescription("slotの履歴グラフを表示します。")
+            .addNumberOption(option =>
+                option
+                    .setName("type")
+                    .setDescription("5か20コインスロットを選択できます。")
+                    .setRequired(true)
+                    .addChoices(
+                        { name: "5コイン", value: 5 },
+                        { name: "20コイン", value: 20 }
+                    )
+            )
+    },
+    {
+        data: new SlashCommandBuilder()
+            .setName("slotgraph")
+            .setDescription("slotのグラフを表示します。")
+            .addNumberOption(option =>
+                option
+                    .setName("type")
+                    .setDescription("5か20コインスロットを選択できます。")
+                    .setRequired(true)
+                    .addChoices(
+                        { name: "5コイン", value: 5 },
+                        { name: "20コイン", value: 20 }
+                    )
+            )
+    },
+    {
+        data: new SlashCommandBuilder()
             .setName("coinflip")
             .setDescription("コインフリップを開始します。")
             .addNumberOption(option =>

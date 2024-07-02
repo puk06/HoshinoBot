@@ -204,8 +204,6 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			if (!interaction.isCommand()) return;
 			commandLogs(interaction, interaction.commandName, 0);
 
-			//Casino
-
 			if (interaction.commandName == "slotsetting") {
 				if (interaction.user.id !== BotadminId) {
 					await interaction.reply("このコマンドはBot管理者専用です。");
@@ -308,6 +306,46 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				return;
 			}
 
+			if (interaction.commandName == "slotgraph") {
+				let bankData = fs.readJsonSync("./ServerDatas/UserBankData.json");
+				if (!bankData[interaction.user.id]) {
+					await interaction.reply("このカジノにユーザー登録されていないようです。/regcasinoで登録してください。");
+					return;
+				}
+
+				const Type = interaction.options.get("type").value;
+				const USER_DATA = bankData[interaction.user.id].slot[Type == 5 ? 0 : 1];
+
+				const Juggler = new ImJugglerEX(SLOT_SETTING, USER_DATA);
+				const Graph = await Juggler.showGraph();
+				if (Graph == null) {
+					await interaction.reply("グラフが存在しません。");
+					return;
+				}
+				await interaction.reply({ files: [{ attachment: Graph, name: "slotgraph.png" }] });
+				return;
+			}
+
+			if (interaction.commandName == "slothistory") {
+				let bankData = fs.readJsonSync("./ServerDatas/UserBankData.json");
+				if (!bankData[interaction.user.id]) {
+					await interaction.reply("このカジノにユーザー登録されていないようです。/regcasinoで登録してください。");
+					return;
+				}
+
+				const Type = interaction.options.get("type").value;
+				const USER_DATA = bankData[interaction.user.id].slot[Type == 5 ? 0 : 1];
+
+				const Juggler = new ImJugglerEX(SLOT_SETTING, USER_DATA);
+				const History = await Juggler.showHistory();
+				if (History == null) {
+					await interaction.reply("履歴が存在しません。");
+					return;
+				}
+				await interaction.reply({ files: [{ attachment: History, name: "slothistory.png" }] });
+				return;
+			}
+
 			if (interaction.commandName == "dice") {
 				await interaction.reply(`サイコロを振った結果: **${Math.floor(Math.random() * 6) + 1}**`);
 				return;
@@ -322,6 +360,11 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 				const Coin = interaction.options.get("coin").value;
 				const Type = interaction.options.get("type").value;
+
+				if (Coin <= 0) {
+					await interaction.reply("0以上の金額を入力してください。");
+					return;
+				}
 
 				if (Type == 5) {
 					if (bankData[interaction.user.id].balance < Coin) {
@@ -357,6 +400,11 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 				const Medal = interaction.options.get("medal").value;
 				const Type = interaction.options.get("type").value;
+
+				if (Medal <= 0) {
+					await interaction.reply("0以上の金額を入力してください。");
+					return;
+				}
 
 				if (Type == 5) {
 					if (bankData[interaction.user.id].slot[0].medal < Medal) {

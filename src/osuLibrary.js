@@ -1061,7 +1061,7 @@ class SRChart {
                                     label: "SRdata",
                                     borderColor: "rgb(255, 255, 255)",
                                     backgroundColor: "rgba(54, 162, 235, 0.5)",
-                                    fill: 'start'
+                                    fill: "start"
                                 }
                             ],
                             labels: srdatalengtharray,

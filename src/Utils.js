@@ -508,75 +508,55 @@ class Juggler {
         };
     }
 
-    async showGraph(name="slump_graph", save=false) {
-        const canvas = createCanvas(800, 400);
-        const ctx = canvas.getContext('2d');
-        
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: Array.from({ length: this.slump.length }, (_, i) => i + 1),
-                datasets: [{
-                    label: 'Slump',
-                    data: this.slump,
-                    borderColor: 'red',
-                    fill: false
-                }]
-            },
-            options: {
-                title: {
-                    display: true,
-                    text: 'Slump Graph'
-                },
-                scales: {
-                    xAxes: [{ display: true, scaleLabel: { display: true, labelString: '# of draw' } }],
-                    yAxes: [{ display: true, scaleLabel: { display: true, labelString: 'medals' } }]
-                }
-            }
-        });
-
-        if (save) {
-            const buffer = canvas.toBuffer('image/png');
-            fs.writeFileSync(`${name}.png`, buffer);
+    async showGraph() {
+        if (this.slump.length == 0) {
+            return null;
         }
+        const BaseURL = 'https://image-charts.com/chart.js/2.8.0';
+        const Labels = Array.from({ length: this.slump.length }, (_, i) => i + 1);
+        const Data = this.slump;
+        const ChartConfig = {
+            type: "line",
+            data: {
+                datasets: [
+                    {
+                        data: Data,
+                        label: "Slump",
+                        borderColor: "red"
+                    }
+                ],
+                labels: Labels
+            }
+        };
+        const RequestURL = `${BaseURL}?bkg=white&c=${JSON.stringify(ChartConfig)}`;
+        const Response = await Utils.getAPIResponse(RequestURL, { responseType: "arraybuffer" });
+        return Response;
     }
 
-    async showHistory(name="history", save=false) {
-        const history = this.log;
-        if (history.length > 1) {
-            const canvas = createCanvas(800, 400);
-            const ctx = canvas.getContext('2d');
-            const labels = Array.from({ length: history.length }, (_, i) => history.length - i);
-            const data = history.map(h => h[0]);
-            const backgroundColors = history.map(h => h[1] === "B" ? 'orange' : 'limegreen');
-
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'BONUS History',
-                        data: data,
-                        backgroundColor: backgroundColors
-                    }]
-                },
-                options: {
-                    title: {
-                        display: true,
-                        text: 'BONUS History'
-                    },
-                    scales: {
-                        xAxes: [{ display: true, scaleLabel: { display: true, labelString: 'N bonuses ago' } }],
-                        yAxes: [{ display: true, scaleLabel: { display: true, labelString: '# of draw' } }]
-                    }
-                }
-            });
-
-            if (save) {
-                const buffer = canvas.toBuffer('image/png');
-                fs.writeFileSync(`${name}.png`, buffer);
-            }
+    async showHistory() {
+        if (this.log.length == 0) {
+            return null;
         }
+        const BaseURL = 'https://image-charts.com/chart.js/2.8.0';
+        const Labels = Array.from({ length: this.log.length }, (_, i) => this.log.length - i);
+        const Data = this.log.map(h => h[0]);
+        const BackgroundColors = this.log.map(h => h[1] === "B" ? 'orange' : 'limegreen');
+        const ChartConfig = {
+            type: "bar",
+            data: {
+                datasets: [
+                    {
+                        data: Data,
+                        label: "History",
+                        backgroundColor: BackgroundColors
+                    }
+                ],
+                labels: Labels
+            }
+        };
+        const RequestURL = `${BaseURL}?bkg=white&c=${JSON.stringify(ChartConfig)}`;
+        const Response = await Utils.getAPIResponse(RequestURL, { responseType: "arraybuffer" });
+        return Response;
     }
 
     generateResultString(result) {
