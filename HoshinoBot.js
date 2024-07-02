@@ -491,7 +491,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 								const winner = CasinoData[interaction.channel.id].players[result];
 								const loser = CasinoData[interaction.channel.id].players[result == 0 ? 1 : 0];
 								const bet = CasinoData[interaction.channel.id].bet;
-								if (winner.id != 0) bankData[winner.id].balance += bet * 2;
+								if (winner.id != 0) bankData[winner.id].balance += bet;
 								if (loser.id != 0) bankData[loser.id].balance -= bet;
 								fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
 								const Embed = new EmbedBuilder()
