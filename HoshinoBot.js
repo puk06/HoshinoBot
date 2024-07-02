@@ -645,7 +645,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				};
 
 				fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
-				await interaction.reply(`カジノへようこそ ${interaction.user.username}! 初回なので10000コインを差し上げます。`);
+				await interaction.reply(`カジノへようこそ ${interaction.user.username}! 初回なので10000コインを差し上げます。\n__**スロットの遊び方**__\n- \`/medal\`でコインからメダルに\n- \`/coin\`でメダルからコインに変えることができます。\n- \`/slot\`で遊ぶことができます。\n- \`/slotgraph\`でスランプのグラフが表示され\n- \`/slothistory\`で当たりの履歴を見ることができます。\n**Typeがレートで、5コイン1メダル、20コイン1メダルから選べます**\n\n__**コインフリップの遊び方**__\n- \`/coinflip\`でゲームを開始できます。\n- 参加したい人がいる場合、\`/join\`を入力することで参加できます。\n- BOTを追加したい場合、\`/addbot\`を入力することでBOTと戦うことができます。`);
 				bankData = null;
 				return;
 			}
