@@ -2527,10 +2527,10 @@ client.on(Events.InteractionCreate, async (interaction) =>
 						break;
 					}
 
-					case "./src/Tools.js": {
-						const data = await Tools.getAPIResponse(url + "src/Tools.js");
-						fs.writeFileSync("./src/Tools.js", data);
-						await interaction.reply("Tools.jsのアップデートが完了しました。");
+					case "./src/Utils.js": {
+						const data = await Tools.getAPIResponse(url + "src/Utils.js");
+						fs.writeFileSync("./src/Utils.js", data);
+						await interaction.reply("Utils.jsのアップデートが完了しました。");
 						break;
 					}
 
