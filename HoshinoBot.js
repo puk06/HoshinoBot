@@ -2546,8 +2546,8 @@ client.on(Events.InteractionCreate, async (interaction) =>
 						fs.writeFileSync("./HoshinoBot.js", data1);
 						const data2 = await Tools.getAPIResponse(url + "src/osuLibrary.js");
 						fs.writeFileSync("./src/osuLibrary.js", data2);
-						const data3 = await Tools.getAPIResponse(url + "src/Tools.js");
-						fs.writeFileSync("./src/Tools.js", data3);
+						const data3 = await Tools.getAPIResponse(url + "src/Utils.js");
+						fs.writeFileSync("./src/Utils.js", data3);
 						const data4 = await Tools.getAPIResponse(url + "package.json");
 						fs.writeFileSync("./package.json", data4);
 						await interaction.reply("全てのアップデートが完了しました。");
