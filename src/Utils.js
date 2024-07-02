@@ -529,7 +529,7 @@ class Juggler {
             }
         };
         const RequestURL = `${BaseURL}?bkg=white&c=${JSON.stringify(ChartConfig)}`;
-        const Response = await Utils.getAPIResponse(RequestURL, { responseType: "arraybuffer" });
+        const Response = await Tools.getAPIResponse(RequestURL, { responseType: "arraybuffer" });
         return Response;
     }
 
@@ -555,7 +555,7 @@ class Juggler {
             }
         };
         const RequestURL = `${BaseURL}?bkg=white&c=${JSON.stringify(ChartConfig)}`;
-        const Response = await Utils.getAPIResponse(RequestURL, { responseType: "arraybuffer" });
+        const Response = await Tools.getAPIResponse(RequestURL, { responseType: "arraybuffer" });
         return Response;
     }
 
