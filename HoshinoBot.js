@@ -690,7 +690,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 				bankData[interaction.user.id].balance = bankData[interaction.user.id].balance - Amount;
 				for (const key in bankData) {
-					if (bankData[key].username == sentusername) {
+					if (bankData[key].username == MESSAGER_USERDATA) {
 						bankData[key].balance = bankData[key].balance + Amount;
 						break;
 					}
