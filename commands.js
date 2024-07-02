@@ -156,7 +156,7 @@ module.exports = [
                     .setRequired(true)
                     .setAutocomplete(true)
             )
-            .addStringOption(option =>
+            .addNumberOption(option =>
                 option
                     .setName("amount")
                     .setDescription("送りたい金額")
