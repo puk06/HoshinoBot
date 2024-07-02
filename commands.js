@@ -4,23 +4,94 @@ const fs = require("./node_modules/fs-extra");
 module.exports = [
     {
         data: new SlashCommandBuilder()
-            .setName("slot")
-            .setDescription("スロットを回します。")
-            .addStringOption(option =>
+            .setName("coin")
+            .setDescription("スロット用のメダルをコインに換金できます。")
+            .addNumberOption(option =>
                 option
-                    .setName("betamount")
-                    .setDescription("賭け金額")
+                    .setName("medal")
+                    .setDescription("交換したいメダルの枚数")
                     .setRequired(true)
+            )
+            .addNumberOption(option =>
+                option
+                    .setName("type")
+                    .setDescription("5か20コインスロットを選択できます。")
+                    .setRequired(true)
+                    .addChoices(
+                        { name: "5コイン", value: 5 },
+                        { name: "20コイン", value: 20 }
+                    )
             )
     },
     {
         data: new SlashCommandBuilder()
-            .setName("safeslot")
-            .setDescription("スロットを回します。負けても報酬が0ではないです。")
-            .addStringOption(option =>
+            .setName("medal")
+            .setDescription("コインをスロット用のメダルに交換できます。")
+            .addNumberOption(option =>
                 option
-                    .setName("betamount")
-                    .setDescription("賭け金額")
+                    .setName("coin")
+                    .setDescription("交換したいコインの枚数")
+                    .setRequired(true)
+            )
+            .addNumberOption(option =>
+                option
+                    .setName("type")
+                    .setDescription("5か20コインスロットを選択できます。")
+                    .setRequired(true)
+                    .addChoices(
+                        { name: "5コイン", value: 5 },
+                        { name: "20コイン", value: 20 }
+                    )
+            )
+    },
+    {
+        data: new SlashCommandBuilder()
+            .setName("join")
+            .setDescription("そのチャンネル内で行われているカジノゲームに参加します。")
+    },
+    {
+        data: new SlashCommandBuilder()
+            .setName("leave")
+            .setDescription("そのチャンネル内で行われているカジノゲームから退出します。")
+    },
+    {
+        data: new SlashCommandBuilder()
+            .setName("cancel")
+            .setDescription("そのチャンネル内で行われているカジノゲームをキャンセルします。")
+    },
+    {
+        data: new SlashCommandBuilder()
+            .setName("addbot")
+            .setDescription("そのチャンネル内で行われているカジノゲームにBOTを参加させます。対応してるものが限られています。")
+    },
+    {
+        data: new SlashCommandBuilder()
+            .setName("slotsetting")
+            .setDescription("スロットの設定を表示します。管理者専用です。")
+    },
+    {
+        data: new SlashCommandBuilder()
+            .setName("slot")
+            .setDescription("ジャグラーを起動します。")
+            .addNumberOption(option =>
+                option
+                    .setName("type")
+                    .setDescription("5か20コインスロットを選択できます。")
+                    .setRequired(true)
+                    .addChoices(
+                        { name: "5コイン", value: 5 },
+                        { name: "20コイン", value: 20 }
+                    )
+            )
+    },
+    {
+        data: new SlashCommandBuilder()
+            .setName("coinflip")
+            .setDescription("コインフリップを開始します。")
+            .addNumberOption(option =>
+                option
+                    .setName("bet")
+                    .setDescription("賭ける金額")
                     .setRequired(true)
             )
     },
@@ -36,35 +107,8 @@ module.exports = [
     },
     {
         data: new SlashCommandBuilder()
-            .setName("recoshot")
-            .setDescription("recoコマンドで出る金額を自動で賭け金額に設定します。")
-            .addNumberOption(option =>
-                option
-                    .setName("times")
-                    .setDescription("回数を指定できます。100回まで一度に実行できます。")
-                    .setRequired(false)
-            )
-    },
-    {
-        data: new SlashCommandBuilder()
-            .setName("reco")
-            .setDescription("おすすめの賭け金額を表示します。")
-    },
-    {
-        data: new SlashCommandBuilder()
             .setName("bank")
             .setDescription("現在の銀行口座残高を表示します。")
-    },
-    {
-        data: new SlashCommandBuilder()
-            .setName("amount")
-            .setDescription("数値を漢字で表示します。")
-            .addStringOption(option =>
-                option
-                    .setName("amount")
-                    .setDescription("数値")
-                    .setRequired(true)
-            )
     },
     {
         data: new SlashCommandBuilder()

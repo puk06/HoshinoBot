@@ -10,8 +10,9 @@ class Tools {
      * Generates a random slot result.
      * @returns {string[]} An array of three random symbols.
      */
-    static generateSlotResult() {
+    generateSlotResult() {
         const symbols = ['🍒', '🍊', '🍇', '🔔', '💰', '⌚', '⛵'];
+        //1/319で3つ揃うようにする
         const result = [];
         for (let i = 0; i < 3; i++) {
             const randomIndex = Math.floor(Math.random() * symbols.length);
@@ -338,4 +339,324 @@ class Tools {
     }
 }
 
-module.exports = Tools;
+
+class Juggler {
+    constructor(user, name, setting=6, big_single=172, big_cherry=72, reg_single=172, reg_cherry=72, grape=10600, cherry_single=1840, replay=8978, bell=60, pierrot=60) {
+        this.name = name;
+        this.setting = setting;
+        this.rotation = user.rotation;
+        this.rotation_total = user.rotation_total;
+        this.medal = user.medal;
+        this.log = user.log;
+        this.slump = user.slump;
+        this.counter = user.counter;
+        this.flag_big = user.flag_big;
+        this.flag_reg = user.flag_reg;
+
+        this.big_single = big_single;
+        this.big_cherry = big_cherry;
+        this.reg_single = reg_single;
+        this.reg_cherry = reg_cherry;
+        this.grape = grape;
+        this.cherry_single = cherry_single;
+        this.replay = replay;
+        this.pierrot = pierrot;
+        this.bell = bell;
+
+        this.big_total = big_single + big_cherry;
+        this.reg_total = reg_single + reg_cherry;
+        this.bonus_total = this.big_total + this.reg_total;
+        this.cherry_total = big_cherry + reg_cherry + cherry_single;
+
+        this.th_big_single = big_single;
+        this.th_big_cherry = this.th_big_single + big_cherry;
+        this.th_reg_single = this.th_big_cherry + reg_single;
+        this.th_reg_cherry = this.th_reg_single + reg_cherry;
+        this.th_grape = this.th_reg_cherry + grape;
+        this.th_cherry_single = this.th_grape + cherry_single;
+        this.th_replay = this.th_cherry_single + replay;
+        this.th_bell = this.th_replay + bell;
+        this.th_pierrot = this.th_bell + pierrot;
+    }
+
+    showSpec() {
+        return `設定:${this.setting}\nBIG確率:1/${Math.round(65536 / this.big_total * 100) / 100}\nREG確率:1/${Math.round(65536 / this.reg_total * 100) / 100}\nボーナス合算:1/${Math.round(65536 / this.bonus_total * 100) / 100}\nブドウ確率:1/${Math.round(65536 / this.grape * 100) / 100}\nチェリー確率:1/${Math.round(65536 / this.cherry_total * 100) / 100}\nリプレイ確率:1/${Math.round(65536 / this.replay * 100) / 100}\nピエロ確率:1/${Math.round(65536 / this.pierrot * 100) / 100}\nベル確率:1/${Math.round(65536 / this.bell * 100) / 100}`;
+    }
+
+    showStatus() {
+        const p_big = this.counter[0] === 0 ? `BIG確率:0/${this.rotation_total}, ` : `BIG確率:1/${this.rotation_total / this.counter[0]}, `;
+        const p_reg = this.counter[1] === 0 ? `REG確率:0/${this.rotation_total}, ` : `REG確率:1/${this.rotation_total / this.counter[1]}, `;
+        const p_total = (this.counter[0] + this.counter[1]) === 0 ? `ボーナス合算確率:0/${this.rotation_total}` : `ボーナス合算確率:1/${this.rotation_total / (this.counter[0] + this.counter[1])}`;
+        return `現在の回転数:${this.rotation}\n現在のメダル数:${this.medal}\n総回転数:${this.rotation_total}\nBIG:${this.counter[0]}回\nREG:${this.counter[1]}回\n${p_big}\n${p_reg}\n${p_total}`
+
+    }
+
+    showCounter() {
+        const n_koyaku = this.counter.slice(2).map((count, _) => count === 0 ? 0 : this.rotation_total / count);
+        return `ブドウ確率:1/${Math.round(n_koyaku[0] * 100) / 100}\nチェリー確率:1/${Math.round(n_koyaku[1] * 100) / 100}\nリプレイ確率:1/${Math.round(n_koyaku[2] * 100) / 100}\nベル確率:1/${Math.round(n_koyaku[3] * 100) / 100}\nピエロ確率:1/${Math.round(n_koyaku[4] * 100) / 100}`;
+    }
+
+    draw() {
+        let result = "ハズレ";
+        if (this.medal < 3) {
+            result =  "メダルが足りません";
+            return {
+                result: result,
+                user: {
+                    rotation: this.rotation,
+                    rotation_total: this.rotation_total,
+                    medal: this.medal,
+                    log: this.log,
+                    slump: this.slump,
+                    counter: this.counter,
+                    flag_big: this.flag_big,
+                    flag_reg: this.flag_reg
+                }
+            };
+        }
+        this.medal -= 3;
+        this.rotation += 1;
+        this.rotation_total += 1;
+
+        if (this.flag_big || this.flag_reg) {
+            if (this.flag_big) {
+                this.medal += 325;
+                this.flag_big = false;
+                this.counter[0] += 1;
+                this.log.push([this.rotation, "B"]);
+                this.rotation = 0;
+                result = "BIG";
+            }
+
+            if (this.flag_reg) {
+                this.medal += 104;
+                this.flag_reg = false;
+                this.counter[1] += 1;
+                this.log.push([this.rotation, "R"]);
+                this.rotation = 0;
+                result = "REG";
+            }
+
+            return {
+                result: result,
+                user: {
+                    rotation: this.rotation,
+                    rotation_total: this.rotation_total,
+                    medal: this.medal,
+                    log: this.log,
+                    slump: this.slump,
+                    counter: this.counter,
+                    flag_big: this.flag_big,
+                    flag_reg: this.flag_reg
+                }
+            };
+        }
+
+        const table = Math.floor(Math.random() * 65536);
+
+        if (table < this.th_big_single) {
+            this.flag_big = true;
+            result = "ハズレ(ペカッ)";
+        } else if (table < this.th_big_cherry) {
+            this.flag_big = true;
+            this.medal += 2;
+            this.counter[3] += 1;
+            result = "チェリー(ペカッ)";
+        } else if (table < this.th_reg_single) {
+            this.flag_reg = true;
+            result = "ハズレ(ペカッ)";
+        } else if (table < this.th_reg_cherry) {
+            this.flag_reg = true;
+            this.medal += 2;
+            this.counter[3] += 1;
+            result = "チェリー(ペカッ)";
+        } else if (table < this.th_grape) {
+            this.medal += 7;
+            this.counter[2] += 1;
+            result = "ブドウ";
+        } else if (table < this.th_cherry_single) {
+            this.medal += 2;
+            this.counter[3] += 1;
+            result = "チェリー";
+        } else if (table < this.th_replay) {
+            this.medal += 3;
+            this.counter[4] += 1;
+            result = "リプレイ";
+        } else if (table < this.th_bell) {
+            this.medal += 14;
+            this.counter[5] += 1;
+            result = "ベル";
+        } else if (table < this.th_pierrot) {
+            this.medal += 10;
+            this.counter[6] += 1;
+            result = "ピエロ";
+        }
+
+        this.slump.push(this.medal);
+        return {
+            result: result,
+            user: {
+                rotation: this.rotation,
+                rotation_total: this.rotation_total,
+                medal: this.medal,
+                log: this.log,
+                slump: this.slump,
+                counter: this.counter,
+                flag_big: this.flag_big,
+                flag_reg: this.flag_reg
+            }
+        };
+    }
+
+    async showGraph(name="slump_graph", save=false) {
+        const canvas = createCanvas(800, 400);
+        const ctx = canvas.getContext('2d');
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array.from({ length: this.slump.length }, (_, i) => i + 1),
+                datasets: [{
+                    label: 'Slump',
+                    data: this.slump,
+                    borderColor: 'red',
+                    fill: false
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: 'Slump Graph'
+                },
+                scales: {
+                    xAxes: [{ display: true, scaleLabel: { display: true, labelString: '# of draw' } }],
+                    yAxes: [{ display: true, scaleLabel: { display: true, labelString: 'medals' } }]
+                }
+            }
+        });
+
+        if (save) {
+            const buffer = canvas.toBuffer('image/png');
+            fs.writeFileSync(`${name}.png`, buffer);
+        }
+    }
+
+    async showHistory(name="history", save=false) {
+        const history = this.log;
+        if (history.length > 1) {
+            const canvas = createCanvas(800, 400);
+            const ctx = canvas.getContext('2d');
+            const labels = Array.from({ length: history.length }, (_, i) => history.length - i);
+            const data = history.map(h => h[0]);
+            const backgroundColors = history.map(h => h[1] === "B" ? 'orange' : 'limegreen');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'BONUS History',
+                        data: data,
+                        backgroundColor: backgroundColors
+                    }]
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: 'BONUS History'
+                    },
+                    scales: {
+                        xAxes: [{ display: true, scaleLabel: { display: true, labelString: 'N bonuses ago' } }],
+                        yAxes: [{ display: true, scaleLabel: { display: true, labelString: '# of draw' } }]
+                    }
+                }
+            });
+
+            if (save) {
+                const buffer = canvas.toBuffer('image/png');
+                fs.writeFileSync(`${name}.png`, buffer);
+            }
+        }
+    }
+
+    generateResultString(result) {
+        const Emoji = {
+            "pierrot": "<:pierrot:1257570705902538763>",
+            "cherry": "<:cherry:1257570637736706078>",
+            "bar": "<:bar:1257570563669622865>",
+            "bell": "<:slotbell:1257569636485173310>",
+            "big": "<:big:1257569774704263228>",
+            "grape": "<:grape:1257570492639088692>",
+            "replay": "<:replay:1257570384484765779>",
+            "GOGO":"<:GOGO:1257572076613795872>"
+        };
+
+        switch (result) {
+            case "BIG":
+                return `${Emoji.big} ${Emoji.big} ${Emoji.big}`;
+            case "REG":
+                return `${Emoji.big} ${Emoji.big} ${Emoji.bar}`;
+            case "ハズレ(ペカッ)": {
+                const symbols = [Emoji.bar, Emoji.bell, Emoji.big, Emoji.grape, Emoji.replay];
+                const result = [];
+                while (result.length < 3) {
+                    const randomIndex = Math.floor(Math.random() * symbols.length);
+                    if (result.length == 2 && result[0] == symbols[randomIndex]) {
+                        continue;
+                    }
+                    result.push(symbols[randomIndex]);
+                }
+
+                return `${result[0]} ${result[1]} ${result[2]}\n${Emoji.GOGO}`;
+            }
+            case "チェリー(ペカッ)":
+                return `${Emoji.cherry} ${Emoji.cherry} ${Emoji.cherry}\n${Emoji.GOGO}`;
+            case "ブドウ":
+                return `${Emoji.grape} ${Emoji.grape} ${Emoji.grape}`;
+            case "チェリー":
+                return `${Emoji.cherry} ${Emoji.cherry} ${Emoji.cherry}`;
+            case "リプレイ":
+                return `${Emoji.replay} ${Emoji.replay} ${Emoji.replay}`;
+            case "ベル":
+                return `${Emoji.bell} ${Emoji.bell} ${Emoji.bell}`;
+            case "ピエロ":
+                return `${Emoji.pierrot} ${Emoji.pierrot} ${Emoji.pierrot}`;
+            default: {
+                const symbols = [Emoji.bar, Emoji.bell, Emoji.big, Emoji.grape, Emoji.replay];
+                const result = [];
+                while (result.length < 3) {
+                    const randomIndex = Math.floor(Math.random() * symbols.length);
+                    if (result.length == 2 && result[0] == symbols[randomIndex]) {
+                        continue;
+                    }
+                    result.push(symbols[randomIndex]);
+                }
+
+                return `${result[0]} ${result[1]} ${result[2]}`;
+            }
+        }
+    }
+}
+
+class ImJugglerEX extends Juggler {
+    constructor(settei, user) {
+        const big_single_prob = [160, 164, 164, 168, 168, 172];
+        const big_cherry_prob = [68, 68, 68, 72, 72, 72];
+        const reg_single_prob = [100, 104, 132, 144, 172, 172];
+        const reg_cherry_prob = [44, 44, 56, 60, 72, 72];
+        const grape_prob = [10100, 10100, 10100, 10100, 10100, 10600];
+
+        const big_single = big_single_prob[settei - 1];
+        const big_cherry = big_cherry_prob[settei - 1];
+        const reg_single = reg_single_prob[settei - 1];
+        const reg_cherry = reg_cherry_prob[settei - 1];
+        const grape = grape_prob[settei - 1];
+
+        super(user, "アイムジャグラーEXAE", settei, big_single, big_cherry, reg_single, reg_cherry, grape);
+    }
+}
+
+module.exports = {
+    Tools,
+    ImJugglerEX
+};

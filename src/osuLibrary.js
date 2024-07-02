@@ -1,5 +1,5 @@
 const rosu = require("../node_modules/rosu-pp-js");
-const Utils = require("../src/Utils");
+const { Tools: Utils } = require("../src/Utils.js");
 
 /**
  * Represents a class for retrieving user data.
