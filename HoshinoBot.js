@@ -1,5 +1,5 @@
 //必要となるライブラリ
-const { Client, EmbedBuilder, Events, GatewayIntentBits, ActivityType, WebhookClient, ButtonStyle } = require("./node_modules/discord.js");
+const { Client, EmbedBuilder, Events, GatewayIntentBits, ActivityType, WebhookClient } = require("./node_modules/discord.js");
 require("./node_modules/dotenv").config();
 const fs = require("./node_modules/fs-extra");
 const { tools, auth, v2 } = require("./node_modules/osu-api-extended");
@@ -2534,45 +2534,45 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 				const fileName = interaction.options.get("file").value;
 
-				let url = "https://raw.githubusercontent.com/puk06/HoshinoBot/main/";
+				const Base_URL = "https://raw.githubusercontent.com/puk06/HoshinoBot/main/";
 
 				switch (fileName) {
 					case "HoshinoBot.js": {
-						const data = await Tools.getAPIResponse(url + "HoshinoBot.js");
+						const data = await Tools.getAPIResponse(Base_URL + "HoshinoBot.js");
 						fs.writeFileSync("./HoshinoBot.js", data);
 						await interaction.reply("HoshinoBot.jsのアップデートが完了しました。");
 						break;
 					}
 
 					case "./src/osuLibrary.js": {
-						const data = await Tools.getAPIResponse(url + "src/osuLibrary.js");
+						const data = await Tools.getAPIResponse(Base_URL + "src/osuLibrary.js");
 						fs.writeFileSync("./src/osuLibrary.js", data);
 						await interaction.reply("osuLibrary.jsのアップデートが完了しました。");
 						break;
 					}
 
 					case "./src/Utils.js": {
-						const data = await Tools.getAPIResponse(url + "src/Utils.js");
+						const data = await Tools.getAPIResponse(Base_URL + "src/Utils.js");
 						fs.writeFileSync("./src/Utils.js", data);
 						await interaction.reply("Utils.jsのアップデートが完了しました。");
 						break;
 					}
 
 					case "package.json": {
-						const data = await Tools.getAPIResponse(url + "package.json");
+						const data = await Tools.getAPIResponse(Base_URL + "package.json");
 						fs.writeFileSync("./package.json", data);
 						await interaction.reply("package.jsonのアップデートが完了しました。");
 						break;
 					}
 
 					case "All Files": {
-						const data1 = await Tools.getAPIResponse(url + "HoshinoBot.js");
+						const data1 = await Tools.getAPIResponse(Base_URL + "HoshinoBot.js");
 						fs.writeFileSync("./HoshinoBot.js", data1);
-						const data2 = await Tools.getAPIResponse(url + "src/osuLibrary.js");
+						const data2 = await Tools.getAPIResponse(Base_URL + "src/osuLibrary.js");
 						fs.writeFileSync("./src/osuLibrary.js", data2);
-						const data3 = await Tools.getAPIResponse(url + "src/Utils.js");
+						const data3 = await Tools.getAPIResponse(Base_URL + "src/Utils.js");
 						fs.writeFileSync("./src/Utils.js", data3);
-						const data4 = await Tools.getAPIResponse(url + "package.json");
+						const data4 = await Tools.getAPIResponse(Base_URL+ "package.json");
 						fs.writeFileSync("./package.json", data4);
 						await interaction.reply("全てのアップデートが完了しました。");
 						break;
