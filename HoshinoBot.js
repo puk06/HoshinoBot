@@ -72,6 +72,30 @@ client.on(Events.ClientReady, async () =>
 		}, 10000);
 		setInterval(makeBackup, 3600000);
 
+		let bankData = fs.readJsonSync("./ServerDatas/UserBankData.json");
+		for (const key in bankData) {
+			for (let i = 0; i < 2; i++) {
+				bankData[key].slot[i].rotation = 0;
+				bankData[key].slot[i].rotation_total = 0;
+				bankData[key].slot[i].log = [];
+				bankData[key].slot[i].slump = [];
+				bankData[key].slot[i].counter = [
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0
+				];
+				bankData[key].slot[i].flag_big = false;
+				bankData[key].slot[i].flag_reg = false;
+			}
+		}
+		fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
+		bankData = null;
+
+
 		(async () => {
 			let webHookData = fs.readJsonSync("./ServerDatas/WebHookData.json");
 			if (webHookData.lastDate == new Date().getDate()) return;
