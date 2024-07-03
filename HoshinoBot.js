@@ -78,6 +78,7 @@ client.on(Events.ClientReady, async () =>
 				bankData[key].slot[i].rotation = 0;
 				bankData[key].slot[i].rotation_total = 0;
 				bankData[key].slot[i].log = [];
+				bankData[key].slot[i].slump_value = 0;
 				bankData[key].slot[i].slump = [];
 				bankData[key].slot[i].counter = [
 					0,
@@ -304,6 +305,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				USER_DATA.rotation = Result.user.rotation;
 				USER_DATA.rotation_total = Result.user.rotation_total;
 				USER_DATA.log = Result.user.log;
+				USER_DATA.slump_value = Result.user.slump_value;
 				USER_DATA.slump = Result.user.slump;
 				USER_DATA.counter = Result.user.counter;
 				USER_DATA.flag_big = Result.user.flag_big;
@@ -634,6 +636,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 								rotation: 0,
 								rotation_total: 0,
 								log: [],
+								slump_value: 0,
 								slump: [],
 								counter: [
 									0,
@@ -652,6 +655,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 								rotation: 0,
 								rotation_total: 0,
 								log: [],
+								slump_value: 0,
 								slump: [],
 								counter: [
 									0,
@@ -4044,6 +4048,52 @@ client.on(Events.MessageCreate, async (message) =>
 
 			if (message.content == "h!help") {
 				commandLogs(message, "ヘルプ", 1);
+				const Arg = message.content.split(" ")[1];
+				//カジノのコマンド
+				switch (Arg) {
+					case "casino": {
+						let casinoMessage = "__\*\*カジノの遊び方\*\*\__\n";
+						casinoMessage += "- `/medal`でコインからメダルに\n";
+						casinoMessage += "- `/coin`でメダルからコインに変えることができます。\n";
+						casinoMessage += "- `/slot`で遊ぶことができます。\n";
+						casinoMessage += "- `/slotgraph`でスランプのグラフが表示され\n";
+						casinoMessage += "- `/slothistory`で当たりの履歴を見ることができます。\n";
+						casinoMessage += "**Typeがレートで、5コイン1メダル、20コイン1メダルから選べます**\n\n";
+						casinoMessage += "__\*\*コインフリップの遊び方\*\*\__\n";
+						casinoMessage += "- `/coinflip`でゲームを開始できます。\n";
+						casinoMessage += "- 参加したい人がいる場合、`/join`を入力することで参加できます。\n";
+						casinoMessage += "- BOTを追加したい場合、`/addbot`を入力することでBOTと戦うことができます。\n";
+
+						await message.reply(casinoMessage);
+						break;
+					}
+
+					case "osu(!コマンド)": {
+						let osuMessage = "__\*\*osu!のコマンド一覧(!〇〇)\*\*\__\n";
+						osuMessage += "- `!osureg [osu! Username]`でosu!のユーザー名を登録します。スラッシュコマンドもあります\n";
+						osuMessage += "- `!map [maplink] (mods) (acc)`で指定した譜面の情報を表示します。modsとaccは省略可能です。\n";
+						osuMessage += "- `!c (maplink) (username)`でユーザーのそのマップでの記録(最大5個)を表示します。usernameは登録していれば省略可能です。マップリンクも省略可です。\n";
+						osuMessage += "- `!r(o, t, c, m) (username)`でユーザーの最新のosu!std、taiko、catch、maniaの記録を表示します。usernameは登録していれば省略可能です。stdは!rでも!roでも実行可能です。\n";
+						osuMessage += "- `!wi[o, t, c, m] [pp] (username)`でユーザーが指定したppを新しく取得したときのppを表示します。usernameは省略可能です。\n";
+						osuMessage += "- `!m [mods]`で直近に送信された譜面にmodsをつけてppを表示します。/linkコマンドで有効になります。\n";
+						osuMessage += "- `!skip`はosubgquiz、osubgquizpf、osuquiz、osuquizpfコマンドで使用できます。現在の問題をスキップします。\n";
+						osuMessage += "- `!hint`はosubgquiz、osubgquizpf、osuquiz、osuquizpfコマンドで使用できます。現在の問題のヒントを表示します。\n";
+						
+						await message.reply(osuMessage);
+						break
+					}
+
+					case "osu(スラッシュコマンド)1ページ目": {
+						let osuMessage = "__\*\*osu!のスラッシュコマンド一覧\*\*\__\n";
+						osuMessage += "- `/osureg [osu! Username]`でosu!のユーザー名を登録します。\n";
+						osuMessage += "- `/calculatepp [beatmapfile] [mode] (mods)`で送信されたosuファイルのPPを計算します。\n";
+						
+
+					}
+				}
+
+
+
 				const commandInfo = {
 					"h!help": "コマンドのヘルプを表示します。",
 					"!osureg [osu! Username]": "osu!のユーザー名を登録します。コマンドでユーザー名を省略することができるようになります！",

@@ -348,6 +348,7 @@ class Juggler {
         this.rotation_total = user.rotation_total;
         this.medal = user.medal;
         this.log = user.log;
+        this.slump_value = user.slump_value;
         this.slump = user.slump;
         this.counter = user.counter;
         this.flag_big = user.flag_big;
@@ -407,6 +408,7 @@ class Juggler {
                     rotation_total: this.rotation_total,
                     medal: this.medal,
                     log: this.log,
+                    slump_value: this.slump_value,
                     slump: this.slump,
                     counter: this.counter,
                     flag_big: this.flag_big,
@@ -444,6 +446,7 @@ class Juggler {
                     rotation_total: this.rotation_total,
                     medal: this.medal,
                     log: this.log,
+                    slump_value: this.slump_value,
                     slump: this.slump,
                     counter: this.counter,
                     flag_big: this.flag_big,
@@ -460,6 +463,7 @@ class Juggler {
         } else if (table < this.th_big_cherry) {
             this.flag_big = true;
             this.medal += 2;
+            this.slump_value += 2;
             this.counter[3] += 1;
             result = "チェリー(ペカッ)";
         } else if (table < this.th_reg_single) {
@@ -468,31 +472,37 @@ class Juggler {
         } else if (table < this.th_reg_cherry) {
             this.flag_reg = true;
             this.medal += 2;
+            this.slump_value += 2;
             this.counter[3] += 1;
             result = "チェリー(ペカッ)";
         } else if (table < this.th_grape) {
             this.medal += 7;
+            this.slump_value += 7;
             this.counter[2] += 1;
             result = "ブドウ";
         } else if (table < this.th_cherry_single) {
             this.medal += 2;
+            this.slump_value += 2;
             this.counter[3] += 1;
             result = "チェリー";
         } else if (table < this.th_replay) {
             this.medal += 3;
+            this.slump_value += 3;
             this.counter[4] += 1;
             result = "リプレイ";
         } else if (table < this.th_bell) {
             this.medal += 14;
+            this.slump_value += 14;
             this.counter[5] += 1;
             result = "ベル";
         } else if (table < this.th_pierrot) {
             this.medal += 10;
+            this.slump_value += 10;
             this.counter[6] += 1;
             result = "ピエロ";
         }
 
-        this.slump.push(this.medal);
+        this.slump.push(this.slump_value);
         return {
             result: result,
             user: {
@@ -500,6 +510,7 @@ class Juggler {
                 rotation_total: this.rotation_total,
                 medal: this.medal,
                 log: this.log,
+                slump_value: this.slump_value,
                 slump: this.slump,
                 counter: this.counter,
                 flag_big: this.flag_big,
