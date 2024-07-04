@@ -314,8 +314,9 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const USER_DATA = bankData[interaction.user.id].slot[Type == 5 ? 0 : 1];
 
 				const Juggler = new ImJugglerEX(SLOT_SETTING, USER_DATA);
+				let Result = null;
 				for (let i = 0; i < Auto; i++) {
-					const Result = Juggler.draw();
+					Result = Juggler.draw();
 					if (Result.result == "メダルが足りません") {
 						await interaction.reply("スロットをするためのメダルがなくなりました。\`/medal\`コマンドでスロット用のメダルを交換してください。");
 						return;
@@ -336,7 +337,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const Status = Juggler.showStatus();
 				const Counter = Juggler.showCounter();
 				const Embed = new EmbedBuilder()
-					.setTitle("スロット")
+					.setTitle(`スロット(${Auto}回)`)
 					.setDescription(`データ元機種名: アイムジャグラーEXAE`)
 					.setColor("Blue")
 					.addFields({ name: "Result", value: Result.result, inline: true })
