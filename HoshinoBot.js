@@ -77,9 +77,6 @@ client.on(Events.ClientReady, async () =>
 			for (let i = 0; i < 2; i++) {
 				bankData[key].slot[i].rotation = 0;
 				bankData[key].slot[i].rotation_total = 0;
-				bankData[key].slot[i].log = [];
-				bankData[key].slot[i].slump_value = 0;
-				bankData[key].slot[i].slump = [];
 				bankData[key].slot[i].counter = [
 					0,
 					0,
@@ -95,7 +92,6 @@ client.on(Events.ClientReady, async () =>
 		}
 		fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
 		bankData = null;
-
 
 		(async () => {
 			let webHookData = fs.readJsonSync("./ServerDatas/WebHookData.json");
@@ -328,9 +324,6 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					USER_DATA.medal = Result.user.medal;
 					USER_DATA.rotation = Result.user.rotation;
 					USER_DATA.rotation_total = Result.user.rotation_total;
-					USER_DATA.log = Result.user.log;
-					USER_DATA.slump_value = Result.user.slump_value;
-					USER_DATA.slump = Result.user.slump;
 					USER_DATA.counter = Result.user.counter;
 					USER_DATA.flag_big = Result.user.flag_big;
 					USER_DATA.flag_reg = Result.user.flag_reg;
@@ -371,46 +364,6 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					content: Juggler.generateResultString(Result.result),
 					embeds: [Embed]
 				});
-				return;
-			}
-
-			if (interaction.commandName == "slotgraph") {
-				let bankData = fs.readJsonSync("./ServerDatas/UserBankData.json");
-				if (!bankData[interaction.user.id]) {
-					await interaction.reply("このカジノにユーザー登録されていないようです。\`/regcasino\`で登録してください。");
-					return;
-				}
-
-				const Type = interaction.options.get("type").value;
-				const USER_DATA = bankData[interaction.user.id].slot[Type == 5 ? 0 : 1];
-
-				const Juggler = new ImJugglerEX(SLOT_SETTING, USER_DATA);
-				const Graph = await Juggler.showGraph();
-				if (Graph == null) {
-					await interaction.reply("グラフが存在しません。");
-					return;
-				}
-				await interaction.reply({ files: [{ attachment: Graph, name: "slotgraph.png" }] });
-				return;
-			}
-
-			if (interaction.commandName == "slothistory") {
-				let bankData = fs.readJsonSync("./ServerDatas/UserBankData.json");
-				if (!bankData[interaction.user.id]) {
-					await interaction.reply("このカジノにユーザー登録されていないようです。\`/regcasino\`で登録してください。");
-					return;
-				}
-
-				const Type = interaction.options.get("type").value;
-				const USER_DATA = bankData[interaction.user.id].slot[Type == 5 ? 0 : 1];
-
-				const Juggler = new ImJugglerEX(SLOT_SETTING, USER_DATA);
-				const History = await Juggler.showHistory();
-				if (History == null) {
-					await interaction.reply("履歴が存在しません。");
-					return;
-				}
-				await interaction.reply({ files: [{ attachment: History, name: "slothistory.png" }] });
 				return;
 			}
 

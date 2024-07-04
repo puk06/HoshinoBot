@@ -377,9 +377,6 @@ class Juggler {
                     rotation: this.rotation,
                     rotation_total: this.rotation_total,
                     medal: this.medal,
-                    log: this.log,
-                    slump_value: this.slump_value,
-                    slump: this.slump,
                     counter: this.counter,
                     flag_big: this.flag_big,
                     flag_reg: this.flag_reg
@@ -387,17 +384,14 @@ class Juggler {
             };
         }
         this.medal -= 3;
-        this.slump_value -= 3;
         this.rotation += 1;
         this.rotation_total += 1;
 
         if (this.flag_big || this.flag_reg) {
             if (this.flag_big) {
                 this.medal += 325;
-                this.slump_value += 325;
                 this.flag_big = false;
                 this.counter[0] += 1;
-                this.log.push([this.rotation, "B"]);
                 this.rotation = 0;
                 result = "BIG";
             }
@@ -407,7 +401,6 @@ class Juggler {
                 this.slump_value += 104;
                 this.flag_reg = false;
                 this.counter[1] += 1;
-                this.log.push([this.rotation, "R"]);
                 this.rotation = 0;
                 result = "REG";
             }
@@ -418,9 +411,6 @@ class Juggler {
                     rotation: this.rotation,
                     rotation_total: this.rotation_total,
                     medal: this.medal,
-                    log: this.log,
-                    slump_value: this.slump_value,
-                    slump: this.slump,
                     counter: this.counter,
                     flag_big: this.flag_big,
                     flag_reg: this.flag_reg
@@ -436,7 +426,6 @@ class Juggler {
         } else if (table < this.th_big_cherry) {
             this.flag_big = true;
             this.medal += 2;
-            this.slump_value += 2;
             this.counter[3] += 1;
             result = "チェリー(ペカッ)";
         } else if (table < this.th_reg_single) {
@@ -445,32 +434,26 @@ class Juggler {
         } else if (table < this.th_reg_cherry) {
             this.flag_reg = true;
             this.medal += 2;
-            this.slump_value += 2;
             this.counter[3] += 1;
             result = "チェリー(ペカッ)";
         } else if (table < this.th_grape) {
             this.medal += 7;
-            this.slump_value += 7;
             this.counter[2] += 1;
             result = "ブドウ";
         } else if (table < this.th_cherry_single) {
             this.medal += 2;
-            this.slump_value += 2;
             this.counter[3] += 1;
             result = "チェリー";
         } else if (table < this.th_replay) {
             this.medal += 3;
-            this.slump_value += 3;
             this.counter[4] += 1;
             result = "リプレイ";
         } else if (table < this.th_bell) {
             this.medal += 14;
-            this.slump_value += 14;
             this.counter[5] += 1;
             result = "ベル";
         } else if (table < this.th_pierrot) {
             this.medal += 10;
-            this.slump_value += 10;
             this.counter[6] += 1;
             result = "ピエロ";
         }
@@ -482,65 +465,11 @@ class Juggler {
                 rotation: this.rotation,
                 rotation_total: this.rotation_total,
                 medal: this.medal,
-                log: this.log,
-                slump_value: this.slump_value,
-                slump: this.slump,
                 counter: this.counter,
                 flag_big: this.flag_big,
                 flag_reg: this.flag_reg
             }
         };
-    }
-
-    async showGraph() {
-        if (this.slump.length == 0) {
-            return null;
-        }
-        const BaseURL = "https://image-charts.com/chart.js/2.8.0";
-        const Labels = Array.from({ length: this.slump.length }, (_, i) => i + 1);
-        const Data = this.slump;
-        const ChartConfig = {
-            type: "line",
-            data: {
-                datasets: [
-                    {
-                        data: Data,
-                        label: "Slump",
-                        borderColor: "red"
-                    }
-                ],
-                labels: Labels
-            }
-        };
-        const RequestURL = `${BaseURL}?bkg=white&c=${JSON.stringify(ChartConfig)}`;
-        const Response = await Tools.getAPIResponse(RequestURL, { responseType: "arraybuffer" });
-        return Response;
-    }
-
-    async showHistory() {
-        if (this.log.length == 0) {
-            return null;
-        }
-        const BaseURL = "https://image-charts.com/chart.js/2.8.0";
-        const Labels = Array.from({ length: this.log.length }, (_, i) => this.log.length - i);
-        const Data = this.log.map(h => h[0]);
-        const BackgroundColors = this.log.map(h => h[1] === "B" ? "orange" : "limegreen");
-        const ChartConfig = {
-            type: "bar",
-            data: {
-                datasets: [
-                    {
-                        data: Data,
-                        label: "History",
-                        backgroundColor: BackgroundColors
-                    }
-                ],
-                labels: Labels
-            }
-        };
-        const RequestURL = `${BaseURL}?bkg=white&c=${JSON.stringify(ChartConfig)}`;
-        const Response = await Tools.getAPIResponse(RequestURL, { responseType: "arraybuffer" });
-        return Response;
     }
 
     generateResultString(result) {
