@@ -662,6 +662,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 				bankData[interaction.user.id] = {
 					username: interaction.user.username,
+					id: interaction.user.id,
 					balance: 10000,
 					rank: 0,
 					slot: [
@@ -722,7 +723,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 				let bankData = fs.readJsonSync("./ServerDatas/UserBankData.json");
 				if (!bankData[interaction.user.id]) {
-					await interaction.reply("このカジノにユーザー登録されていないようです。/regcasinoで登録してください。");
+					await interaction.reply("このカジノにユーザー登録されていないようです。\`/regcasino\`で登録してください。");
 					return;
 				}
 
@@ -744,7 +745,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				}
 
 				bankData[interaction.user.id].balance = bankData[interaction.user.id].balance - Amount;
-				bankData[bankArray.find(item => item.username == OBJECTIVE_USERNAME)].balance = bankData[bankArray.find(item => item.username == OBJECTIVE_USERNAME)].balance + Amount;
+				bankData[bankArray.find(item => item.username == OBJECTIVE_USERNAME).id].balance = bankData[bankArray.find(item => item.username == OBJECTIVE_USERNAME).id].balance + Amount;
 
 				fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
 				await interaction.reply("送金が完了しました。");
@@ -770,7 +771,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			if (interaction.commandName == "coinshop") {
 				let bankData = fs.readJsonSync("./ServerDatas/UserBankData.json");
 				if (!bankData[interaction.user.id]) {
-					await interaction.reply("このカジノにユーザー登録されていないようです。/regcasinoで登録してください。");
+					await interaction.reply("このカジノにユーザー登録されていないようです。\`/regcasino\`で登録してください。");
 					return;
 				}
 
