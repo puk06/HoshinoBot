@@ -317,9 +317,6 @@ class Juggler {
         this.rotation = user.rotation;
         this.rotation_total = user.rotation_total;
         this.medal = user.medal;
-        this.log = user.log;
-        this.slump_value = user.slump_value;
-        this.slump = user.slump;
         this.counter = user.counter;
         this.flag_big = user.flag_big;
         this.flag_reg = user.flag_reg;
@@ -398,7 +395,6 @@ class Juggler {
 
             if (this.flag_reg) {
                 this.medal += 104;
-                this.slump_value += 104;
                 this.flag_reg = false;
                 this.counter[1] += 1;
                 this.rotation = 0;
@@ -458,7 +454,6 @@ class Juggler {
             result = "ピエロ";
         }
 
-        this.slump.push(this.slump_value);
         return {
             result: result,
             user: {
