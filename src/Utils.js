@@ -117,20 +117,20 @@ class Tools {
 
     /**
      * Converts a rank into its corresponding emoji representation for casino.
-     * @param {string} rank - The rank to be converted.
+     * @param {number} rank - The rank to be converted.
      * @returns {string} - The emoji representation of the rank.
      */
     static rankConverterForCasino(rank) {
         switch (rank) {
-            case "VIP":
+            case 1:
                 return "<:VIP:1258297231929376768> ";
-            case "VIP+":
+            case 2:
                 return "<:VIPplus:1258297739909922857> ";
-            case "MVP":
+            case 3:
                 return "<:MVP:1258297787213156363> ";
-            case "MVP+":
+            case 4:
                 return "<:MVPplus:1258297719454175273> ";
-            case "MVP++":
+            case 5:
                 return "<:MVPplusplus:1258297802354589777> ";
             default:
                 return "";
