@@ -235,7 +235,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					return;
 				}
 				await interaction.reply({
-					content: `現在のスロット設定は${SLOT_SETTING}です。`,
+					content: `現在のスロット設定は**${SLOT_SETTING}**です。`,
 					ephemeral: true
 				});
 				return;
@@ -244,13 +244,20 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			if (interaction.commandName == "coinflip") {
 				let bankData = fs.readJsonSync("./ServerDatas/UserBankData.json");
 				if (!bankData[interaction.user.id]) {
-					await interaction.reply("このカジノにユーザー登録されていないようです。/regcasinoで登録してください。");
+					await interaction.reply("このカジノにユーザー登録されていないようです。\`/regcasino\`で登録してください。");
 					return;
 				}
 
-				const CasinoData = fs.readJsonSync("./ServerDatas/CasinoStatus.json");
+				let Rank = interaction.options.get("rank")?.value;
+				if (!Rank) Rank = 0;
+				if (bankData[interaction.user.id].rank < Rank) {
+					await interaction.reply("あなたのランクが指定されたランク以下のため、このゲームを開始できません。");
+					return;
+				}
 
-				if (CasinoData[interaction.channel.id]) {
+				let casinoData = fs.readJsonSync("./ServerDatas/CasinoStatus.json");
+
+				if (casinoData[interaction.channel.id]) {
 					await interaction.reply("このチャンネルで既にゲームが進行中です。");
 					return;
 				}
@@ -266,27 +273,35 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					return;
 				}
 
-				CasinoData[interaction.channel.id] = {
+				casinoData[interaction.channel.id] = {
 					game: "コインフリップ",
 					starter: interaction.user.id,
 					bet: bet,
+					rank: Rank,
 					players: [
 						{
 							id: interaction.user.id,
-							username: interaction.user.username,
+							username: interaction.user.username
 						}
 					]
 				};
 
-				fs.writeJsonSync("./ServerDatas/CasinoStatus.json", CasinoData, { spaces: 4, replacer: null });
-
-				await interaction.reply(`コインフリップゲーム(${bet}コイン)を開始しました。参加したい場合は\`/join\`を入力してください。`);
+				fs.writeJsonSync("./ServerDatas/CasinoStatus.json", casinoData, { spaces: 4, replacer: null });
+				if (Rank == 0) {
+					await interaction.reply(`${Tools.rankConverterForCasino(bankData[interaction.user.id].rank)}${interaction.user.username}さんがコインフリップゲーム(**${bet}**コイン)を開始しました。参加したい場合は\`/join\`を入力してください。`);
+				} else {
+					const RankString = Tools.getRankFromValue(Rank);
+					await interaction.reply(`${Tools.rankConverterForCasino(bankData[interaction.user.id].rank)}${interaction.user.username}さんが${RankString}以上のランク向けコインフリップゲーム(**${bet}**コイン)を開始しました。参加したい場合は\`/join\`を入力してください。`);
+				}
+				bankData = null;
+				casinoData = null;
+				return;
 			}
 
 			if (interaction.commandName == "slot") {
 				let bankData = fs.readJsonSync("./ServerDatas/UserBankData.json");
 				if (!bankData[interaction.user.id]) {
-					await interaction.reply("このカジノにユーザー登録されていないようです。/regcasinoで登録してください。");
+					await interaction.reply("このカジノにユーザー登録されていないようです。\`/regcasino\`で登録してください。");
 					return;
 				}
 
@@ -297,7 +312,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const Result = Juggler.draw();
 				
 				if (Result.result == "メダルが足りません") {
-					await interaction.reply("スロットをするためのメダルが足りません。medalコマンドでスロット用のメダルを交換してください。");
+					await interaction.reply("スロットをするためのメダルが足りません。\`/medal\`コマンドでスロット用のメダルを交換してください。");
 					return;
 				}
 
@@ -335,7 +350,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			if (interaction.commandName == "slotgraph") {
 				let bankData = fs.readJsonSync("./ServerDatas/UserBankData.json");
 				if (!bankData[interaction.user.id]) {
-					await interaction.reply("このカジノにユーザー登録されていないようです。/regcasinoで登録してください。");
+					await interaction.reply("このカジノにユーザー登録されていないようです。\`/regcasino\`で登録してください。");
 					return;
 				}
 
@@ -355,7 +370,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			if (interaction.commandName == "slothistory") {
 				let bankData = fs.readJsonSync("./ServerDatas/UserBankData.json");
 				if (!bankData[interaction.user.id]) {
-					await interaction.reply("このカジノにユーザー登録されていないようです。/regcasinoで登録してください。");
+					await interaction.reply("このカジノにユーザー登録されていないようです。\`/regcasino\`で登録してください。");
 					return;
 				}
 
@@ -380,7 +395,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			if (interaction.commandName == "medal") {
 				let bankData = fs.readJsonSync("./ServerDatas/UserBankData.json");
 				if (!bankData[interaction.user.id]) {
-					await interaction.reply("このカジノにユーザー登録されていないようです。/regcasinoで登録してください。");
+					await interaction.reply("このカジノにユーザー登録されていないようです。\`/regcasino\`で登録してください。");
 					return;
 				}
 
@@ -420,7 +435,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			if (interaction.commandName == "coin") {
 				let bankData = fs.readJsonSync("./ServerDatas/UserBankData.json");
 				if (!bankData[interaction.user.id]) {
-					await interaction.reply("このカジノにユーザー登録されていないようです。/regcasinoで登録してください。");
+					await interaction.reply("このカジノにユーザー登録されていないようです。\`/regcasino\`で登録してください。");
 					return;
 				}
 
@@ -460,63 +475,68 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			if (interaction.commandName == "join" || interaction.commandName == "addbot") {
 				let bankData = fs.readJsonSync("./ServerDatas/UserBankData.json");
 				if (!bankData[interaction.user.id] && interaction.commandName != "addbot") {
-					await interaction.reply("このカジノにユーザー登録されていないようです。/regcasinoで登録してください。");
+					await interaction.reply("このカジノにユーザー登録されていないようです。\`/regcasino\`で登録してください。");
 					return;
 				}
 
-				let CasinoData = fs.readJsonSync("ServerDatas/CasinoStatus.json");
-				if (!CasinoData[interaction.channel.id]) {
+				let casinoData = fs.readJsonSync("ServerDatas/CasinoStatus.json");
+				if (!casinoData[interaction.channel.id]) {
 					await interaction.reply("このチャンネルでゲームが開始されていません。");
 					return;
 				}
 				
-				if (CasinoData[interaction.channel.id].bet > bankData[interaction.user.id].balance && interaction.commandName != "addbot") {
+				if (casinoData[interaction.channel.id].bet > bankData[interaction.user.id].balance && interaction.commandName != "addbot") {
 					await interaction.reply("所持金以上の金額が賭けられているため、参加できません。");
 					return;
 				}
 
-				switch (CasinoData[interaction.channel.id].game) {
+				switch (casinoData[interaction.channel.id].game) {
 					case "コインフリップ": {
-						if (CasinoData[interaction.channel.id].players.length == 2) {
+						if (bankData[interaction.user.id].rank < casinoData[interaction.channel.id].rank) {
+							await interaction.reply("あなたのランクが指定されたランク以下のため、このゲームに参加できません。");
+							return;
+						}
+
+						if (casinoData[interaction.channel.id].players.length == 2) {
 							await interaction.reply("このゲームは既に2人揃っています。");
 							return;
 						}
 					}
 				}
 
-				if (CasinoData[interaction.channel.id].players.find(player => player.id == interaction.user.id) && interaction.commandName != "addbot") {
+				if (casinoData[interaction.channel.id].players.find(player => player.id == interaction.user.id) && interaction.commandName != "addbot") {
 					await interaction.reply("既にゲームに参加しています。");
 					return;
 				}
 
 				if (interaction.commandName == "addbot") {
-					CasinoData[interaction.channel.id].players.push({
+					casinoData[interaction.channel.id].players.push({
 						id: 0,
 						username: "BOT"
 					});
 				} else {
-					CasinoData[interaction.channel.id].players.push({
+					casinoData[interaction.channel.id].players.push({
 						id: interaction.user.id,
 						username: interaction.user.username
 					});
 				}
-				fs.writeJsonSync("./ServerDatas/CasinoStatus.json", CasinoData, { spaces: 4, replacer: null });
+				fs.writeJsonSync("./ServerDatas/CasinoStatus.json", casinoData, { spaces: 4, replacer: null });
 
 				if (interaction.commandName == "addbot") {
-					await interaction.reply(`BOTが${CasinoData[interaction.channel.id].game}ゲームに参加しました。`);
+					await interaction.reply(`BOTが${casinoData[interaction.channel.id].game}ゲームに参加しました。`);
 				} else {
-					await interaction.reply(`${CasinoData[interaction.channel.id].game}ゲームに参加しました。`);
+					await interaction.reply(`${casinoData[interaction.channel.id].game}ゲームに参加しました。`);
 				}
 
-				switch (CasinoData[interaction.channel.id].game) {
+				switch (casinoData[interaction.channel.id].game) {
 					case "コインフリップ": {
-						if (CasinoData[interaction.channel.id].players.length == 2) {
+						if (casinoData[interaction.channel.id].players.length == 2) {
 							await interaction.followUp("コインを投げています...");
 							setTimeout(async () => {
 								const result = Math.floor(Math.random() * 2);
-								const winner = CasinoData[interaction.channel.id].players[result];
-								const loser = CasinoData[interaction.channel.id].players[result == 0 ? 1 : 0];
-								const bet = CasinoData[interaction.channel.id].bet;
+								const winner = casinoData[interaction.channel.id].players[result];
+								const loser = casinoData[interaction.channel.id].players[result == 0 ? 1 : 0];
+								const bet = casinoData[interaction.channel.id].bet;
 								if (winner.id != 0) bankData[winner.id].balance += bet;
 								if (loser.id != 0) bankData[loser.id].balance -= bet;
 								fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
@@ -524,17 +544,20 @@ client.on(Events.InteractionCreate, async (interaction) =>
 									.setTitle("コインフリップ")
 									.setDescription(`賭け金: **${bet}**コイン`)
 									.setColor("Blue")
-									.addFields({ name: "Winner", value: `**${winner.username}**`, inline: true })
-									.addFields({ name: "Loser", value: `**${loser.username}**`, inline: true })
-									.addFields({ name: "Result", value: `${winner.username}さんが勝利しました。(+ ${bet * 2}コイン)`, inline: false })
+									.addFields({ name: "Winner", value: `${Tools.rankConverterForCasino(bankData[winner.id]?.rank)}**${winner.username}**`, inline: true })
+									.addFields({ name: "Loser", value: `**${Tools.rankConverterForCasino(bankData[loser.id]?.rank)}${loser.username}**`, inline: true })
+									.addFields({ name: "Result", value: `${Tools.rankConverterForCasino(bankData[winner.id]?.rank)}**${winner.username}**さんが勝利しました。(+ ${bet * 2}コイン)`, inline: false })
 									.setTimestamp();
 								await interaction.followUp({ embeds: [Embed] });
-								delete CasinoData[interaction.channel.id];
-								fs.writeJsonSync("./ServerDatas/CasinoStatus.json", CasinoData, { spaces: 4, replacer: null });
+								delete casinoData[interaction.channel.id];
+								fs.writeJsonSync("./ServerDatas/CasinoStatus.json", casinoData, { spaces: 4, replacer: null });
 							}, 2000);
 						}
 					}
 				}
+				bankData = null;
+				casinoData = null;
+				return;
 			}
 
 			if (interaction.commandName == "leave") {
@@ -544,37 +567,42 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					return;
 				}
 
-				let CasinoData = fs.readJsonSync("ServerDatas/CasinoStatus.json");
-				if (!CasinoData[interaction.channel.id]) {
+				let casinoData = fs.readJsonSync("ServerDatas/CasinoStatus.json");
+				if (!casinoData[interaction.channel.id]) {
 					await interaction.reply("このチャンネルでゲームが開始されていません。");
 					return;
 				}
 
-				if (!CasinoData[interaction.channel.id].players.find(player => player.id == interaction.user.id)) {
+				if (!casinoData[interaction.channel.id].players.find(player => player.id == interaction.user.id)) {
 					await interaction.reply("このゲームに参加していません。");
 					return;
 				}
 
-				CasinoData[interaction.channel.id].players = CasinoData[interaction.channel.id].players.filter(player => player.id != interaction.user.id);
-				fs.writeJsonSync("./ServerDatas/CasinoStatus.json", CasinoData, { spaces: 4, replacer: null });
+				casinoData[interaction.channel.id].players = casinoData[interaction.channel.id].players.filter(player => player.id != interaction.user.id);
+				fs.writeJsonSync("./ServerDatas/CasinoStatus.json", casinoData, { spaces: 4, replacer: null });
 				await interaction.reply("ゲームから退出しました。");
+				bankData = null;
+				casinoData = null;
+				return;
 			}
 
 			if (interaction.commandName == "cancel") {
-				let CasinoData = fs.readJsonSync("ServerDatas/CasinoStatus.json");
-				if (!CasinoData[interaction.channel.id]) {
+				let casinoData = fs.readJsonSync("ServerDatas/CasinoStatus.json");
+				if (!casinoData[interaction.channel.id]) {
 					await interaction.reply("このチャンネルでゲームが開始されていません。");
 					return;
 				}
 
-				if (CasinoData[interaction.channel.id].starter != interaction.user.id) {
+				if (casinoData[interaction.channel.id].starter != interaction.user.id) {
 					await interaction.reply("このゲームはあなたが開始したものではありません。");
 					return;
 				}
 
 				await interaction.reply("ゲームをキャンセルしました。");
-				delete CasinoData[interaction.channel.id];
-				fs.writeJsonSync("./ServerDatas/CasinoStatus.json", CasinoData, { spaces: 4, replacer: null });
+				delete casinoData[interaction.channel.id];
+				fs.writeJsonSync("./ServerDatas/CasinoStatus.json", casinoData, { spaces: 4, replacer: null });
+				casinoData = null;
+				return;
 			}
 
 			if (interaction.commandName == "bankranking") {
@@ -630,6 +658,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				bankData[interaction.user.id] = {
 					username: interaction.user.username,
 					balance: 10000,
+					rank: 0,
 					slot: [
 							{
 								medal: 0,
@@ -692,15 +721,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					return;
 				}
 
-				let isObjectiveUserRegistered = false;
-				for (const key in bankData) {
-					if (bankData[key].username == OBJECTIVE_USERNAME) {
-						isObjectiveUserRegistered = true;
-						break;
-					}
-				}
-
-				if (!isObjectiveUserRegistered) {
+				if (!bankData.find(item => item.username == OBJECTIVE_USERNAME)) {
 					await interaction.reply(`${OBJECTIVE_USERNAME} というユーザーはこのカジノに登録されていません。`);
 					return;
 				}
@@ -717,12 +738,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				}
 
 				bankData[interaction.user.id].balance = bankData[interaction.user.id].balance - Amount;
-				for (const key in bankData) {
-					if (bankData[key].username == OBJECTIVE_USERNAME) {
-						bankData[key].balance = bankData[key].balance + Amount;
-						break;
-					}
-				}
+				bankData.find(item => item.username == OBJECTIVE_USERNAME).balance += Amount;
 
 				fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
 				await interaction.reply("送金が完了しました。");
@@ -741,6 +757,39 @@ client.on(Events.InteractionCreate, async (interaction) =>
 						await interaction.reply("ルーレットの結果: **黒**");
 						break;
 				}
+				return;
+			}
+
+			if (interaction.commandName == "coinshop") {
+				let bankData = fs.readJsonSync("./ServerDatas/UserBankData.json");
+				if (!bankData[interaction.user.id]) {
+					await interaction.reply("このカジノにユーザー登録されていないようです。/regcasinoで登録してください。");
+					return;
+				}
+
+				const RankValue = {
+					"VIP": 50000,
+					"VIP+": 80000,
+					"MVP": 120000,
+					"MVP+": 250000,
+					"MVP++": 800000
+				};
+
+				const Rank = interaction.options.get("rank").value;
+				const RankNumber = Tools.getRankFromValue(Rank);
+				if (bankData[interaction.user.id].rank >= RankNumber) {
+					await interaction.reply(`既に${Rank}、または${Rank}以上を購入しています。`);
+					return;
+				}
+				if (bankData[interaction.user.id].balance < RankValue[RankNumber]) {
+					await interaction.reply(`${Rank}を購入するためのコインが足りません。`);
+					return;
+				}
+				bankData[interaction.user.id].balance -= RankValue[RankNumber];
+				bankData[interaction.user.id].rank = RankNumber;
+				fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
+				await interaction.reply(`${Rank}を購入しました。`);
+				bankData = null;
 				return;
 			}
 

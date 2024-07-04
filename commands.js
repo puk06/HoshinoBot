@@ -46,6 +46,24 @@ module.exports = [
     },
     {
         data: new SlashCommandBuilder()
+            .setName("coinshop")
+            .setDescription("コインでランクを買うことができます。")
+            .addStringOption(option =>
+                option
+                    .setName("rank")
+                    .setDescription("購入したいランクを選択してください。")
+                    .setRequired(true)
+                    .addChoices(
+                        { name: "VIP(50000コイン)", value: "VIP" },
+                        { name: "VIP+(80000コイン)", value: "VIP+" },
+                        { name: "MVP(120000コイン)", value: "MVP" },
+                        { name: "MVP+(250000コイン)", value: "MVP+" },
+                        { name: "MVP++(800000コイン)", value: "MVP++" }
+                    )
+            )
+    },
+    {
+        data: new SlashCommandBuilder()
             .setName("join")
             .setDescription("そのチャンネル内で行われているカジノゲームに参加します。")
     },
@@ -123,6 +141,18 @@ module.exports = [
                     .setName("bet")
                     .setDescription("賭ける金額")
                     .setRequired(true)
+            )
+            .addNumberOption(option =>
+                option
+                    .setName("rank")
+                    .setDescription("指定したRank以上の者のみ限定にします。")
+                    .addChoices(
+                        { name: "VIP", value: 1 },
+                        { name: "VIP+", value: 2 },
+                        { name: "MVP", value: 3 },
+                        { name: "MVP+", value: 4 },
+                        { name: "MVP++", value: 5 }
+                    )
             )
     },
     {
@@ -516,7 +546,7 @@ module.exports = [
     },
     {
         data: new SlashCommandBuilder()
-            .setName("delovevmention")
+            .setName("delovedmention")
             .setDescription("Lovedが検出されたらメンションするのを解除します。")
             .addStringOption(option =>
                 option

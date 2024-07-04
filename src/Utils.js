@@ -6,78 +6,6 @@ const axios = require("../node_modules/axios");
  * A utility class that provides various helper methods.
  */
 class Tools {
-    /**
-     * Generates a random slot result.
-     * @returns {string[]} An array of three random symbols.
-     */
-    generateSlotResult() {
-        const symbols = ['🍒', '🍊', '🍇', '🔔', '💰', '⌚', '⛵'];
-        //1/319で3つ揃うようにする
-        const result = [];
-        for (let i = 0; i < 3; i++) {
-            const randomIndex = Math.floor(Math.random() * symbols.length);
-            result.push(symbols[randomIndex]);
-        }
-        return result;
-    }
-
-    /**
-     * Evaluates the result of a slot machine game and returns the corresponding score.
-     * @param {Array} result - The result of the slot machine game, represented as an array of three elements.
-     * @returns {BigInt} The score based on the result of the slot machine game.
-     */
-    static evaluateSlotResult(result) {
-        switch (true) {
-            case result[0] == result[1] && result[1] == result[2]:
-                return 30n;
-            case result[0] == result[1] || result[1] == result[2]:
-                return 10n;
-            case result[0] == result[2]:
-                return 5n;
-            default:
-                return 0n;
-        }
-    }
-
-    /**
-     * Converts a number to a Japanese unit representation.
-     * @param {string} num - The number to be converted.
-     * @returns {string} - The Japanese unit representation of the number.
-     */
-    static toJPUnit(num) {
-        const str = num;
-        if (str.length >= 216) {
-            return "約" + `${this.formatBigInt(str)}`;
-        } else {
-            let n = "";
-            let count = 0;
-            let ptr = 0;
-            let kName = ["万","億","兆","京","垓","杼","穰","溝","澗","正","載","極","恒河沙","阿僧祇","那由他","不可思議","無量大数","無限超越数","無限超超越数","無限高次超越数","超限大数","超限超越大数","超限高次大数","超超限大数","超超限超越大数","超超限高次大数","超超超限大数","無辺数","無限大数","無限極数","無窮数","無限巨数","無涯数","無辺無数","無窮無数","無限超数","無辺超数","無尽数","無量超数","無辺絶数","無限絶数","イクカン","イガグン","レジギガス","イイググ","イガグググ","イカレジ","イカマニア","イガ","イグ","グイグイ","イクンカ","イカクンガ"]
-            for (let i = str.length - 1; i >= 0; i--) {
-                n = str.charAt(i) + n;
-                count++;
-                if ((count % 4 == 0) && (i != 0)) n = kName[ptr++] + n;
-            }
-            return n;
-        }
-    }
-
-    /**
-     * Formats a BigInt number.
-     * If the number is greater than or equal to 10^216, it returns the number in scientific notation.
-     * Otherwise, it returns the number as a string with commas for thousands separators.
-     * @param {BigInt} num - The BigInt number to format.
-     * @returns {string} The formatted number.
-     */
-    static formatBigInt(num) {
-        const str = num.toString();
-        if (str.length >= 216) {
-            const power = str.length - 1;
-            const numstr = str.slice(0, 2) + '.' + str.slice(2, 5).padEnd(3, '0');
-              return `${numstr} * 10^${power}`;
-        }
-        return str.toLocaleString();
-    }
 
     /**
      * Formats the given time in seconds into a string representation of minutes and seconds.
@@ -188,6 +116,48 @@ class Tools {
     }
 
     /**
+     * Converts a rank into its corresponding emoji representation for casino.
+     * @param {string} rank - The rank to be converted.
+     * @returns {string} - The emoji representation of the rank.
+     */
+    static rankConverterForCasino(rank) {
+        switch (rank) {
+            case "VIP":
+                return "<:VIP:1258297231929376768> ";
+            case "VIP+":
+                return "<:VIPplus:1258297739909922857> ";
+            case "MVP":
+                return "<:MVP:1258297787213156363> ";
+            case "MVP+":
+                return "<:MVPplus:1258297719454175273> ";
+            case "MVP++":
+                return "<:MVPplusplus:1258297802354589777> ";
+            default:
+                return "";
+        }
+    }
+
+    /**
+     * Converts a rank into its corresponding letter representation.
+     * @param {string} rank - The rank to be converted.
+     * @returns {string} - The letter representation of the rank.
+     */
+    static getRankFromValue(value) {
+        switch (value) {
+            case 1:
+                return "VIP";
+            case 2:
+                return "VIP+";
+            case 3:
+                return "MVP";
+            case 4:
+                return "MVP+";
+            case 5:
+                return "MVP++";
+        }
+    }
+
+    /**
      * Checks if a value is NaN and returns 0 if it is.
      * @param {number} num - The value to check.
      * @returns {number} - The original value if it is not NaN, otherwise 0.
@@ -202,7 +172,7 @@ class Tools {
      * @returns {string} The formatted number.
      */
     static formatNumber(num) {
-        return num < 10 ? '0' + num : num.toString();
+        return num < 10 ? "0" + num : num.toString();
     }
 
     /**
@@ -276,7 +246,7 @@ class Tools {
      * @returns {number} The match percentage between the two strings.
      */
     static matchPercentage(current, total) {
-        let data = current.split('').map((_, index) => current.slice(0, index + 1));
+        let data = current.split("").map((_, index) => current.slice(0, index + 1));
         for (let i = 0; i < current.length; i++) {
             data.push(current.slice(i));
         }
@@ -523,7 +493,7 @@ class Juggler {
         if (this.slump.length == 0) {
             return null;
         }
-        const BaseURL = 'https://image-charts.com/chart.js/2.8.0';
+        const BaseURL = "https://image-charts.com/chart.js/2.8.0";
         const Labels = Array.from({ length: this.slump.length }, (_, i) => i + 1);
         const Data = this.slump;
         const ChartConfig = {
@@ -548,10 +518,10 @@ class Juggler {
         if (this.log.length == 0) {
             return null;
         }
-        const BaseURL = 'https://image-charts.com/chart.js/2.8.0';
+        const BaseURL = "https://image-charts.com/chart.js/2.8.0";
         const Labels = Array.from({ length: this.log.length }, (_, i) => this.log.length - i);
         const Data = this.log.map(h => h[0]);
-        const BackgroundColors = this.log.map(h => h[1] === "B" ? 'orange' : 'limegreen');
+        const BackgroundColors = this.log.map(h => h[1] === "B" ? "orange" : "limegreen");
         const ChartConfig = {
             type: "bar",
             data: {
