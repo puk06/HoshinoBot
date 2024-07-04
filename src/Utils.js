@@ -140,20 +140,20 @@ class Tools {
     /**
      * Converts a rank into its corresponding letter representation.
      * @param {string} rank - The rank to be converted.
-     * @returns {string} - The letter representation of the rank.
+     * @returns {Number} - The numeric representation of the rank.
      */
     static getRankFromValue(value) {
         switch (value) {
-            case 1:
-                return "VIP";
-            case 2:
-                return "VIP+";
-            case 3:
-                return "MVP";
-            case 4:
-                return "MVP+";
-            case 5:
-                return "MVP++";
+            case "VIP":
+                return 1;
+            case "VIP+":
+                return 2;
+            case "MVP":
+                return 3;
+            case "MVP+":
+                return 4;
+            case "MVP++":
+                return 5;
         }
     }
 

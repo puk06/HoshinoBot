@@ -781,11 +781,11 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					await interaction.reply(`既に${Rank}、または${Rank}以上を購入しています。`);
 					return;
 				}
-				if (bankData[interaction.user.id].balance < RankValue[RankNumber]) {
+				if (bankData[interaction.user.id].balance < RankValue[Rank]) {
 					await interaction.reply(`${Rank}を購入するためのコインが足りません。`);
 					return;
 				}
-				bankData[interaction.user.id].balance -= RankValue[RankNumber];
+				bankData[interaction.user.id].balance -= RankValue[Rank];
 				bankData[interaction.user.id].rank = RankNumber;
 				fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
 				await interaction.reply(`${Rank}を購入しました。`);
