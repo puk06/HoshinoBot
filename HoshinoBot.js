@@ -308,6 +308,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					await interaction.reply("Auto欄には0以上の回数を入力してください。");
 					return;
 				} else if (!Auto) Auto = 1;
+				if (Auto > 1000) Auto = 1000;
 				const USER_DATA = bankData[interaction.user.id].slot[Type == 5 ? 0 : 1];
 
 				const Juggler = new ImJugglerEX(SLOT_SETTING, USER_DATA);
