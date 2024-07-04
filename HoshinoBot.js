@@ -744,7 +744,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				}
 
 				bankData[interaction.user.id].balance = bankData[interaction.user.id].balance - Amount;
-				bankData[bankArray.find(item => item.username == OBJECTIVE_USERNAME).id].balance = bankData[bankArray.find(item => item.username == OBJECTIVE_USERNAME).id].balance + Amount;
+				bankData[bankArray.find(item => item.username == OBJECTIVE_USERNAME)].balance = bankData[bankArray.find(item => item.username == OBJECTIVE_USERNAME)].balance + Amount;
 
 				fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
 				await interaction.reply("送金が完了しました。");
