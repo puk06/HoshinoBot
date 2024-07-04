@@ -307,6 +307,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 				const Type = interaction.options.get("type").value;
 				let Auto = interaction.options.get("auto")?.value;
+				if (Auto) Auto = Math.ceil(Auto);
 				if (Auto && Auto < 0) {
 					await interaction.reply("Auto欄には0以上の回数を入力してください。");
 					return;
@@ -405,7 +406,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					return;
 				}
 
-				const Coin = interaction.options.get("coin").value;
+				const Coin = Math.ceil(interaction.options.get("coin").value);
 				const Type = interaction.options.get("type").value;
 
 				if (Coin <= 0) {
@@ -445,7 +446,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					return;
 				}
 
-				const Medal = interaction.options.get("medal").value;
+				const Medal = Math.ceil(interaction.options.get("medal").value);
 				const Type = interaction.options.get("type").value;
 
 				if (Medal <= 0) {
@@ -720,7 +721,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			}
 
 			if (interaction.commandName == "send") {
-				const Amount = interaction.options.get("amount").value;
+				const Amount = Math.ceil(interaction.options.get("amount").value);
 				const OBJECTIVE_USERNAME = interaction.options.get("username").value;
 				if (OBJECTIVE_USERNAME == interaction.user.username) {
 					await interaction.reply("自分自身に送ることは許されていません！");
