@@ -551,7 +551,11 @@ client.on(Events.InteractionCreate, async (interaction) =>
 								await interaction.followUp({ embeds: [Embed] });
 								delete casinoData[interaction.channel.id];
 								fs.writeJsonSync("./ServerDatas/CasinoStatus.json", casinoData, { spaces: 4, replacer: null });
+								bankData = null;
+								casinoData = null;
 							}, 2000);
+						} else {
+							await interaction.followUp(`他のプレイヤーを待っています...(${casinoData[interaction.channel.id].players.length}/2)`);
 							bankData = null;
 							casinoData = null;
 						}
