@@ -306,26 +306,31 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				}
 
 				const Type = interaction.options.get("type").value;
+				let Auto = interaction.options.get("auto")?.value;
+				if (Auto && Auto < 0) {
+					await interaction.reply("Auto欄には0以上の回数を入力してください。");
+					return;
+				} else if (!Auto) Auto = 1;
 				const USER_DATA = bankData[interaction.user.id].slot[Type == 5 ? 0 : 1];
 
 				const Juggler = new ImJugglerEX(SLOT_SETTING, USER_DATA);
-				const Result = Juggler.draw();
-				
-				if (Result.result == "メダルが足りません") {
-					await interaction.reply("スロットをするためのメダルが足りません。\`/medal\`コマンドでスロット用のメダルを交換してください。");
-					return;
+				for (let i = 0; i < Auto; i++) {
+					const Result = Juggler.draw();
+					if (Result.result == "メダルが足りません") {
+						await interaction.reply("スロットをするためのメダルがなくなりました。\`/medal\`コマンドでスロット用のメダルを交換してください。");
+						return;
+					}
+					USER_DATA.medal = Result.user.medal;
+					USER_DATA.rotation = Result.user.rotation;
+					USER_DATA.rotation_total = Result.user.rotation_total;
+					USER_DATA.log = Result.user.log;
+					USER_DATA.slump_value = Result.user.slump_value;
+					USER_DATA.slump = Result.user.slump;
+					USER_DATA.counter = Result.user.counter;
+					USER_DATA.flag_big = Result.user.flag_big;
+					USER_DATA.flag_reg = Result.user.flag_reg;
+					bankData[interaction.user.id].slot[Type == 5 ? 0 : 1] = USER_DATA;
 				}
-
-				USER_DATA.medal = Result.user.medal;
-				USER_DATA.rotation = Result.user.rotation;
-				USER_DATA.rotation_total = Result.user.rotation_total;
-				USER_DATA.log = Result.user.log;
-				USER_DATA.slump_value = Result.user.slump_value;
-				USER_DATA.slump = Result.user.slump;
-				USER_DATA.counter = Result.user.counter;
-				USER_DATA.flag_big = Result.user.flag_big;
-				USER_DATA.flag_reg = Result.user.flag_reg;
-				bankData[interaction.user.id].slot[Type == 5 ? 0 : 1] = USER_DATA;
 				fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
 
 				const Status = Juggler.showStatus();

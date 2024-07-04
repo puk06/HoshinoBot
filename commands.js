@@ -101,6 +101,11 @@ module.exports = [
                         { name: "20コイン", value: 20 }
                     )
             )
+            .addNumberOption(option =>
+                option
+                    .setName("auto")
+                    .setDescription("自動でスロットを回します。")
+            )
     },
     {
         data: new SlashCommandBuilder()
