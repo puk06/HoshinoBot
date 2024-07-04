@@ -322,7 +322,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					Result = Juggler.draw();
 					if (Result.result == "メダルが足りません") {
 						slotFail = true;
-						slotFailTimes = i - 1;
+						slotFailTimes = i;
 						break;
 					}
 					USER_DATA.medal = Result.user.medal;
