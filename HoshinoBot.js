@@ -322,7 +322,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					Result = Juggler.draw();
 					if (Result.result == "メダルが足りません") {
 						slotFail = true;
-						slotFailTimes = i;
+						slotFailTimes = i - 1;
 						break;
 					}
 					USER_DATA.medal = Result.user.medal;
@@ -337,7 +337,6 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					bankData[interaction.user.id].slot[Type == 5 ? 0 : 1] = USER_DATA;
 				}
 				fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
-
 				
 				const Status = Juggler.showStatus();
 				const Counter = Juggler.showCounter();
@@ -351,11 +350,11 @@ client.on(Events.InteractionCreate, async (interaction) =>
 						.addFields({ name: "Status", value: Status, inline: true })
 						.addFields({ name: "Counter", value: Counter, inline: true })
 						.setTimestamp();
+					
 					await interaction.reply({
-						content: Juggler.generateResultString(Result.result),
+						content: "メダルが足りないため、スロットは中断されました。",
 						embeds: [Embed]
 					});
-					await interaction.followUp("メダルが足りないため、スロットは中断されました。");
 					return;
 				}
 
