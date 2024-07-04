@@ -316,10 +316,13 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 				const Juggler = new ImJugglerEX(SLOT_SETTING, USER_DATA);
 				let Result = null;
+				let slotFail = false;
+				let slotFailTimes = 0;
 				for (let i = 0; i < Auto; i++) {
 					Result = Juggler.draw();
 					if (Result.result == "メダルが足りません") {
-						await interaction.reply("スロットをするためのメダルがなくなりました。\`/medal\`コマンドでスロット用のメダルを交換してください。");
+						slotFail = true;
+						slotFailTimes = i;
 						break;
 					}
 					USER_DATA.medal = Result.user.medal;
@@ -335,8 +338,27 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				}
 				fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
 
+				
 				const Status = Juggler.showStatus();
 				const Counter = Juggler.showCounter();
+				
+				if (slotFail) {
+					const Embed = new EmbedBuilder()
+						.setTitle(`スロット(${slotFailTimes} / ${Auto}回)`)
+						.setDescription(`データ元機種名: アイムジャグラーEXAE`)
+						.setColor("Blue")
+						.addFields({ name: "Result", value: Result.result, inline: true })
+						.addFields({ name: "Status", value: Status, inline: true })
+						.addFields({ name: "Counter", value: Counter, inline: true })
+						.setTimestamp();
+					await interaction.reply({
+						content: Juggler.generateResultString(Result.result),
+						embeds: [Embed]
+					});
+					await interaction.followUp("メダルが足りないため、スロットは中断されました。");
+					return;
+				}
+
 				const Embed = new EmbedBuilder()
 					.setTitle(`スロット(${Auto}回)`)
 					.setDescription(`データ元機種名: アイムジャグラーEXAE`)
