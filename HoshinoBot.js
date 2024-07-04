@@ -348,8 +348,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 				await interaction.reply({
 					content: Juggler.generateResultString(Result.result),
-					embeds: [Embed],
-					ephemeral: true
+					embeds: [Embed]
 				});
 				return;
 			}
