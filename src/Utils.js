@@ -387,12 +387,14 @@ class Juggler {
             };
         }
         this.medal -= 3;
+        this.slump_value -= 3;
         this.rotation += 1;
         this.rotation_total += 1;
 
         if (this.flag_big || this.flag_reg) {
             if (this.flag_big) {
                 this.medal += 325;
+                this.slump_value += 325;
                 this.flag_big = false;
                 this.counter[0] += 1;
                 this.log.push([this.rotation, "B"]);
@@ -402,6 +404,7 @@ class Juggler {
 
             if (this.flag_reg) {
                 this.medal += 104;
+                this.slump_value += 104;
                 this.flag_reg = false;
                 this.counter[1] += 1;
                 this.log.push([this.rotation, "R"]);
