@@ -479,7 +479,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					return;
 				}
 
-				let casinoData = fs.readJsonSync("ServerDatas/CasinoStatus.json");
+				let casinoData = fs.readJsonSync("./ServerDatas/CasinoStatus.json");
 				if (!casinoData[interaction.channel.id]) {
 					await interaction.reply("このチャンネルでゲームが開始されていません。");
 					return;
@@ -552,11 +552,12 @@ client.on(Events.InteractionCreate, async (interaction) =>
 								delete casinoData[interaction.channel.id];
 								fs.writeJsonSync("./ServerDatas/CasinoStatus.json", casinoData, { spaces: 4, replacer: null });
 							}, 2000);
+							bankData = null;
+							casinoData = null;
 						}
 					}
 				}
-				bankData = null;
-				casinoData = null;
+
 				return;
 			}
 
@@ -567,7 +568,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					return;
 				}
 
-				let casinoData = fs.readJsonSync("ServerDatas/CasinoStatus.json");
+				let casinoData = fs.readJsonSync("./ServerDatas/CasinoStatus.json");
 				if (!casinoData[interaction.channel.id]) {
 					await interaction.reply("このチャンネルでゲームが開始されていません。");
 					return;
