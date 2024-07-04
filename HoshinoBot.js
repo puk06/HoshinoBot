@@ -726,7 +726,8 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					return;
 				}
 
-				if (!bankData.find(item => item.username == OBJECTIVE_USERNAME)) {
+				let bankArray = Object.values(bankData);
+				if (!bankArray.find(item => item.username == OBJECTIVE_USERNAME)) {
 					await interaction.reply(`${OBJECTIVE_USERNAME} というユーザーはこのカジノに登録されていません。`);
 					return;
 				}
@@ -743,11 +744,12 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				}
 
 				bankData[interaction.user.id].balance = bankData[interaction.user.id].balance - Amount;
-				bankData.find(item => item.username == OBJECTIVE_USERNAME).balance += Amount;
+				bankData[bankArray.find(item => item.username == OBJECTIVE_USERNAME).id].balance = bankData[bankArray.find(item => item.username == OBJECTIVE_USERNAME).id].balance + Amount;
 
 				fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
 				await interaction.reply("送金が完了しました。");
 				bankData = null;
+				bankArray = null;
 				return;
 			}
 
