@@ -320,33 +320,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					Result = Juggler.draw();
 					if (Result.result == "メダルが足りません") {
 						await interaction.reply("スロットをするためのメダルがなくなりました。\`/medal\`コマンドでスロット用のメダルを交換してください。");
-						USER_DATA.medal = Result.user.medal;
-						USER_DATA.rotation = Result.user.rotation;
-						USER_DATA.rotation_total = Result.user.rotation_total;
-						USER_DATA.log = Result.user.log;
-						USER_DATA.slump_value = Result.user.slump_value;
-						USER_DATA.slump = Result.user.slump;
-						USER_DATA.counter = Result.user.counter;
-						USER_DATA.flag_big = Result.user.flag_big;
-						USER_DATA.flag_reg = Result.user.flag_reg;
-						bankData[interaction.user.id].slot[Type == 5 ? 0 : 1] = USER_DATA;
-						fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
-						const Status = Juggler.showStatus();
-						const Counter = Juggler.showCounter();
-						const Embed = new EmbedBuilder()
-							.setTitle(`スロット(${i} / ${Auto}回)`)
-							.setDescription(`データ元機種名: アイムジャグラーEXAE`)
-							.setColor("Blue")
-							.addFields({ name: "Result", value: Result.result, inline: true })
-							.addFields({ name: "Status", value: Status, inline: true })
-							.addFields({ name: "Counter", value: Counter, inline: true })
-							.setTimestamp();
-
-						await interaction.reply({
-							content: Juggler.generateResultString(Result.result),
-							embeds: [Embed]
-						});
-						return;
+						break;
 					}
 					USER_DATA.medal = Result.user.medal;
 					USER_DATA.rotation = Result.user.rotation;
