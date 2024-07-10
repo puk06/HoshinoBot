@@ -805,6 +805,22 @@ module.exports = [
     },
     {
         data: new SlashCommandBuilder()
+            .setName("ratchecker")
+            .setDescription("送られたChattrigger ModuleにRatが含まれているかを確認します。")
+            .addAttachmentOption(option =>
+                option
+                    .setName("file")
+                    .setDescription("モジュールファイル(zip)")
+                    .setRequired(true)
+            )
+            .addBooleanOption(option =>
+                option
+                    .setName("output")
+                    .setDescription("警告の部分のコードを送信します。")
+            )
+    },
+    {
+        data: new SlashCommandBuilder()
             .setName("skyblockpatch")
             .setDescription("Hypixel Skyblockの最新のパッチノートを表示します。")
     },

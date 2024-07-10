@@ -8,7 +8,8 @@ const { Readable } = require("node:stream");
 const path = require("node:path");
 const asciify = require("node:util").promisify(require("./node_modules/asciify"));
 const osuLibrary = require("./src/osuLibrary.js");
-const { Tools, ImJugglerEX } = require("./src/Utils.js");
+const { Tools, ImJugglerEX, RatChecker } = require("./src/Utils.js");
+const AdmZip = require("./node_modules/adm-zip");
 
 const apikey = process.env.APIKEY;
 const token = process.env.TOKEN;
@@ -124,7 +125,7 @@ client.on(Events.ClientReady, async () =>
 			setTimeout(async () => {
 				if (webHookData.lastDate == new Date().getDate()) return;
 				await webHookClient.send({
-					content: "daily bread"
+					content: "先生は絶頂した。ウイのま〇こが想像の3倍締まっていたからだ。挿入した瞬間から、コレはとんでもない名器だと分かっていたが、興奮のあまり目測を見誤った。激しすぎるピストン運動に耐え切れず、ウイが絶頂した瞬間、ま〇この締りは極限の境地へと達し、先生のイチモツはこの世に細胞ひとつ残らず霧散した。先生の葬儀はキヴォトス総揚げで大々的に行われた。しかし、死因は自宅でのテクノブレイクに改竄され、本当の事を知るのはウイとシャーレのひと握りの者だけだった。葬式の当日には、各地から生徒たちが集まり、開発された部位を遺影の前で存分に見せびらかし、最後は生徒たちの一斉潮吹きのイキ潮に流されながらゆっくりと海へ流れていった。先生は絶頂した。ウイのま〇こが想像の3倍締まっていたからだ。挿入した瞬間から、コレはとんでもない名器だと分かっていたが、興奮のあまり目測を見誤った。激しすぎるピストン運動に耐え切れず、ウイが絶頂した瞬間、ま〇この締りは極限の境地へと達し、先生のイチモツはこの世に細胞ひとつ残らず霧散した。先生の葬儀はキヴォトス総揚げで大々的に行われた。しかし、死因は自宅でのテクノブレイクに改竄され、本当の事を知るのはウイとシャーレのひと握りの者だけだった。葬式の当日には、各地から生徒たちが集まり、開発された部位を遺影の前で存分に見せびらかし、最後は生徒たちの一斉潮吹きのイキ潮に流されながらゆっくりと海へ流れていった。先生は絶頂した。ウイのま〇こが想像の3倍締まっていたからだ。挿入した瞬間から、コレはとんでもない名器だと分かっていたが、興奮のあまり目測を見誤った。激しすぎるピストン運動に耐え切れず、ウイが絶頂した瞬間、ま〇この締りは極限の境地へと達し、先生のイチモツはこの世に細胞ひとつ残らず霧散した。先生の葬儀はキヴォトス総揚げで大々的に行われた。しかし、死因は自宅でのテクノブレイクに改竄され、本当の事を知るのはウイとシャーレのひと握りの者だけだった。葬式の当日には、各地から生徒たちが集まり、開発された部位を遺影の前で存分に見せびらかし、最後は生徒たちの一斉潮吹きのイキ潮に流されながらゆっくりと海へ流れていった。先生は絶頂した。ウイのま〇こが想像の3倍締まっていたからだ。挿入した瞬間から、コレはとんでもない名器だと分かっていたが、興奮のあまり目測を見誤った。激しすぎるピストン運動に耐え切れず、ウイが絶頂した瞬間、ま〇この締りは極限の境地へと達し、先生のイチモツはこの世に細胞ひとつ残らず霧散した。先生の葬儀はキヴォトス総揚げで大々的に行われた。しかし、死因は自宅でのテクノブレイクに改竄され、本当の事を知るのはウイとシャーレのひと握りの者だけだった。葬式の当日には、各地から生徒たちが集まり、開発された部位を遺影の前で存分に見せびらかし、最後は生徒たちの一斉潮吹きのイキ潮に流されながらゆっくりと海へ流れていった。先生は絶頂した。ウイのま〇こが想像の3倍締まっていたからだ。挿入した瞬間から、コレはとんでもない名器だと分かっていたが、興奮のあまり目測を見誤った。激しすぎるピストン運動に耐え切れず、ウイが絶頂した瞬間、ま〇この締りは極限の境地へと達し、先生のイチモツはこの世に細胞ひとつ残らず霧散した。先生の葬儀はキヴォトス総揚げで大々的に行われた。しかし、死因は自宅でのテクノブレイクに改竄され、本当の事を知るのはウイとシャーレのひと握りの者だけだった。葬式の当日には、各地から生徒たちが集まり、開発された部位を遺影の前で存分に見せびらかし、最後は生徒たちの一斉潮吹きのイキ潮に流されながらゆっくりと海へ流れていった。先生は絶頂した。ウイのま〇こが想像の3倍締まっていたからだ。挿入した瞬間から、コレはとんでもない名器だと分かっていたが、興奮のあまり目測を見誤った。激しすぎるピストン運動に耐え切れず、ウイが絶頂した瞬間、ま〇この締りは極限の境地へと達し、先生のイチモツはこの世に細胞ひとつ残らず霧散した。先生の葬儀はキヴォトス総揚げで大々的に行われた。しかし、死因は自宅でのテクノブレイクに改竄され、本当の事を知るのはウイとシャーレのひと握りの者だけだった。葬式の当日には、各地から生徒たちが集まり、開発された部位を遺影の前で存分に見せびらかし、最後は生徒たちの一斉潮吹きのイキ潮に流されながらゆっくりと海へ流れていった。先生は絶頂した。ウイのま〇こが想像の3倍締まっていたからだ。挿入した瞬間から、コレはとんでもない名器だと分かっていたが、興奮のあまり目測を見誤った。激しすぎるピストン運動に耐え切れず、ウイが絶頂した瞬間、ま〇この締りは極限の境地へと達し、先生のイチモツはこの世に細胞ひとつ残らず霧散した。先生の葬儀はキヴォトス総揚げで大々的に行われた。しかし、死因は自宅でのテクノブレイクに改竄され、本当の事を知るのはウイとシャーレのひと握りの者だけだった。葬式の当日には、各地から生徒たちが集まり、開発された部位を遺影の前で存分に見せびらかし、最後は生徒たちの一斉潮吹きのイキ潮に流されながらゆっくりと海へ流れていった。先生は絶頂した。ウイのま〇こが想像の3倍締まっていたからだ。挿入した瞬間から、コレはとんでもない名器だと分かっていたが、興奮のあまり目測を見誤った。激しすぎるピストン運動に耐え切れず、ウイが絶頂した瞬間、ま〇この締りは極限の境地へと達し、先生のイチモツはこの世に細胞ひとつ残らず霧散した。先生の葬儀はキヴォトス総揚げで大々的に行われた。しかし、死因は自宅でのテクノブレイクに改竄され、本当の事を知るのはウイとシャーレのひと握りの者だけだった。葬式の当日には、各地から生徒たちが集まり、開発された部位を遺影の前で存分に見せびらかし、最後は生徒たちの一斉潮吹きのイキ潮に流されながらゆっくりと海へ流れていった。"
 				}).then(() => {
 					let now = new Date();
 					console.log(`[${now.toLocaleString()}] WebHookの送信に成功しました。`);
@@ -2346,6 +2347,79 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					.setFooter({ text: "Hypixel Skyblock News" })
 					.setTimestamp();
 				await interaction.reply({ embeds: [embed] });
+				return;
+			}
+
+			if (interaction.commandName == "ratchecker") {
+				function removeExtentions(fileName) {
+					return fileName.split(".").slice(0, -1).join(".");
+				}
+				const modulefile = interaction.options.get("file").attachment;
+				const outputBoolean = interaction.options.get("output").value;
+				if (!modulefile.url.includes(".zip")) {
+					await interaction.reply("ファイル形式が不正です。");
+					return;
+				}
+				const message = await interaction.reply("ファイルの解析中です...");
+				const modulefiledata = await Tools.getAPIResponse(modulefile.url, { responseType: "stream" });
+				const moduleUnzippedName = `./temp/Unzipped ${removeExtentions(modulefile.name)}`;
+				const stream = fs.createWriteStream(`./temp/${modulefile.name}`);
+				modulefiledata.pipe(stream);
+				await new Promise((resolve, reject) => {
+					stream.on("finish", resolve);
+					stream.on("error", reject);
+				});
+				const zip = new AdmZip(`./temp/${modulefile.name}`);
+				await zip.extractAllToAsync(moduleUnzippedName, true);
+				const ratChecker = new RatChecker();
+				const result = await ratChecker.searchDirectory(moduleUnzippedName);
+				if (result.length == 0) {
+					const embed = new EmbedBuilder()
+						.setColor("Green")
+						.setTitle("RATチェッカー")
+						.setDescription("このファイルに問題はありませんでした。")
+						.setTimestamp();
+					await message.edit({ embeds: [embed] });
+				} else {
+					const embed = new EmbedBuilder()
+						.setColor("Red")
+						.setTitle("RATチェッカー")
+						.setTimestamp();
+					let cautions = 0;
+					let dangerous = 0;
+					let added = 0
+					if (outputBoolean) fs.writeFileSync(`./temp/Unzipped ${removeExtentions(modulefile.name)}/ratcheck.txt`, "");
+					result.sort((a, b) => b.reasons.length - a.reasons.length);
+					for (const element of result) {
+						const fileName = element.file.replace(`temp\\Unzipped ${removeExtentions(modulefile.name)}\\`, "");
+						let reasonStr = "";
+						if (element.reasons.length == 1) {
+							cautions++;
+							for (const reason of element.reasons) {
+								reasonStr += reason;
+							}
+							if (outputBoolean) fs.appendFileSync(`./temp/Unzipped ${removeExtentions(modulefile.name)}/ratcheck.txt`, `ファイル: ${fileName} (${element.line}行目)\n警告レベル: 注意\n理由:${reasonStr}\n内容:\n${element.content}\n\n`);
+						} else if (element.reasons.length > 2) {
+							dangerous++;
+							if (added < 5) {
+								for (const reason of element.reasons) {
+									reasonStr += `- **${reason}**\n`;
+								}
+								embed.addFields({
+									name: `ファイル: ${fileName} (${element.line}行目)`,
+									value: `**理由**:\n${reasonStr}`
+								});
+								added++;
+							}
+							if (outputBoolean) fs.appendFileSync(`./temp/Unzipped ${removeExtentions(modulefile.name)}/ratcheck.txt`, `ファイル: ${fileName} (${element.line}行目)\n警告レベル: 危険\n理由:\n${reasonStr}\n\n内容:\n${element.content}\n\n`);
+						}
+					}
+					embed.setDescription(`このファイルには問題があります。\n警告: **${dangerous}**件\n危険: **${cautions}**件`);
+					await message.edit({ embeds: [embed] });
+					if (outputBoolean) await interaction.channel.send({ files: [{ attachment: `./temp/Unzipped ${removeExtentions(modulefile.name)}/ratcheck.txt`, name: "ratcheck.txt" }] });
+				}
+				fs.removeSync(`./temp/${modulefile.name}`);
+				fs.removeSync(moduleUnzippedName);
 				return;
 			}
 

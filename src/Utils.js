@@ -1,6 +1,7 @@
 const path = require("node:path");
 const fs = require("../node_modules/fs-extra");
 const axios = require("../node_modules/axios");
+const readline = require("node:readline");
 
 /**
  * A utility class that provides various helper methods.
@@ -309,6 +310,99 @@ class Tools {
     }
 }
 
+/**
+ * A class that checks for malicious code in files.
+ */
+class RatChecker{
+    constructor() {
+        this.conditions = [
+            { regex: /eval\(/, message: "eval関数が使用されています" },
+            { regex: /.{500,}/, message: "1行に大量の文字列が含まれています" },
+            { regex: /\b(?:var|let|const)\s+\w+/g, countThreshold: 3, message: "1行に大量の変数が含まれています" },
+            { regex: /(\bfunction\b|\b\w+\s*=\s*function\b|\b\w+\s*=>\s*{|\b\w+\s*=>\s*\w+)/g, countThreshold: 5, message: "1行に大量の関数が含まれています" },
+            { regex: /[+\-*/]{5,}/, message: "1行に大量の演算子が含まれています" },
+            { regex: /\brequest\b/, message: "request文が使用されています" },
+            { regex: /\bwebhook\b/, message: "webhookの文字列が含まれています" },
+            { regex: /\\x[0-9A-Fa-f]{2}/, message: "\\xXX形式のエスケープ文字が含まれています" }
+        ];
+    }
+
+    searchDirectory(dir) {
+        return new Promise((resolve, reject) => {
+            fs.readdir(dir, (err, files) => {
+                if (err) {
+                    console.error(`❌ ディレクトリの読み取りに失敗しました: ${dir}`);
+                    return reject(err);
+                }
+    
+                let fileChecks = files.map(file => {
+                    const filePath = path.join(dir, file);
+                    return new Promise((resolve, reject) => {
+                        fs.stat(filePath, (err, stats) => {
+                            if (err) {
+                                console.error(`❌ ファイルの情報取得に失敗しました: ${filePath}`);
+                                return reject(err);
+                            }
+    
+                            if (stats.isDirectory()) {
+                                this.searchDirectory(filePath).then(resolve).catch(reject);
+                            } else if (stats.isFile()) {
+                                this.check(filePath).then(resolve).catch(reject);
+                            }
+                        });
+                    });
+                });
+    
+                Promise.all(fileChecks).then(results => {
+                    resolve(results.flat());
+                }).catch(reject);
+            });
+        });
+    }
+
+    check(filePath) {
+        return new Promise((resolve, reject) => {
+            const fileStream = fs.createReadStream(filePath);
+            const rl = readline.createInterface({
+                input: fileStream,
+                crlfDelay: Infinity
+            });
+    
+            let lineNumber = 0;
+            let results = [];
+    
+            rl.on("line", (line) => {
+                lineNumber++;
+                let reasons = [];
+                let reasonCount = 0;
+                this.conditions.forEach(condition => {
+                    const matches = line.match(condition.regex);
+                    if (matches && (!condition.countThreshold || matches.length >= condition.countThreshold)) {
+                        reasonCount++;
+                        reasons.push(condition.message);
+                    }
+                });
+                if (reasonCount > 0) {
+                    results.push({
+                        file: filePath,
+                        line: lineNumber,
+                        content: line.trim(),
+                        reasons: reasons
+                    });
+                }
+            });
+    
+            rl.on("close", () => {
+                resolve(results);
+            });
+    
+            rl.on("error", (err) => {
+                reject(err);
+            });
+        });
+    }
+}
+
 
 class Juggler {
     constructor(user, name, setting=6, big_single=172, big_cherry=72, reg_single=172, reg_cherry=72, grape=10600, cherry_single=1840, replay=8978, bell=60, pierrot=60) {
@@ -546,5 +640,6 @@ class ImJugglerEX extends Juggler {
 
 module.exports = {
     Tools,
-    ImJugglerEX
+    ImJugglerEX,
+    RatChecker
 };
