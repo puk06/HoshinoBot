@@ -2402,10 +2402,10 @@ client.on(Events.InteractionCreate, async (interaction) =>
 							if (outputBoolean) fs.appendFileSync(`./temp/Unzipped ${removeExtentions(modulefile.name)}/ratcheck.txt`, `ファイル: ${fileName} (${element.line}行目)\n警告レベル: 注意\n理由:${reasonStr}内容:\n${element.content}\n\n`);
 						} else if (element.reasons.length > 2) {
 							dangerous++;
+							for (const reason of element.reasons) {
+								reasonStr += `- **${reason}**\n`;
+							}
 							if (added < 5) {
-								for (const reason of element.reasons) {
-									reasonStr += `- **${reason}**\n`;
-								}
 								embed.addFields({
 									name: `ファイル: ${fileName} (${element.line}行目)`,
 									value: `**理由**:\n${reasonStr}`
