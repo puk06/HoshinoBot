@@ -2391,14 +2391,14 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					if (outputBoolean) fs.writeFileSync(`./temp/Unzipped ${removeExtentions(modulefile.name)}/ratcheck.txt`, "");
 					result.sort((a, b) => b.reasons.length - a.reasons.length);
 					for (const element of result) {
-						const fileName = element.file.replace(`temp\\Unzipped ${removeExtentions(modulefile.name)}\\`, "");
+						const fileName = element.file.replace(`temp/Unzipped ${removeExtentions(modulefile.name)}/`, "");
 						let reasonStr = "";
 						if (element.reasons.length == 1) {
 							cautions++;
 							for (const reason of element.reasons) {
-								reasonStr += reason;
+								reasonStr += reason + "\n";
 							}
-							if (outputBoolean) fs.appendFileSync(`./temp/Unzipped ${removeExtentions(modulefile.name)}/ratcheck.txt`, `ファイル: ${fileName} (${element.line}行目)\n警告レベル: 注意\n理由:${reasonStr}\n内容:\n${element.content}\n\n`);
+							if (outputBoolean) fs.appendFileSync(`./temp/Unzipped ${removeExtentions(modulefile.name)}/ratcheck.txt`, `ファイル: ${fileName} (${element.line}行目)\n警告レベル: 注意\n理由:${reasonStr}内容:\n${element.content}\n\n`);
 						} else if (element.reasons.length > 2) {
 							dangerous++;
 							if (added < 5) {
@@ -2411,7 +2411,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 								});
 								added++;
 							}
-							if (outputBoolean) fs.appendFileSync(`./temp/Unzipped ${removeExtentions(modulefile.name)}/ratcheck.txt`, `ファイル: ${fileName} (${element.line}行目)\n警告レベル: 危険\n理由:\n${reasonStr}\n\n内容:\n${element.content}\n\n`);
+							if (outputBoolean) fs.appendFileSync(`./temp/Unzipped ${removeExtentions(modulefile.name)}/ratcheck.txt`, `ファイル: ${fileName} (${element.line}行目)\n警告レベル: 危険\n理由:\n${reasonStr}内容:\n${element.content}\n\n`);
 						}
 					}
 					embed.setDescription(`このファイルには問題があります。\n警告: **${dangerous}**件\n危険: **${cautions}**件`);

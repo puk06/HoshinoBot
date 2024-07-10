@@ -322,7 +322,7 @@ class RatChecker{
             { regex: /(\bfunction\b|\b\w+\s*=\s*function\b|\b\w+\s*=>\s*{|\b\w+\s*=>\s*\w+)/g, countThreshold: 5, message: "1行に大量の関数が含まれています" },
             { regex: /[+\-*/]{5,}/, message: "1行に大量の演算子が含まれています" },
             { regex: /\brequest\b/, message: "request文が使用されています" },
-            { regex: /\bwebhook\b/, message: "webhookの文字列が含まれています" },
+            { regex: /webhook/g, message: "webhookの文字列が含まれています" },
             { regex: /\\x[0-9A-Fa-f]{2}/, message: "\\xXX形式のエスケープ文字が含まれています" }
         ];
     }
