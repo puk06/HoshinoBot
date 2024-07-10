@@ -2357,7 +2357,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const modulefile = interaction.options.get("file").attachment;
 				let outputBoolean = interaction.options.get("output")?.value;
 				if (!outputBoolean) outputBoolean = false;
-				if (!modulefile.url.includes(".zip")) {
+				if (!modulefile.name.endsWith(".zip")) {
 					await interaction.reply("ファイル形式が不正です。");
 					return;
 				}
