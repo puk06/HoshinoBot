@@ -2399,7 +2399,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 							for (const reason of element.reasons) {
 								reasonStr += reason + "\n";
 							}
-							if (outputBoolean) fs.appendFileSync(`./temp/Unzipped ${removeExtentions(modulefile.name)}/ratcheck.txt`, `ファイル: ${fileName} (${element.line}行目)\n警告レベル: 注意\n理由:${reasonStr}内容:\n${element.content}\n\n`);
+							if (outputBoolean) fs.appendFileSync(`./temp/Unzipped ${removeExtentions(modulefile.name)}/ratcheck.txt`, `ファイル: ${fileName} (${element.line}行目)\n警告レベル: 注意\n理由: ${reasonStr}内容:\n${element.content}\n\n`);
 						} else if (element.reasons.length > 2) {
 							dangerous++;
 							for (const reason of element.reasons) {
@@ -2415,7 +2415,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 							if (outputBoolean) fs.appendFileSync(`./temp/Unzipped ${removeExtentions(modulefile.name)}/ratcheck.txt`, `ファイル: ${fileName} (${element.line}行目)\n警告レベル: 危険\n理由:\n${reasonStr}内容:\n${element.content}\n\n`);
 						}
 					}
-					embed.setDescription(`このファイルには問題があります。\n警告: **${dangerous}**件\n危険: **${cautions}**件`);
+					embed.setDescription(`このファイルには問題があります。\n危険: **${dangerous}**件\n注意: **${cautions}**件`);
 					await message.edit({ embeds: [embed] });
 					if (outputBoolean) await interaction.channel.send({ files: [{ attachment: `./temp/Unzipped ${removeExtentions(modulefile.name)}/ratcheck.txt`, name: "ratcheck.txt" }] });
 				}
