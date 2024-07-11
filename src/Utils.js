@@ -403,6 +403,306 @@ class RatChecker{
     }
 }
 
+/**
+ * A class that provides methods to download videos from Twitter.
+ */
+class TwitterDownloader {
+    constructor() {
+        const script_dir = __dirname;
+        this.request_details_file = path.join(script_dir, "RequestDetails.json");
+        const request_details = JSON.parse(
+            fs.readFileSync(this.request_details_file, "utf-8")
+        );
+        const { features, variables } = request_details;
+        this.features = features;
+        this.variables = variables;
+    }
+
+    async get_tokens(tweet_url) {
+        const headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:84.0) Gecko/20100101 Firefox/84.0",
+            "Accept": "*/*",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Encoding": "gzip, deflate, br",
+            "TE": "trailers",
+        };
+    
+        const session = axios.create({ headers });
+        let response = await session.get(tweet_url);
+    
+        if (response.status !== 200) {
+            throw new Error(
+                `Failed to get tweet page. Status code: ${response.status}. Tweet url: ${tweet_url}`
+            );
+        }
+    
+        const redirect_url_match = response.data.match(/content="0; url = (https:\/\/twitter\.com\/[^"]+)"/);
+    
+        if (!redirect_url_match) {
+            throw new Error(
+                `Failed to find redirect URL. Tweet url: ${tweet_url}`
+            );
+        }
+    
+        const redirect_url = redirect_url_match[1];
+    
+        const tok_match = redirect_url.match(/tok=([^&"]+)/);
+    
+        if (!tok_match) {
+            throw new Error(
+                `Failed to find 'tok' parameter in redirect URL. Redirect URL: ${redirect_url}`
+            );
+        }
+    
+        const tok = tok_match[1];
+    
+        response = await session.get(redirect_url);
+    
+        if (response.status !== 200) {
+            throw new Error(
+                `Failed to get redirect page. Status code: ${response.status}. Redirect URL: ${redirect_url}`
+            );
+        }
+    
+        const data_match = response.data.match(/<input type="hidden" name="data" value="([^"]+)"/);
+    
+        if (!data_match) {
+            throw new Error(
+                `Failed to find 'data' parameter in redirect page. Redirect URL: ${redirect_url}`
+            );
+        }
+    
+        const data = data_match[1];
+    
+        const auth_url = "https://x.com/x/migrate";
+        const auth_params = { tok, data };
+    
+        response = await session.post(auth_url, auth_params);
+    
+        if (response.status !== 200) {
+            throw new Error(
+                `Failed to authenticate. Status code: ${response.status}. Auth URL: ${auth_url}`
+            );
+        }
+    
+        const mainjs_url = response.data.match(/https:\/\/abs\.twimg\.com\/responsive-web\/client-web-legacy\/main\.[^\.]+\.js/g);
+    
+        if (!mainjs_url || mainjs_url.length === 0) {
+            throw new Error(
+                `Failed to find main.js file. If you are using the correct Twitter URL this suggests a bug in the script. Please open a GitHub issue and copy and paste this message. Tweet url: ${tweet_url}`
+            );
+        }
+    
+        const mainjs = await session.get(mainjs_url[0]);
+    
+        if (mainjs.status !== 200) {
+            throw new Error(
+                `Failed to get main.js file. If you are using the correct Twitter URL this suggests a bug in the script. Please open a GitHub issue and copy and paste this message. Status code: ${mainjs.status}. Tweet url: ${tweet_url}`
+            );
+        }
+    
+        const bearer_token = mainjs.data.match(/AAAAAAAAA[^"]+/g);
+    
+        if (!bearer_token || bearer_token.length === 0) {
+            throw new Error(
+                `Failed to find bearer token. If you are using the correct Twitter URL this suggests a bug in the script. Please open a GitHub issue and copy and paste this message. Tweet url: ${tweet_url}, main.js url: ${mainjs_url[0]}`
+            );
+        }
+    
+        session.defaults.headers.common["authorization"] = `Bearer ${bearer_token[0]}`;
+        const guest_token_response = await session.post("https://api.twitter.com/1.1/guest/activate.json");
+    
+        if (guest_token_response.status !== 200) {
+            throw new Error(
+                `Failed to activate guest token. Status code: ${guest_token_response.status}. Tweet url: ${tweet_url}`
+            );
+        }
+    
+        const guest_token = guest_token_response.data.guest_token;
+    
+        if (!guest_token) {
+            throw new Error(
+                `Failed to find guest token. If you are using the correct Twitter URL this suggests a bug in the script. Please open a GitHub issue and copy and paste this message. Tweet url: ${tweet_url}, main.js url: ${mainjs_url[0]}`
+            );
+        }
+    
+        return [bearer_token[0], guest_token];
+    }
+
+    get_details_url(tweet_id, features, variables) {
+        const variablesCopy = { ...variables };
+        variablesCopy.tweetId = tweet_id;
+    
+        return `https://twitter.com/i/api/graphql/0hWvDhmW8YQ-S_ib3azIrw/TweetResultByRestId?variables=${encodeURIComponent(
+            JSON.stringify(variablesCopy)
+        )}&features=${encodeURIComponent(JSON.stringify(features))}`;
+    }
+
+    async get_tweet_details(tweet_url, guest_token, bearer_token) {
+        const tweet_id = tweet_url.match(/(?<=status\/)\d+/);
+        if (!tweet_id || tweet_id.length !== 1) {
+            throw new Error(
+                `Could not parse tweet id from your url. Make sure you are using the correct url. If you are, then file a GitHub issue and copy and paste this message. Tweet url: ${tweet_url}`
+            );
+        }
+    
+        const url = this.get_details_url(tweet_id[0], this.features, this.variables);
+    
+        const details = await axios.get(url, {
+            headers: {
+                authorization: `Bearer ${bearer_token}`,
+                "x-guest-token": guest_token,
+            },
+        });
+    
+        let max_retries = 10;
+        let cur_retry = 0;
+        while (details.status === 400 && cur_retry < max_retries) {
+            let error_json;
+            try {
+                error_json = JSON.parse(details.data);
+            } catch (e) {
+                throw new Error(
+                    `Failed to parse json from details error. details text: ${details.data} If you are using the correct Twitter URL this suggests a bug in the script. Please open a GitHub issue and copy and paste this message. Status code: ${details.status}. Tweet url: ${tweet_url}`
+                );
+            }
+    
+            if (!("errors" in error_json)) {
+                throw new Error(
+                    `Failed to find errors in details error json. If you are using the correct Twitter URL this suggests a bug in the script. Please open a GitHub issue and copy and paste this message. Status code: ${details.status}. Tweet url: ${tweet_url}`
+                );
+            }
+    
+            const needed_variable_pattern = /Variable '([^']+)'/;
+            const needed_features_pattern = /The following features cannot be null: ([^"]+)/;
+    
+            for (const error of error_json.errors) {
+                const needed_vars = error.message.match(needed_variable_pattern);
+                for (const needed_var of needed_vars) {
+                    variables[needed_var] = true;
+                }
+    
+                const needed_features = error.message.match(needed_features_pattern);
+                for (const nf of needed_features) {
+                    for (const feature of nf.split(",")) {
+                        this.features[feature.trim()] = true;
+                    }
+                }
+            }
+    
+            const url = this.get_details_url(tweet_id[0], this.features, this.variables);
+    
+            const details = await axios.get(url, {
+                headers: {
+                    authorization: `Bearer ${bearer_token}`,
+                    "x-guest-token": guest_token,
+                },
+            });
+    
+            cur_retry += 1;
+    
+            if (details.status === 200) {
+                request_details.variables = this.variables;
+                request_details.features = this.features;
+    
+                fs.writeFileSync(
+                    this.request_details_file,
+                    JSON.stringify(request_details, null, 4)
+                );
+            }
+        }
+    
+        if (details.status !== 200) {
+            throw new Error(
+                `Failed to get tweet details. If you are using the correct Twitter URL this suggests a bug in the script. Please open a GitHub issue and copy and paste this message. Status code: ${details.status}. Tweet url: ${tweet_url}`
+            );
+        }
+    
+        return details;
+    }
+
+    createVideoUrls(jsonData) {
+        const mediaList = jsonData.data.tweetResult.result.legacy.extended_entities.media;
+        const videoUrlList = [];
+    
+        if (mediaList) {
+            for (const mediaItem of mediaList) {
+                const videoInfo = mediaItem.video_info;
+                if (!videoInfo) continue;
+    
+                const variants = videoInfo.variants;
+                if (!variants) continue;
+    
+                let videoUrl = null;
+                let maxBitrate = 0;
+    
+                for (const variant of variants) {
+                    if (variant.bitrate && variant.bitrate > maxBitrate) {
+                        maxBitrate = variant.bitrate;
+                        videoUrl = variant.url;
+                    } else if (variant.bitrate == 0) {
+                        videoUrl = variant.url;
+                    }
+                }
+    
+                if (videoUrl) {
+                    videoUrlList.push(videoUrl);
+                }
+            }
+        }
+        return videoUrlList;
+    }
+
+    async download_video(tweet_url, output_file = undefined, output_folder_path = "./output") {
+        try {
+            const [bearer_token, guest_token] = await this.get_tokens(tweet_url);
+            const resp = await this.get_tweet_details(tweet_url, guest_token, bearer_token);
+            const videoUrls = this.createVideoUrls(resp.data);
+    
+            let baseFileName = output_file ? output_file.replace(".mp4", "") : "output";
+            if (!baseFileName) baseFileName = "output";
+    
+            if (!output_file.includes(".mp4")) {
+                output_file += ".mp4";
+            }
+    
+            if (!fs.existsSync(output_folder_path)) {
+                fs.mkdirSync(output_folder_path, { recursive: true });
+            }
+    
+            for (let i = 0; i < videoUrls.length; i++) {
+                const videoUrl = videoUrls[i];
+                let outputPath = "";
+                if (videoUrls.length === 1) {
+                    outputPath = output_file === ".mp4" || output_file === "" || output_file === undefined ? "output.mp4" : output_file;
+                } else {
+                    outputPath = `${baseFileName}-${i + 1}.mp4`;
+                }
+                const fullOutputPath = path.resolve(output_folder_path, outputPath);
+                const response = await Tools.getAPIResponse(videoUrl, {
+                    responseType: "stream"
+                });
+    
+                response.pipe(fs.createWriteStream(fullOutputPath));
+    
+                await new Promise((resolve, reject) => {
+                    response.on("end", () => {
+                        resolve();
+                    });
+    
+                    response.on("error", (error) => {
+                        reject(error);
+                    });
+                });
+            }
+    
+            console.log("All videos downloaded successfully.");
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    }
+}
+
 
 class Juggler {
     constructor(user, name, setting=6, big_single=172, big_cherry=72, reg_single=172, reg_cherry=72, grape=10600, cherry_single=1840, replay=8978, bell=60, pierrot=60) {
@@ -641,5 +941,6 @@ class ImJugglerEX extends Juggler {
 module.exports = {
     Tools,
     ImJugglerEX,
-    RatChecker
+    RatChecker,
+    TwitterDownloader
 };

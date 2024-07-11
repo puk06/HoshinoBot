@@ -821,6 +821,17 @@ module.exports = [
     },
     {
         data: new SlashCommandBuilder()
+            .setName("tweetdownloader")
+            .setDescription("送られたツイートの動画をダウンロードします。")
+            .addStringOption(option =>
+                option
+                    .setName("link")
+                    .setDescription("ツイートリンク")
+                    .setRequired(true)
+            )
+    },
+    {
+        data: new SlashCommandBuilder()
             .setName("skyblockpatch")
             .setDescription("Hypixel Skyblockの最新のパッチノートを表示します。")
     },

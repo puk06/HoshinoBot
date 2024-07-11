@@ -8,7 +8,7 @@ const { Readable } = require("node:stream");
 const path = require("node:path");
 const asciify = require("node:util").promisify(require("./node_modules/asciify"));
 const osuLibrary = require("./src/osuLibrary.js");
-const { Tools, ImJugglerEX, RatChecker } = require("./src/Utils.js");
+const { Tools, ImJugglerEX, RatChecker, TwitterDownloader } = require("./src/Utils.js");
 const AdmZip = require("./node_modules/adm-zip");
 
 const apikey = process.env.APIKEY;
@@ -784,6 +784,31 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			}
 
 			//Casino
+
+			if (interaction.commandName == "tweetdownloader") {
+				const mediaLink = interaction.options.get("link").value;
+				const tweetId = mediaLink.split("/")[mediaLink.split("/").length - 1].split("?")[0];
+				const Interaction = await interaction.reply("動画のダウンロード中です...");
+				const Downloader = new TwitterDownloader();
+				await Downloader.download_video(mediaLink, "video", `./temp/${tweetId}`)
+					.then(async () => {
+						await Interaction.edit("動画のアップロード中です。");
+						const videoFiles = fs.readdirSync(`./temp/${tweetId}`);
+						const attachment = [];
+						for (const videoFile of videoFiles) {
+							attachment.push({ attachment: `./temp/${tweetId}/${videoFile}`, name: videoFile });
+						}
+						await Interaction.edit({
+							content: "動画のアップロードが完了しました！こちらからダウンロードできます！",
+							files: attachment
+						});
+						fs.removeSync(`./temp/${tweetId}`);
+					})
+					.catch(async () => {
+						await Interaction.edit("動画のダウンロードに失敗しました。");
+					});
+				return;
+			}
 
 			if (interaction.commandName == "kemo") {
 				let dataBase = fs.readJsonSync("./Pictures/Furry/DataBase.json");
@@ -2766,6 +2791,35 @@ client.on(Events.MessageCreate, async (message) =>
 				serverJSONdata = null;
 			} catch (e) {
 				console.log(e);
+			}
+
+			if (message.content.split(" ")[0] == "!tdw") {
+				const mediaLink = message.content.split(" ")[1];
+				const tweetId = mediaLink.split("/")[mediaLink.split("/").length - 1].split("?")[0];
+				if (mediaLink == undefined) {
+					await message.reply("使い方: !tdw [ツイートリンク]");
+					return;
+				}
+				const Message = await message.reply("動画のダウンロード中です...");
+				const Downloader = new TwitterDownloader();
+				await Downloader.download_video(mediaLink, "video", `./temp/${tweetId}`)
+					.then(async () => {
+						await Message.edit("動画のアップロード中です。");
+						const videoFiles = fs.readdirSync(`./temp/${tweetId}`);
+						const attachment = [];
+						for (const videoFile of videoFiles) {
+							attachment.push({ attachment: `./temp/${tweetId}/${videoFile}`, name: videoFile });
+						}
+						await Message.edit({
+							content: "動画のアップロードが完了しました！ダウンロードできます！",
+							files: attachment
+						});
+						fs.removeSync(`./temp/${tweetId}`);
+					})
+					.catch(async () => {
+						await Message.edit("動画のダウンロードに失敗しました。");
+					});
+				return;
 			}
 
 			if (message.content.split(" ")[0] == "!map") {
