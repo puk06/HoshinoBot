@@ -832,6 +832,17 @@ module.exports = [
     },
     {
         data: new SlashCommandBuilder()
+            .setName("youtubedownloader")
+            .setDescription("送られたYoutubeの動画をダウンロードします。")
+            .addStringOption(option =>
+                option
+                    .setName("link")
+                    .setDescription("動画リンク")
+                    .setRequired(true)
+            )
+    },
+    {
+        data: new SlashCommandBuilder()
             .setName("skyblockpatch")
             .setDescription("Hypixel Skyblockの最新のパッチノートを表示します。")
     },

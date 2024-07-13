@@ -8,7 +8,7 @@ const { Readable } = require("node:stream");
 const path = require("node:path");
 const asciify = require("node:util").promisify(require("./node_modules/asciify"));
 const osuLibrary = require("./src/osuLibrary.js");
-const { Tools, ImJugglerEX, RatChecker, TwitterDownloader } = require("./src/Utils.js");
+const { Tools, ImJugglerEX, RatChecker, TwitterDownloader, YoutubeDownloader } = require("./src/Utils.js");
 const AdmZip = require("./node_modules/adm-zip");
 
 const apikey = process.env.APIKEY;
@@ -801,12 +801,32 @@ client.on(Events.InteractionCreate, async (interaction) =>
 						await Interaction.edit({
 							content: "動画のアップロードが完了しました！こちらからダウンロードできます！",
 							files: attachment
-						});
-						fs.removeSync(`./temp/${tweetId}`);
+						});;
 					})
 					.catch(async () => {
 						await Interaction.edit("動画のダウンロードに失敗しました。");
 					});
+				fs.removeSync(`./temp/${tweetId}`)
+				return;
+			}
+
+			if (interaction.commandName == "youtubedownloader") {
+				const mediaLink = interaction.options.get("link").value;
+				const videoId = mediaLink.split("/")[mediaLink.split("/").length - 1].split("&")[0];
+				const Interaction = await interaction.reply("動画のダウンロード中です...");
+				const Downloader = new YoutubeDownloader(mediaLink, `./temp/${videoId}`);
+				await Downloader.download_video()
+					.then(async () => {
+						await Interaction.edit("動画のアップロード中です。");
+						await Interaction.edit({
+							content: "動画のアップロードが完了しました！こちらからダウンロードできます！",
+							files: [{ attachment: `./temp/${videoId}/output.mp4`, name: "video.mp4" }]
+						});
+					})
+					.catch(async () => {
+						await Interaction.edit("動画のダウンロードに失敗しました。");
+					});
+				fs.removeSync(`./temp/${videoId}`);
 				return;
 			}
 
@@ -2811,14 +2831,38 @@ client.on(Events.MessageCreate, async (message) =>
 							attachment.push({ attachment: `./temp/${tweetId}/${videoFile}`, name: videoFile });
 						}
 						await Message.edit({
-							content: "動画のアップロードが完了しました！ダウンロードできます！",
+							content: "動画のアップロードが完了しました！こちらからダウンロードできます！",
 							files: attachment
 						});
-						fs.removeSync(`./temp/${tweetId}`);
 					})
 					.catch(async () => {
 						await Message.edit("動画のダウンロードに失敗しました。");
 					});
+				fs.removeSync(`./temp/${tweetId}`);
+				return;
+			}
+
+			if (message.content.split(" ")[0] == "!ydw") {
+				const mediaLink = message.content.split(" ")[1];
+				const videoId = mediaLink.split("watch?v=")[1].split("&")[0];
+				if (mediaLink == undefined) {
+					await message.reply("使い方: !ydw [動画リンク]");
+					return;
+				}
+				const Message = await message.reply("動画のダウンロード中です...");
+				const Downloader = new YoutubeDownloader(mediaLink, `./temp/${videoId}`);
+				await Downloader.download_video()
+					.then(async () => {
+						await Message.edit("動画のアップロード中です。");
+						await Message.edit({
+							content: "動画のアップロードが完了しました！こちらからダウンロードできます！",
+							files: [{ attachment: `./temp/${videoId}/output.mp4`, name: "video.mp4" }]
+						});
+					})
+					.catch(async () => {
+						await Message.edit("動画のダウンロードに失敗しました。");
+					});
+				fs.removeSync(`./temp/${videoId}`);
 				return;
 			}
 

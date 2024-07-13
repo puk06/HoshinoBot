@@ -1,6 +1,8 @@
 const path = require("node:path");
 const fs = require("../node_modules/fs-extra");
 const axios = require("../node_modules/axios");
+const ytdl = require("../node_modules/@distube/ytdl-core");
+const ffmpeg = require("../node_modules/fluent-ffmpeg");
 const readline = require("node:readline");
 
 /**
@@ -653,7 +655,7 @@ class TwitterDownloader {
         return videoUrlList;
     }
 
-    async download_video(tweet_url, output_file = undefined, output_folder_path = "./output") {
+    async download_video(tweet_url, output_file, output_folder_path) {
         try {
             const [bearer_token, guest_token] = await this.get_tokens(tweet_url);
             const resp = await this.get_tweet_details(tweet_url, guest_token, bearer_token);
@@ -700,6 +702,76 @@ class TwitterDownloader {
         } catch (error) {
             console.error("Error:", error);
         }
+    }
+}
+
+/**
+ * A class that provides methods to download videos from YouTube.
+ */
+class YoutubeDownloader {
+    constructor(url, output_folder_path) {
+        this.url = url;
+        this.output_folder_path = output_folder_path;
+    }
+
+    async download_video() {
+        return new Promise((resolve, reject) => {
+            if (!fs.existsSync(this.output_folder_path)) {
+                fs.mkdirSync(this.output_folder_path, { recursive: true });
+            }
+            const videoPath = path.join(this.output_folder_path, "output-temp.mp4");
+            const audioPath = path.join(this.output_folder_path, "output-temp.wav");
+            const mergePath = path.join(this.output_folder_path, "output.mp4");
+    
+            const video = ytdl(this.url, { filter: format => format.container === "mp4", quality: "highestvideo" });
+            const audio = ytdl(this.url, { quality: "highestaudio" });
+    
+            const videoStream = fs.createWriteStream(videoPath);
+            const audioStream = fs.createWriteStream(audioPath);
+    
+            video.pipe(videoStream);
+            audio.pipe(audioStream);
+    
+            let videoFinished = false;
+            let audioFinished = false;
+    
+            const checkCompletion = () => {
+                if (videoFinished && audioFinished) {
+                    ffmpeg()
+                        .input(videoPath)
+                        .input(audioPath)
+                        .outputOptions(["-c:v copy", "-c:a aac", "-map 0:v:0", "-map 1:a:0"])
+                        .output(mergePath)
+                        .on("end", () => {
+                            fs.removeSync(videoPath);
+                            fs.removeSync(audioPath);
+                            resolve();
+                        })
+                        .on("error", (err) => {
+                            reject(err);
+                        })
+                        .run();
+                }
+            };
+    
+            videoStream.on("finish", () => {
+                videoFinished = true;
+                checkCompletion();
+            });
+    
+            videoStream.on("error", (err) => {
+                reject(err);
+            });
+    
+            audioStream.on("finish", () => {
+                audioFinished = true;
+                checkCompletion();
+            });
+    
+            audioStream.on("error", (err) => {
+                reject(err);
+            });
+        });
     }
 }
 
@@ -942,5 +1014,6 @@ module.exports = {
     Tools,
     ImJugglerEX,
     RatChecker,
-    TwitterDownloader
+    TwitterDownloader,
+    YoutubeDownloader
 };
