@@ -680,7 +680,7 @@ module.exports = [
     {
         data: new SlashCommandBuilder()
             .setName("osuquiz")
-            .setDescription("送られたユーザー、モードからBGクイズを出題します。")
+            .setDescription("送られたユーザー、モードからプレビュークイズを出題します。")
             .addStringOption(option =>
                 option
                     .setName("username")
@@ -703,7 +703,7 @@ module.exports = [
     {
         data: new SlashCommandBuilder()
             .setName("osuquizpf")
-            .setDescription("送られたユーザー、モードからBGクイズを出題します。")
+            .setDescription("送られたユーザー、モードからプレビュークイズを出題します。")
             .addStringOption(option =>
                 option
                     .setName("username")
