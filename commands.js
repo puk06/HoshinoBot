@@ -318,11 +318,6 @@ module.exports = [
     },
     {
         data: new SlashCommandBuilder()
-            .setName("unlink")
-            .setDescription("リンクが送信されても、マップ情報は表示しなくなります。")
-    },
-    {
-        data: new SlashCommandBuilder()
             .setName("check")
             .setDescription("送られたマップのオブジェクトに関する情報を計算します。")
             .addStringOption(option =>
@@ -330,23 +325,6 @@ module.exports = [
                     .setName("beatmaplink")
                     .setDescription("マップリンク")
                     .setRequired(true)
-            )
-    },
-    {
-        data: new SlashCommandBuilder()
-            .setName("ispp")
-            .setDescription("PPマップかどうかを表示します。FPという単位で表示されます。")
-            .addStringOption(option =>
-                option
-                    .setName("beatmaplink")
-                    .setDescription("マップリンク")
-                    .setRequired(true)
-            )
-            .addStringOption(option =>
-                option
-                    .setName("mods")
-                    .setDescription("Mod")
-                    .setRequired(false)
             )
     },
     {
@@ -438,91 +416,6 @@ module.exports = [
         data: new SlashCommandBuilder()
             .setName("rankedmention")
             .setDescription("Rankedが検出されたらメンションします。")
-            .addStringOption(option =>
-                option
-                    .setName("mode")
-                    .setDescription("モード")
-                    .addChoices(
-                        { name: "osu!", value: "osu" },
-                        { name: "osu!taiko", value: "taiko" },
-                        { name: "osu!catch", value: "catch" },
-                        { name: "osu!mania", value: "mania" }
-                    )
-                    .setRequired(true)
-            )
-    },
-    {
-        data: new SlashCommandBuilder()
-            .setName("deqf")
-            .setDescription("送られたチャンネルをQF、rankチャンネルから削除します。")
-            .addStringOption(option =>
-                option
-                    .setName("mode")
-                    .setDescription("モード")
-                    .addChoices(
-                        { name: "osu!", value: "osu" },
-                        { name: "osu!taiko", value: "taiko" },
-                        { name: "osu!catch", value: "catch" },
-                        { name: "osu!mania", value: "mania" }
-                    )
-                    .setRequired(true)
-            )
-    },
-    {
-        data: new SlashCommandBuilder()
-            .setName("deloved")
-            .setDescription("送られたチャンネルをLovedチャンネルから削除します。")
-            .addStringOption(option =>
-                option
-                    .setName("mode")
-                    .setDescription("モード")
-                    .addChoices(
-                        { name: "osu!", value: "osu" },
-                        { name: "osu!taiko", value: "taiko" },
-                        { name: "osu!catch", value: "catch" },
-                        { name: "osu!mania", value: "mania" }
-                    )
-                    .setRequired(true)
-            )
-    },
-    {
-        data: new SlashCommandBuilder()
-            .setName("deqfmention")
-            .setDescription("Qualifiedが検出されたらメンションするのを解除します。")
-            .addStringOption(option =>
-                option
-                    .setName("mode")
-                    .setDescription("モード")
-                    .addChoices(
-                        { name: "osu!", value: "osu" },
-                        { name: "osu!taiko", value: "taiko" },
-                        { name: "osu!catch", value: "catch" },
-                        { name: "osu!mania", value: "mania" }
-                    )
-                    .setRequired(true)
-            )
-    },
-    {
-        data: new SlashCommandBuilder()
-            .setName("derankedmention")
-            .setDescription("Rankedが検出されたらメンションするのを解除します。")
-            .addStringOption(option =>
-                option
-                    .setName("mode")
-                    .setDescription("モード")
-                    .addChoices(
-                        { name: "osu!", value: "osu" },
-                        { name: "osu!taiko", value: "taiko" },
-                        { name: "osu!catch", value: "catch" },
-                        { name: "osu!mania", value: "mania" }
-                    )
-                    .setRequired(true)
-            )
-    },
-    {
-        data: new SlashCommandBuilder()
-            .setName("delovedmention")
-            .setDescription("Lovedが検出されたらメンションするのを解除します。")
             .addStringOption(option =>
                 option
                     .setName("mode")
@@ -764,47 +657,6 @@ module.exports = [
     },
     {
         data: new SlashCommandBuilder()
-            .setName("slayer")
-            .setDescription("スレイヤーの周回数などを表示します。")
-            .addStringOption(option =>
-                option
-                    .setName("username")
-                    .setDescription("ユーザー名")
-                    .setRequired(true)
-            )
-            .addStringOption(option =>
-                option
-                    .setName("slayername")
-                    .setDescription("スレイヤー名")
-                    .addChoices(
-                        { name: "Revenant Horror", value: "Revenant Horror" },
-                        { name: "Sven Packmaster", value: "Sven Packmaster" },
-                        { name: "Voidgloom Seraph", value: "Voidgloom Seraph" },
-                        { name: "Inferno Demonlord", value: "Inferno Demonlord" },
-                        { name: "Riftstalker Bloodfiend", value: "Riftstalker Bloodfiend" },
-                    )
-                    .setRequired(true)
-            )
-            .addNumberOption(option =>
-                option
-                    .setName("profileid")
-                    .setDescription("プロファイルID")
-                    .setRequired(true)
-            )
-    },
-    {
-        data: new SlashCommandBuilder()
-            .setName("profile")
-            .setDescription("プレイヤーのSkyblockプロファイルを表示します。")
-            .addStringOption(option =>
-                option
-                    .setName("username")
-                    .setDescription("ユーザー名")
-                    .setRequired(true)
-            )
-    },
-    {
-        data: new SlashCommandBuilder()
             .setName("ratchecker")
             .setDescription("送られたChattrigger ModuleにRatが含まれているかを確認します。")
             .addAttachmentOption(option =>
@@ -840,11 +692,6 @@ module.exports = [
                     .setDescription("動画リンク")
                     .setRequired(true)
             )
-    },
-    {
-        data: new SlashCommandBuilder()
-            .setName("skyblockpatch")
-            .setDescription("Hypixel Skyblockの最新のパッチノートを表示します。")
     },
     {
         data: new SlashCommandBuilder()

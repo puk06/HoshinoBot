@@ -10,12 +10,12 @@ const asciify = require("node:util").promisify(require("./node_modules/asciify")
 const osuLibrary = require("./src/osuLibrary.js");
 const { Tools, ImJugglerEX, RatChecker, TwitterDownloader, YoutubeDownloader } = require("./src/Utils.js");
 const AdmZip = require("./node_modules/adm-zip");
+const MathJS = require("./node_modules/mathjs");
 
 const apikey = process.env.APIKEY;
 const token = process.env.TOKEN;
 const osuclientid = process.env.CLIENTID;
 const osuclientsecret = process.env.CLIENTSECRET;
-const hypixelapikey = process.env.HYPIXELAPI;
 const BotadminId = process.env.BOTADMINID;
 const Furrychannel = process.env.FURRYCHANNEL;
 const SLOT_SETTING = Math.floor(Math.random() * 6) + 1;
@@ -93,54 +93,6 @@ client.on(Events.ClientReady, async () =>
 		}
 		fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
 		bankData = null;
-
-		(async () => {
-			let webHookData = fs.readJsonSync("./ServerDatas/WebHookData.json");
-			if (webHookData.lastDate == new Date().getDate()) return;
-			const webHookClient = new WebhookClient({ url: process.env.WEBHOOKURL });
-			let timeUntilNextExecution = 0;
-			const currentTime = new Date();
-			if (currentTime.getHours() >= 6 && currentTime.getHours() <= 18) {
-				const sixPM = new Date(currentTime);
-				sixPM.setHours(18, 0, 0, 0);
-				const timeDiff = sixPM - currentTime;
-				const randomTime = currentTime.getTime() + Math.random() * timeDiff;
-				const nextExecutionTime = new Date(randomTime);
-				console.log(`[${currentTime.toLocaleString()}] WebHook送信予定時刻: ${nextExecutionTime.toLocaleString()}`);
-				timeUntilNextExecution = nextExecutionTime - currentTime;
-			} else if (currentTime.getHours() <= 18) {
-				const sixAM = new Date(currentTime);
-				sixAM.setHours(6, 0, 0, 0);
-				const sixPM = new Date(currentTime);
-				sixPM.setHours(18, 0, 0, 0);
-				const timeDiff = sixPM - sixAM;
-				const randomTime = sixAM.getTime() + Math.random() * timeDiff;
-				const nextExecutionTime = new Date(randomTime);
-				console.log(`[${currentTime.toLocaleString()}] WebHook送信予定時刻: ${nextExecutionTime.toLocaleString()}`);
-				timeUntilNextExecution = nextExecutionTime - currentTime;
-			} else {
-				return;
-			}
-			
-			setTimeout(async () => {
-				if (webHookData.lastDate == new Date().getDate()) return;
-				await webHookClient.send({
-					content: "daily bread"
-				}).then(() => {
-					let now = new Date();
-					console.log(`[${now.toLocaleString()}] WebHookの送信に成功しました。`);
-					webHookData.lastDate = now.getDate();
-					fs.writeJsonSync("./ServerDatas/WebHookData.json", webHookData, { spaces: 4, replacer: null });
-					webHookData = null;
-					now = null;
-				}).catch(() => {
-					let now = new Date();
-					console.log(`[${now.toLocaleString()}] WebHookの送信に失敗しました。`);
-					webHookData = null;
-					now = null;
-				});
-			}, timeUntilNextExecution);
-		})();
 	}
 );
 
@@ -1114,27 +1066,14 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const channelid = interaction.channel.id;
 				let allchannels = fs.readJsonSync("./ServerDatas/BeatmapLinkChannels.json");
 				if (allchannels.Channels.includes(channelid)) {
-					await interaction.reply("このチャンネルでは既にマップ情報が表示されるようになっています。");
-					return;
+					allchannels.Channels = allchannels.Channels.filter(item => item !== channelid);
+					fs.writeJsonSync("./ServerDatas/BeatmapLinkChannels.json", allchannels, { spaces: 4, replacer: null });
+					await interaction.reply(`このチャンネルにマップリンクが送信されてもマップ情報が表示されないようになりました。再度表示したい場合は/linkコマンドを使用してください。`);	
+				} else {
+					allchannels.Channels.push(channelid);
+					fs.writeJsonSync("./ServerDatas/BeatmapLinkChannels.json", allchannels, { spaces: 4, replacer: null });
+					await interaction.reply(`このチャンネルにマップリンクが送信されたら自動的にマップ情報が表示されるようになりました。解除したい場合は/linkコマンドをもう一度使用してください。`);
 				}
-				allchannels.Channels.push(channelid);
-				fs.writeJsonSync("./ServerDatas/BeatmapLinkChannels.json", allchannels, { spaces: 4, replacer: null });
-				await interaction.reply(`このチャンネルにマップリンクが送信されたら自動的にマップ情報が表示されるようになりました。解除したい場合は/unlinkコマンドを使用してください。`);
-				allchannels = null;
-				return;
-			}
-
-			if (interaction.commandName == "unlink") {
-				const channelid = interaction.channel.id;
-				let allchannels = fs.readJsonSync("./ServerDatas/BeatmapLinkChannels.json");
-				if (!allchannels.Channels.includes(channelid)) {
-					await interaction.reply("このチャンネルでは既にマップ情報が表示されないようになっています。");
-					allchannels = null;
-					return;
-				}
-				allchannels.Channels = allchannels.Channels.filter(item => item !== channelid);
-				fs.writeJsonSync("./ServerDatas/BeatmapLinkChannels.json", allchannels, { spaces: 4, replacer: null });
-				await interaction.reply(`このチャンネルにマップリンクが送信されてもマップ情報が表示されないようになりました。再度表示したい場合は/linkコマンドを使用してください。`);
 				allchannels = null;
 				return;
 			}
@@ -1174,59 +1113,6 @@ client.on(Events.InteractionCreate, async (interaction) =>
 							.setImage(backgroundURL);
 						await interaction.channel.send({ embeds: [embed] });
 					});
-				return;
-			}
-
-			if (interaction.commandName == "ispp") {
-				const maplink = interaction.options.get("beatmaplink").value;
-				const regex = /^https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+#[a-z]+\/\d+$/;
-				const regex2 = /^https:\/\/osu\.ppy\.sh\/b\/\d+$/;
-				const regex3 = /^https:\/\/osu\.ppy\.sh\/beatmaps\/\d+$/;
-				if (!(regex.test(maplink) || regex2.test(maplink) || regex3.test(maplink))) {
-					await interaction.reply(`ビートマップリンクの形式が間違っています。`);
-					return;
-				}
-				
-				const Mods = new osuLibrary.Mod(interaction.options?.get("mods")?.value).get();
-				if (!Mods) {
-					await interaction.reply("入力されたModは存在しないか、指定できないModです。存在するMod、AutoなどのMod以外を指定するようにしてください。");
-					return;
-				}
-
-				let mode;
-				let data;
-				if (regex.test(maplink)) {
-					switch (maplink.split("/")[4].split("#")[1]) {
-						case "osu":
-							mode = 0;
-							break;
-
-						case "taiko":
-							mode = 1;
-							break;
-
-						case "fruits":
-							mode = 2;
-							break;
-
-						case "mania":
-							mode = 3;
-							break;
-							
-						default:
-							await interaction.reply("リンク内のモードが不正です。");
-							return;
-					}
-					data = await new osuLibrary.GetMapData(maplink, apikey, mode).getData();
-				} else {
-					data = await new osuLibrary.GetMapData(maplink, apikey).getDataWithoutMode();
-					mode = Number(data.mode);
-				}
-				const ppdata = await new osuLibrary.CalculatePPSR(maplink, Mods.calc, mode).calculateSR();
-				const Mapstatus = osuLibrary.Tools.mapstatus(data.approved);
-				const FP = Math.round(Number(ppdata.pp) / Number(data.hit_length) * 1000) / 10;
-				const ppdevidetotallength = Math.round(Number(ppdata.pp) / Number(data.hit_length) * 10) / 10;
-				await interaction.reply(`Totalpp : **${ppdata.pp.toFixed(2)}** (**${Mapstatus}**)　Farmscore : **${isNaN(FP) ? 0 : FP}**　${isNaN(ppdevidetotallength) ? 0 : ppdevidetotallength} pp/s`);
 				return;
 			}
 
@@ -1338,32 +1224,21 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				return;
 			}
 
-			if (interaction.commandName == "qf" || interaction.commandName == "deqf" || interaction.commandName == "loved" || interaction.commandName == "deloved") {
+			if (interaction.commandName == "qf" || interaction.commandName == "loved") {
 				const mode = interaction.options.get("mode").value;
 				const channelid = interaction.channel.id;
 				let allchannels = fs.readJsonSync(`./ServerDatas/MapcheckChannels.json`);
 				switch (interaction.commandName) {
 					case "qf": {
 						if (allchannels["Qualified"][mode].includes(channelid)) {
-							await interaction.reply("このチャンネルは既にQualified、Rankedチェックチャンネルとして登録されています。");
-							allchannels = null;
-							return;
-						}
-						allchannels["Qualified"][mode].push(channelid);
-						fs.writeJsonSync(`./ServerDatas/MapcheckChannels.json`, allchannels, { spaces: 4, replacer: null });
-						await interaction.reply(`このチャンネルを${mode}のQualified、Rankedチェックチャンネルとして登録しました。`);
-						allchannels = null;
-						return;
-					}
-
-					case "deqf": {
-						if (allchannels["Qualified"][mode].includes(channelid)) {
 							const newchannels = allchannels["Qualified"][mode].filter(item => item !== channelid);
 							allchannels["Qualified"][mode] = newchannels;
 							fs.writeJsonSync(`./ServerDatas/MapcheckChannels.json`, allchannels, { spaces: 4, replacer: null });
 							await interaction.reply(`このチャンネルを${mode}のQualified、Rankedチェックチャンネルから削除しました。`);
 						} else {
-							await interaction.reply("このチャンネルはQualified、Rankedチェックチャンネルとして登録されていません。");
+							allchannels["Qualified"][mode].push(channelid);
+							fs.writeJsonSync(`./ServerDatas/MapcheckChannels.json`, allchannels, { spaces: 4, replacer: null });
+							await interaction.reply(`このチャンネルを${mode}のQualified、Rankedチェックチャンネルとして登録しました。`);
 						}
 						allchannels = null;
 						return;
@@ -1371,25 +1246,14 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 					case "loved": {
 						if (allchannels["Loved"][mode].includes(channelid)) {
-							await interaction.reply("このチャンネルは既にLovedチェックチャンネルとして登録されています。");
-							allchannels = null;
-							return;
-						}
-						allchannels["Loved"][mode].push(channelid);
-						fs.writeJsonSync(`./ServerDatas/MapcheckChannels.json`, allchannels, { spaces: 4, replacer: null });
-						await interaction.reply(`このチャンネルを${mode}のLovedチェックチャンネルとして登録しました。`);
-						allchannels = null;
-						return;
-					}
-
-					case "deloved": {
-						if (allchannels["Loved"][mode].includes(channelid)) {
 							const newchannels = allchannels["Loved"][mode].filter(item => item !== channelid);
 							allchannels["Loved"][mode] = newchannels;
 							fs.writeJsonSync(`./ServerDatas/MapcheckChannels.json`, allchannels, { spaces: 4, replacer: null });
 							await interaction.reply(`このチャンネルを${mode}のLovedチェックチャンネルから削除しました。`);
 						} else {
-							await interaction.reply("このチャンネルはLovedチェックチャンネルとして登録されていません。");
+							allchannels["Loved"][mode].push(channelid);
+							fs.writeJsonSync(`./ServerDatas/MapcheckChannels.json`, allchannels, { spaces: 4, replacer: null });
+							await interaction.reply(`このチャンネルを${mode}のLovedチェックチャンネルとして登録しました。`);
 						}
 						allchannels = null;
 						return;
@@ -1397,7 +1261,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				}
 			}
 
-			if (interaction.commandName == "qfmention" || interaction.commandName == "lovedmention" || interaction.commandName == "rankedmention" || interaction.commandName == "deqfmention" || interaction.commandName == "derankedmention" || interaction.commandName == "delovedmention") {
+			if (interaction.commandName == "qfmention" || interaction.commandName == "lovedmention" || interaction.commandName == "rankedmention") {
 				const mode = interaction.options.get("mode").value;
 				const userid = interaction.user.id;
 				const serverid = interaction.guild.id;
@@ -1405,92 +1269,62 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				switch (interaction.commandName) {
 					case "qfmention": {
 						if (alluser["Qualified"][serverid]?.[mode].includes(userid)) {
-							await interaction.reply("あなたは既にQualifiedチェックチャンネルのメンションを受け取るようになっています。");
-							alluser = null;
-							return;
+							const newuser = alluser["Qualified"][serverid][mode].filter(item => item !== userid);
+							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, newuser, { spaces: 4, replacer: null });
+							await interaction.reply(`今度から${mode}でQualified検出されても、メンションが飛ばないようになりました。`);
+						} else {
+							if (!alluser["Qualified"][serverid]) alluser["Qualified"][serverid] = {
+								"osu": [],
+								"taiko": [],
+								"catch": [],
+								"mania": []
+							};
+
+							alluser["Qualified"][serverid][mode].push(userid);
+							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, alluser, { spaces: 4, replacer: null });
+							await interaction.reply(`今度から${mode}でQualifiedが検出されたらメンションが飛ぶようになりました.`);
 						}
-						if (!alluser["Qualified"][serverid]) alluser["Qualified"][serverid] = {
-							"osu": [],
-							"taiko": [],
-							"catch": [],
-							"mania": []
-						};
-						alluser["Qualified"][serverid][mode].push(userid);
-						fs.writeJsonSync(`./ServerDatas/MentionUser.json`, alluser, { spaces: 4, replacer: null });
-						await interaction.reply(`今度から${mode}でQualifiedが検出されたらメンションが飛ぶようになりました.`);
 						alluser = null;
 						return;
 					}
 
 					case "lovedmention": {
 						if (alluser["Loved"][serverid]?.[mode].includes(userid)) {
-							await interaction.reply("あなたは既にLovedチェックチャンネルのメンションを受け取るようになっています。");
-							alluser = null;
-							return;
+							const newuser = alluser["Loved"][serverid][mode].filter(item => item !== userid);
+							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, newuser, { spaces: 4, replacer: null });
+							await interaction.reply(`今度から${mode}でLoved検出されても、メンションが飛ばないようになりました。`);
+						} else {
+							if (!alluser["Loved"][serverid]) alluser["Loved"][serverid] = {
+								"osu": [],
+								"taiko": [],
+								"catch": [],
+								"mania": []
+							};
+
+							alluser["Loved"][serverid][mode].push(userid);
+							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, alluser, { spaces: 4, replacer: null });
+							await interaction.reply(`今度から${mode}でlovedが検出されたらメンションが飛ぶようになりました。`);
 						}
-						if (!alluser["Loved"][serverid]) alluser["Loved"][serverid] = {
-							"osu": [],
-							"taiko": [],
-							"catch": [],
-							"mania": []
-						};
-						alluser["Loved"][serverid][mode].push(userid);
-						fs.writeJsonSync(`./ServerDatas/MentionUser.json`, alluser, { spaces: 4, replacer: null });
-						await interaction.reply(`今度から${mode}でlovedが検出されたらメンションが飛ぶようになりました。`);
 						alluser = null;
 						return;
 					}
 
 					case "rankedmention": {
 						if (alluser["Ranked"][serverid]?.[mode].includes(userid)) {
-							await interaction.reply("あなたは既にRankedチェックチャンネルのメンションを受け取るようになっています。");
-							alluser = null;
-							return;
-						}
-						if (!alluser["Ranked"][serverid]) alluser["Ranked"][serverid] = {
-							"osu": [],
-							"taiko": [],
-							"catch": [],
-							"mania": []
-						};
-						alluser["Ranked"][serverid][mode].push(userid);
-						fs.writeJsonSync(`./ServerDatas/MentionUser.json`, alluser, { spaces: 4, replacer: null });
-						await interaction.reply(`今度から${mode}でRankedが検出されたらメンションが飛ぶようになりました。`);
-						alluser = null;
-						return;
-					}
-
-					case "deqfmention": {
-						if (alluser["Qualified"][serverid]?.[mode].includes(userid)) {
-							const newuser = alluser["Qualified"][serverid][mode].filter(item => item !== userid);
-							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, newuser, { spaces: 4, replacer: null });
-							await interaction.reply(`今度から${mode}でQualified検出されても、メンションが飛ばないようになりました。`);
-						} else {
-							await interaction.reply("あなたは既にQualifiedチェックチャンネルのメンションを受け取るようになっていません。");
-						}
-						alluser = null;
-						return;
-					}
-
-					case "derankedmention": {
-						if (alluser["Ranked"][serverid]?.[mode].includes(userid)) {
 							const newuser = alluser["Ranked"][serverid][mode].filter(item => item !== userid);
 							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, newuser, { spaces: 4, replacer: null });
 							await interaction.reply(`今度から${mode}でRanked検出されても、メンションが飛ばないようになりました。`);
 						} else {
-							await interaction.reply("あなたは既にRankedチェックチャンネルのメンションを受け取るようになっていません。");
-						}
-						alluser = null;
-						return;
-					}
+							if (!alluser["Ranked"][serverid]) alluser["Ranked"][serverid] = {
+								"osu": [],
+								"taiko": [],
+								"catch": [],
+								"mania": []
+							};
 
-					case "delovedmention": {
-						if (alluser["Loved"][serverid]?.[mode].includes(userid)) {
-							const newuser = alluser["Loved"][serverid][mode].filter(item => item !== userid);
-							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, newuser, { spaces: 4, replacer: null });
-							await interaction.reply(`今度から${mode}でLoved検出されても、メンションが飛ばないようになりました。`);
-						} else {
-							await interaction.reply("あなたは既にLovedチェックチャンネルのメンションを受け取るようになっていません。");
+							alluser["Ranked"][serverid][mode].push(userid);
+							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, alluser, { spaces: 4, replacer: null });
+							await interaction.reply(`今度から${mode}でRankedが検出されたらメンションが飛ぶようになりました。`);
 						}
 						alluser = null;
 						return;
@@ -2215,183 +2049,6 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				fs.writeJsonSync("./ServerDatas/PlayerData.json", allUser, { spaces: 4, replacer: null });
 				await interaction.reply(`${interaction.user.displayName}さんは${osuid}として保存されました!`);
 				allUser = null;
-				return;
-			}
-
-			if (interaction.commandName == "slayer") {
-				const username = interaction.options.get("username").value;
-				const slayerid = interaction.options.get("slayername").value;
-				const i = interaction.options.get("profileid").value;
-
-				if (!/^[\d.]+$/g.test(i)) {
-					await interaction.reply("プロファイル番号は数字のみで入力してください。");
-					return;
-				}
-
-				const useruuidresponce = await Tools.getAPIResponse(`https://api.mojang.com/users/profiles/minecraft/${username}`);
-
-				const responce = await Tools.getAPIResponse(
-					`https://api.hypixel.net/skyblock/profiles?key=${hypixelapikey}&uuid=${useruuidresponce.id}`
-				);
-
-				if (!responce.success) {
-					await interaction.reply("データを取得するのに失敗しました。");
-					return;
-				}
-				
-				if (responce.profiles == null) {
-					await interaction.reply("このユーザーはSkyblockをしていないようです。");
-					return;
-				}
-
-				let slayername;
-				switch (slayerid) {
-					case "Revenant Horror":
-						slayername = "zombie";
-						break;
-					case "Tarantula Broodfather":
-						slayername = "spider";
-						break;
-					case "Sven Packmaster":
-						slayername = "wolf";
-						break;
-					case "Voidgloom Seraph":
-						slayername = "enderman";
-						break;
-					case "Inferno Demonlord":
-						slayername = "blaze";
-						break;
-					case "Riftstalker Bloodfiend":
-						interaction.reply("このスレイヤーの処理機能はまだ実装されていません。");
-						return;
-					default:
-						await interaction.reply("スレイヤーのIDが不正です。");
-						return;
-				}
-
-				let showonlyslayername;
-				switch (slayername) {
-					case "zombie":
-						showonlyslayername = "ゾンスレ";
-						break;
-
-					case "spider":
-						showonlyslayername = "クモスレ";
-						break;
-
-					case "wolf":
-						showonlyslayername = "ウルフスレ";
-						break;
-
-					case "enderman":
-						showonlyslayername = "エンスレ";
-						break;
-
-					case "blaze":
-						showonlyslayername = "ブレイズスレ";
-						break;
-				}
-
-				if (responce.profiles[i] == undefined) {
-					await interaction.reply("このプロファイルは存在しないようです。");
-					return;
-				}
-
-				const userslayerxp = responce.profiles[i]?.[members.useruuidresponce.id].slayer_bosses.slayername.xp;
-
-				if (userslayerxp == undefined) {
-					await interaction.reply(`プロファイル:${responce.profiles[i].cute_name} | このプレイヤーは${showonlyslayername}をしていないみたいです。`);
-					return;
-				}
-
-				let remainxp;
-				switch (true) {
-					case userslayerxp >= 1000000:
-						await interaction.reply(`プロファイル:${responce.profiles[i].cute_name} | このプレイヤーの${showonlyslayername}レベルは既に**Lv9**です。`);
-						break;
-					case userslayerxp >= 400000:
-						remainxp = 1000000 - userslayerxp;
-						await interaction.reply(`プロファイル:**${responce.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv8**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Tools.createProgressBar(userslayerxp / 1000000 * 100)}${(userslayerxp / 1000000 * 100).toFixed(1)}%`);
-						break;
-					case userslayerxp >= 100000:
-						remainxp = 400000 - userslayerxp;
-						await interaction.reply(`プロファイル:**${responce.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv7**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Tools.createProgressBar(userslayerxp / 400000 * 100)}${(userslayerxp / 400000 * 100).toFixed(1)}%`);
-						break;
-					case userslayerxp >= 20000:
-						remainxp = 100000 - userslayerxp;
-						await interaction.reply(`プロファイル:**${responce.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv6**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Tools.createProgressBar(userslayerxp / 100000 * 100)}${(userslayerxp / 100000 * 100).toFixed(1)}%`);
-						break;
-					case userslayerxp >= 5000:
-						remainxp = 20000 - userslayerxp;
-						await interaction.reply(`プロファイル:**${responce.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv5**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Tools.createProgressBar(userslayerxp / 20000 * 100)}${(userslayerxp / 20000 * 100).toFixed(1)}%`);
-						break;
-					case ((slayername == "zombie" || slayername == "spider") && userslayerxp >= 1000) || ((slayername == "wolf" || slayername == "enderman" || slayername == "blaze") && userslayerxp >= 1500):
-						remainxp = 5000 - userslayerxp;
-						await interaction.reply(`プロファイル:**${responce.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv4**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Tools.createProgressBar(userslayerxp / 5000 * 100)}${(userslayerxp / 5000 * 100).toFixed(1)}%`);
-						break;
-					case (slayername == "zombie" || slayername == "spider") && userslayerxp >= 200:
-						remainxp = 1000 - userslayerxp;
-						await interaction.reply(`プロファイル:**${responce.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv3**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Tools.createProgressBar(userslayerxp / 1000 * 100)}${(userslayerxp / 1000 * 100).toFixed(1)}%`);
-						break;
-					case (slayername == "wolf" || slayername == "enderman" || slayername == "blaze") && userslayerxp >= 250:
-						remainxp = 1500 - userslayerxp;
-						await interaction.reply(`プロファイル:**${responce.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv3**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Tools.createProgressBar(userslayerxp / 1500 * 100)}${(userslayerxp / 1500 * 100).toFixed(1)}%`);
-						break;
-					case (slayername == "zombie" && userslayerxp >= 15) || (slayername == "spider" && userslayerxp >= 25):
-						remainxp = 200 - userslayerxp;
-						await interaction.reply(`プロファイル:**${responce.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv2**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Tools.createProgressBar(userslayerxp / 200 * 100)}${(userslayerxp / 200 * 100).toFixed(1)}%`);
-						break;
-					case (slayername == "wolf" || slayername == "enderman" || slayername == "blaze") && userslayerxp >= 30:
-						remainxp = 250 - userslayerxp;
-						await interaction.reply(`プロファイル:**${responce.profiles[i].cute_name}** | 現在の${showonlyslayername}レベルは**Lv2**です。次のレベルまでに必要なXPは${remainxp}です。\n次のレベルまでの周回回数 | T1: ${Math.ceil(remainxp / 5)}回 | T2: ${Math.ceil(remainxp / 25)}回 | T3: ${Math.ceil(remainxp / 100)}回 | T4: ${Math.ceil(remainxp / 500)}回 | T5: ${Math.ceil(remainxp / 1500)}回 |\n${Tools.createProgressBar(userslayerxp / 250 * 100)}${(userslayerxp / 250 * 100).toFixed(1)}%`);
-						break;
-					default:
-						remainxp = 5 - userslayerxp;
-						await interaction.reply(`プロファイル:**${responce.profiles[i].cute_name}** | このプレイヤーの${showonlyslayername}はLv1に達していません。次のレベルまでに必要なXPは${remainxp}です。`);
-						break;
-				}
-				return;
-			}
-
-			if (interaction.commandName == "profile") {
-				const username = interaction.options.get("username").value;
-				const useruuidresponce = await Tools.getAPIResponse(`https://api.mojang.com/users/profiles/minecraft/${username}`);
-				const responce = await Tools.getAPIResponse(`https://api.hypixel.net/skyblock/profiles?key=${hypixelapikey}&uuid=${useruuidresponce.id}`);
-
-				if (!responce.success) {
-					await interaction.reply("データを取得するのに失敗しました。");
-					return;
-				}
-				
-				if (responce.profiles == null) {
-					await interaction.reply("このユーザーはSkyblockをしていないようです。");
-					return;
-				}
-
-				let showprofilemessage = ["__**プロファイル一覧**__"];
-				let showonlyselected;
-				for (let i = 0; i < responce.profiles.length; i++) {
-					if (responce.profiles[i].selected) {
-						showonlyselected = "✅";
-					} else {
-						showonlyselected = "❌";
-					}
-					showprofilemessage.push(`**${i}**: ${responce.profiles[i].cute_name} | 選択中: ${showonlyselected}`);
-				}
-				await interaction.reply(showprofilemessage.join("\n"));
-				return;
-			}
-
-			if (interaction.commandName == "skyblockpatch") {
-				const data = await Tools.getAPIResponse(`https://api.hypixel.net/skyblock/news?key=${hypixelapikey}`);
-				const embed = new EmbedBuilder()
-					.setColor("Blue")
-					.setTitle(`最新のパッチ: ${data.title}`)
-					.setURL(data.link)
-					.setDescription(data.text)
-					.setFooter({ text: "Hypixel Skyblock News" })
-					.setTimestamp();
-				await interaction.reply({ embeds: [embed] });
 				return;
 			}
 
@@ -4363,46 +4020,17 @@ client.on(Events.MessageCreate, async (message) =>
 				return;
 			}
 
-			if (RegExp(/^\d+([-+*/^])\d+$/).exec(message.content.replace(/ /g, ""))) {
-				commandLogs(message, "計算式", 1);
-				const messageContent = message.content.replace(/ /g, "");
-				switch (true) {
-					case messageContent.includes("+"): {
-						let [left, right] = messageContent.split("+");
-						if (isNaN(left) || isNaN(right)) return;
-						await message.reply(`${left} + ${right} = ${Number(left) + Number(right)}`);
-						break;
-					}
-
-					case messageContent.includes("-"): {
-						let [left, right] = messageContent.split("-");
-						if (isNaN(left) || isNaN(right)) return;
-						await message.reply(`${left} - ${right} = ${Number(left) - Number(right)}`);
-						break;
-					}
-
-					case messageContent.includes("*"): {
-						let [left, right] = messageContent.split("*");
-						if (isNaN(left) || isNaN(right)) return;
-						await message.reply(`${left} * ${right} = ${Number(left) * Number(right)}`);
-						break;
-					}
-
-					case messageContent.includes("/"): {
-						let [left, right] = messageContent.split("/");
-						if (isNaN(left) || isNaN(right)) return;
-						await message.reply(`${left} / ${right} = ${Number(left) / Number(right)}`);
-						break;
-					}
-
-					case messageContent.includes("^"): {
-						let [left, right] = messageContent.split("^");
-						if (isNaN(left) || isNaN(right)) return;
-						await message.reply(`${left} ^ ${right} = ${Number(left) ** Number(right)}`);
-						break;
-					}
+			if (message.content.split(" ")[0] == "!calc") {
+				commandLogs(message, "四則演算", 1);
+				const expression = message.content.split(" ").slice(1).join(" ");
+				try {
+					const result = MathJS.evaluate(expression);
+					message.channel.send(`計算結果: **${result}**`);
+					return;
+				} catch (error) {
+					message.channel.send("無効な計算式です");
+					return;
 				}
-				return;
 			}
 
 			if (/^\d+\.\d+時間$/.test(message.content)) {
