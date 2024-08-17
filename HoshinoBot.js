@@ -42,7 +42,7 @@ client.on(Events.ClientReady, async () =>
 		await asciify("Hoshino Bot", { font: "larry3d" })
 			.then(msg => console.log(msg))
 			.catch(err => console.log(err));
-		client.user.setPresence({
+		client.user?.setPresence({
 			activities: [{
 				name: "ほしのBot Ver1.1.0を起動中",
 				type: ActivityType.Playing
@@ -62,14 +62,13 @@ client.on(Events.ClientReady, async () =>
 		setInterval(() => {
 			let serverJSONdata = fs.readJsonSync("./ServerDatas/talkcount.json");
 			let count = Object.keys(serverJSONdata).length;
-			client.user.setPresence({
+			client.user?.setPresence({
 				activities: [{
 					name: `h!help | Ping: ${client.ws.ping} | Servers: ${count}`,
 					type: ActivityType.Playing
 				}]
 			});
 			serverJSONdata = null;
-			count = null;
 		}, 10000);
 		setInterval(makeBackup, 3600000);
 
@@ -2499,6 +2498,26 @@ client.on(Events.MessageCreate, async (message) =>
 				return;
 			}
 
+			if (message.content.split(" ")[0] == "!chatbot") {
+				const chatbotMessages = [
+					"あなたが知らないでほしい、秘密のアプリ",
+					"これはチャットボットAIで、何でも尋ねることができます",
+					"だから私はそれに私の課題のために地球問題化についての戦後のエッセイを書いてもらいました",
+					"またオンラインで月に1万ドルを稼ぐ方法を巡れたところ、ビーヤーなことを検定が終えてくれました",
+					"だからチェツとボッツとAにすべての遠大を宮を断媒で決議させましょう",
+					"ダウンロードして死してみてください"
+				];
+
+				function wait(ms) {
+					return new Promise(resolve => setTimeout(resolve, ms));
+				}
+
+				for (const chatbotMessage of chatbotMessages) {
+					await message.channel.send(chatbotMessage);
+					await wait(1000);
+				}
+			}
+
 			if (message.content.split(" ")[0] == "!ydw") {
 				const mediaLink = message.content.split(" ")[1];
 				const videoId = mediaLink.split("watch?v=")[1].split("&")[0];
@@ -3453,7 +3472,7 @@ client.on(Events.MessageCreate, async (message) =>
 					50: userPlays[0].count50,
 					0: userPlays[0].countmiss,
 					geki : userPlays[0].countgeki,
-					katu: userPlays[0].countgeki
+					katu: userPlays[0].countkatu
 				}, Tools.modeConvertAcc(mode)) * 100) / 100;
 				const userPlaysHit = Tools.formatHits(userBestPlays, mode);
 
@@ -4179,7 +4198,6 @@ function commandLogs(message, command, mode) {
 	message = null;
 	command = null;
 	mode = null;
-	now = null;
 }
 
 async function checkMap() {
