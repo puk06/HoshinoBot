@@ -3463,8 +3463,8 @@ client.on(Events.MessageCreate, async (message) =>
 				const beatmap = await calculator.getMap();
 				const map = new rosu.Beatmap(new Uint8Array(Buffer.from(beatmap)));
 				const passedObjects = Tools.calcPassedObject(userPlays[0], mode);
+				const recentPp = await calculator.calculateScorePP(userBestPlays, passedObjects);
 				const { ifFCPP, ifFCAcc } = osuLibrary.CalculateIfFC.calculate(userBestPlays, mode, passedObjects, mods.calc, map);
-
 
 				const recentAcc = Math.round(tools.accuracy({
 					300: userPlays[0].count300,
@@ -3479,7 +3479,7 @@ client.on(Events.MessageCreate, async (message) =>
 				let ifFCMessage = `(**${ifFCPP.toFixed(2)}**pp for ${ifFCAcc}% FC)`;
 				if (mode == 3) ifFCMessage = "";
 				if (userPlays[0].maxcombo == mapData.max_combo) ifFCMessage = "**Full Combo!! Congrats!!**";
-				if (userPlays[0].pp.toString().replace(".", "").includes("727")) ifFCMessage = "**WYSI!! WYFSI!!!!!**";
+				if (recentPp.toString().replace(".", "").includes("727")) ifFCMessage = "**WYSI!! WYFSI!!!!!**";
 
 				const embed = new EmbedBuilder()
 					.setColor("Blue")
@@ -3487,13 +3487,25 @@ client.on(Events.MessageCreate, async (message) =>
 					.setThumbnail(osuLibrary.URLBuilder.thumbnailURL(mapData.beatmapset_id))
 					.setURL(mapUrl)
 					.setAuthor({ name: `${playersdata.username}: ${Number(playersdata.pp_raw).toLocaleString()}pp (#${Number(playersdata.pp_rank).toLocaleString()} ${playersdata.country}${Number(playersdata.pp_country_rank).toLocaleString()})`, iconURL: playerIconUrl, url: playerUrl })
-					.addFields({ name: rankingString, value: `${Tools.rankconverter(userPlays[0].rank)} **+ ${bestMods.str}** [**${srppData.sr.toFixed(2)}**★]　**Score**: ${Number(userPlays[0].score).toLocaleString()}　**Acc**: ${recentAcc}% \n **PP**: **${Number(userPlays[0].pp).toFixed(2)}** / ${srppData.pp.toFixed(2)}PP　${ifFCMessage} \n **Combo**: **${userPlays[0].maxcombo}x** / ${mapData.max_combo}x　**Hits**: ${userPlaysHit}`, inline: false })
+					.addFields({ name: rankingString, value: `${Tools.rankconverter(userPlays[0].rank)} **+ ${bestMods.str}** [**${srppData.sr.toFixed(2)}**★]　**Score**: ${Number(userPlays[0].score).toLocaleString()}　**Acc**: ${recentAcc}% \n **PP**: **${recentPp.toFixed(2)}** / ${srppData.pp.toFixed(2)}PP　${ifFCMessage} \n **Combo**: **${userPlays[0].maxcombo}x** / ${mapData.max_combo}x　**Hits**: ${userPlaysHit}`, inline: false })
 				if (userPlays.length > 1) {
 					let valueString = "";
 					for (let i = 1; i < Math.min(userPlays.length, 5); i++) {
 						const Mods = new osuLibrary.Mod(userPlays[i].enabled_mods).get();
 						calculator.mods = Mods.calc;
 						const srppData = await calculator.calculateSR();
+						const userScore = {
+							n300: Number(userPlays[i].count300),
+							n100: Number(userPlays[i].count100),
+							n50: Number(userPlays[i].count50),
+							misses: Number(userPlays[i].countmiss),
+							nGeki: Number(userPlays[i].countgeki),
+							nKatu: Number(userPlays[i].countkatu),
+							combo: Number(userPlays[i].maxcombo),
+							mods: Mods.calc
+						};
+						const passedObjects = Tools.calcPassedObject(userPlays[i], mode);
+						const scorePp = await calculator.calculateScorePP(userScore, passedObjects);
 						const acc = Math.round(tools.accuracy({
 							300: userPlays[i].count300,
 							100: userPlays[i].count100,
@@ -3502,7 +3514,7 @@ client.on(Events.MessageCreate, async (message) =>
 							geki : userPlays[i].countgeki,
 							katu: userPlays[i].countgeki
 						}, Tools.modeConvertAcc(mode)) * 100) / 100;
-						valueString += `${Tools.rankconverter(userPlays[i].rank)} + **${Mods.str}** [**${srppData.sr.toFixed(2)}**★] **${Number(userPlays[i].pp).toFixed(2)}**pp (**${acc}**%) ${userPlays[i].maxcombo}x **Miss**: ${userPlays[i].countmiss}\n`;
+						valueString += `${Tools.rankconverter(userPlays[i].rank)} + **${Mods.str}** [**${srppData.sr.toFixed(2)}**★] **${scorePp.toFixed(2)}**pp (**${acc}**%) ${userPlays[i].maxcombo}x **Miss**: ${userPlays[i].countmiss}\n`;
 					}
 					embed
 						.addFields({ name: "__Other scores on the beatmap:__", value: valueString, inline: false });
