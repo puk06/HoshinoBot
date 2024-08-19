@@ -3512,7 +3512,7 @@ client.on(Events.MessageCreate, async (message) =>
 							50: userPlays[i].count50,
 							0: userPlays[i].countmiss,
 							geki : userPlays[i].countgeki,
-							katu: userPlays[i].countgeki
+							katu: userPlays[i].countkatu
 						}, Tools.modeConvertAcc(mode)) * 100) / 100;
 						valueString += `${Tools.rankconverter(userPlays[i].rank)} + **${Mods.str}** [**${srppData.sr.toFixed(2)}**★] **${scorePp.toFixed(2)}**pp (**${acc}**%) ${userPlays[i].maxcombo}x **Miss**: ${userPlays[i].countmiss}\n`;
 					}
@@ -3991,11 +3991,11 @@ client.on(Events.MessageCreate, async (message) =>
 						let osuMessage = "__\*\*osu!のスラッシュコマンド一覧(1ページ目)\*\*\__\n";
 						osuMessage += "- `/osureg [Username]`でosu!のユーザー名を登録します。\n";
 						osuMessage += "- `/calculatepp [beatmapFile] [mode] (mods)`で送信されたosuファイルのPPを計算します。\n";
-						osuMessage += "- `/loved | /deloved`で、送られたチャンネルをLovedチェックチャンネルに変えます。\n";
-						osuMessage += "- `/lovedmention | /delovedmention (Mode)`で、Lovedチェックチャンネルでメンションを送るかどうかを変更します。\n";
-						osuMessage += "- `/qf | /deqf (Mode)`で、送られたチャンネルをQF/Rankチェックチャンネルに変えます。\n";
-						osuMessage += "- `/qfmention | /deqfmention (Mode)`で、QFチェックチャンネルでメンションを送るかどうかを変更します。\n";
-						osuMessage += "- `/rankedmention | /derankedmention (Mode)`で、Rankedチェックチャンネルでメンションを送るかどうかを変更します。\n";
+						osuMessage += "- `/loved`で、送られたチャンネルをLovedチェックチャンネルに変えます。\n";
+						osuMessage += "- `/lovedmention (Mode)`で、Lovedチェックチャンネルでメンションを送るかどうかを変更します。\n";
+						osuMessage += "- `/qf (Mode)`で、送られたチャンネルをQF/Rankチェックチャンネルに変えます。\n";
+						osuMessage += "- `/qfmention`で、QFチェックチャンネルでメンションを送るかどうかを変更します。\n";
+						osuMessage += "- `/rankedmention (Mode)`で、Rankedチェックチャンネルでメンションを送るかどうかを変更します。\n";
 
 						await message.reply(osuMessage);
 						break;
@@ -4004,7 +4004,6 @@ client.on(Events.MessageCreate, async (message) =>
 					case "osu(スラッシュコマンド)2ページ目": {
 						let osuMessage = "__\*\*osu!のスラッシュコマンド一覧(2ページ目)\*\*\__\n";
 						osuMessage += "- `/ifmod [BeatmapLink] [Mods] (Username) (Scoreの種類)`で、送られたマップのスコアのModsを変更してPPを計算します。\n";
-						osuMessage += "- `/ispp [BeatmapLink] (Mods)`で、PPを譜面の時間で割ったスコアを表示します。\n";
 						osuMessage += "- `/lb [BeatmapLink] (Mods)`で、指定されたModsでのランキングを表示します。n";
 						osuMessage += "- `/link`で、直近に送信された譜面のリンクを表示します。\n";
 						osuMessage += "- `/osubgquiz | /osubgquizpf (Username) (Mode)`で、指定されたユーザーのosu!のBPからBGクイズを出します。PFは完答のみ正解扱いになります。\n";
@@ -4012,17 +4011,10 @@ client.on(Events.MessageCreate, async (message) =>
 						osuMessage += "- `/quizend`でクイズを終了します。\n";
 						osuMessage += "- `/osureg (Username)`でほしのbotにosu!のユーザー名を登録します。\n";
 						osuMessage += "- `/link`でチャンネル内でビートマップリンクが送られた時にマップ情報を表示します。\n";
-
-
 						await message.reply(osuMessage);
 						break;
 					}
-
-
-
 				}
-
-
 
 				const commandInfo = {
 					"h!help": "コマンドのヘルプを表示します。",
