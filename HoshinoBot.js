@@ -1396,27 +1396,22 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 				let mode;
 				let mapInfo;
-				let modeforranking;
 				let mapUrl;
 				if (!regex.test(maplink)) {
 					switch (maplink.split("/")[4].split("#")[1]) {
 						case "osu":
 							mode = 0;
-							modeforranking = "osu";
 							break;
 						case "taiko":
 							mode = 1;
-							modeforranking = "taiko";
 							break;
 	
 						case "fruits":
 							mode = 2;
-							modeforranking = "fruits";
 							break;
 	
 						case "mania":
 							mode = 3;
-							modeforranking = "mania";
 							break;
 	
 						default:
@@ -1428,20 +1423,6 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				} else {
 					mapInfo = await new osuLibrary.GetMapData(maplink, apikey).getDataWithoutMode();
 					mode = Number(mapInfo.mode);
-					switch (mode) {
-						case 0:
-							modeforranking = "osu";
-							break;
-						case 1:
-							modeforranking = "taiko";
-							break;
-						case 2:
-							modeforranking = "fruits";
-							break;
-						case 3:
-							modeforranking = "mania";
-							break;
-					}
 					mapUrl = osuLibrary.URLBuilder.beatmapURL(mapInfo.beatmapset_id, mode, mapInfo.beatmap_id);
 				}
 
@@ -2022,7 +2003,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					const dtminppData = await minsrdata.calculateDT();
 					const srstring = nmmaxppData.sr == nmminppData.sr ? `SR: ☆**${nmmaxppData.sr.toFixed(2)}** (DT ☆**${dtmaxppData.sr.toFixed(2)}**)` : `SR: ☆**${nmminppData.sr.toFixed(2)} ~ ${nmmaxppData.sr.toFixed(2)}** (DT ☆**${dtminppData.sr.toFixed(2)} ~ ${dtmaxppData.sr.toFixed(2)}**)`;
 					const ppstring = nmmaxppData.pp == nmminppData.pp ? `PP: **${nmmaxppData.pp.toFixed(2)}**pp (DT **${dtmaxppData.pp.toFixed(2)}**pp)` : `PP: **${nmminppData.pp.toFixed(2)} ~ ${nmmaxppData.pp.toFixed(2)}**pp (DT **${dtminppData.pp.toFixed(2)} ~ ${dtmaxppData.pp.toFixed(2)}**pp)`;
-					data.push({ name: `${i + 1}. ${seracheddata.beatmapsets[i].title} - ${seracheddata.beatmapsets[i].artist}`, value: `▸Mapped by **${seracheddata.beatmapsets[i].creator}**\n▸${srstring}\n▸${ppstring}\n▸**Download**: [map](https://osu.ppy.sh/beatmapsets/${seracheddata.beatmapsets[i].id}) | [Nerinyan](https://api.nerinyan.moe/d/${seracheddata.beatmapsets[i].id}) | [Nerinyan (No Vid)](https://api.nerinyan.moe/d/${seracheddata.beatmapsets[i].id}?nv=1) | [Beatconnect](https://beatconnect.io/b/${seracheddata.beatmapsets[i].id})` })
+					data.push({ name: `${i + 1}. ${seracheddata.beatmapsets[i].title} - ${seracheddata.beatmapsets[i].artist}`, value: `▸Mapped by **${seracheddata.beatmapsets[i].creator}**\n▸${srstring}\n▸${ppstring}\n▸**Download**: [Map](https://osu.ppy.sh/beatmapsets/${seracheddata.beatmapsets[i].id}) | [Nerinyan](https://api.nerinyan.moe/d/${seracheddata.beatmapsets[i].id}) | [Nerinyan (No Vid)](https://api.nerinyan.moe/d/${seracheddata.beatmapsets[i].id}?nv=1) | [Beatconnect](https://beatconnect.io/b/${seracheddata.beatmapsets[i].id})` })
 				}
 				embed.addFields(data);
 				await interaction.channel.send({ embeds: [embed] });
@@ -3062,11 +3043,34 @@ client.on(Events.MessageCreate, async (message) =>
 				const embed = new EmbedBuilder()
 					.setColor("Blue")
 					.setAuthor({ name: `${mapData.artist} - ${mapData.title} by ${mapData.creator}`, iconURL: mapperIconURL, url: mapUrl })
-					.setDescription(`**Length**: ${Tools.formatTime(Number(mapData.total_length))} (${Tools.formatTime(Number(mapData.hit_length))}) **BPM**: ${mapData.bpm} **Mods**: -\n**Download**: [map](https://osu.ppy.sh/beatmapsets/${mapData.beatmapset_id}) | [Nerinyan](https://api.nerinyan.moe/d/${mapData.beatmapset_id}) | [Nerinyan (No Vid)](https://api.nerinyan.moe/d/${mapData.beatmapset_id}?nv=1) | [Beatconnect](https://beatconnect.io/b/${mapData.beatmapset_id})`)
+					.setDescription(`**Length**: ${Tools.formatTime(Number(mapData.total_length))} (${Tools.formatTime(Number(mapData.hit_length))}) **BPM**: ${mapData.bpm} **Mods**: -\n**Download**: [Map](https://osu.ppy.sh/beatmapsets/${mapData.beatmapset_id}) | [Nerinyan](https://api.nerinyan.moe/d/${mapData.beatmapset_id}) | [Nerinyan (No Vid)](https://api.nerinyan.moe/d/${mapData.beatmapset_id}?nv=1) | [Beatconnect](https://beatconnect.io/b/${mapData.beatmapset_id})`)
 					.addFields({ name: `${osuLibrary.Tools.modeEmojiConvert(mode)} [**__${mapData.version}__**]`, value: `▸**Difficulty:** ${sr[100].sr.toFixed(2)}★ ▸**Max Combo:** ${mapData.max_combo}x\n▸**OD:** ${mapData.diff_overall} ▸**CS:** ${mapData.diff_size} ▸**AR:** ${mapData.diff_approach} ▸**HP:** ${mapData.diff_drain}\n▸**PP**: ○ **95**%-${sr[95].pp.toFixed(2)} ○ **99**%-${sr[99].pp.toFixed(2)} ○ **100**%-${sr[100].pp.toFixed(2)}`, inline: false })
 					.setTimestamp()
 					.setImage(osuLibrary.URLBuilder.backgroundURL(mapData.beatmapset_id))
 					.setFooter({ text: `${osuLibrary.Tools.mapstatus(mapData.approved)} mapset of ${mapData.creator}` });
+				await message.channel.send({ embeds: [embed] });
+				return;
+			}
+
+			if (/^https:\/\/booth\.pm\/ja\/items\/\d+$/.test(message.content)) {
+				const ItemData = await Tools.getBoothItemInfo(message.content)
+					.catch(() => null);
+				
+				if (ItemData == null) {
+					await message.reply("商品情報が取得できませんでした。");
+					return;
+				}
+
+				const embed = new EmbedBuilder()
+					.setColor("Blue")
+					.setTitle(ItemData.title)
+					.setURL(message.content)
+					.setAuthor({ name: ItemData.author, iconURL: ItemData.authorIcon, url: ItemData.authorUrl })
+					.addFields({ name: "価格", value: `${ItemData.price}`, inline: true })
+					.addFields({ name: "購入ページ", value: `[Booth](${message.content})`, inline: true })
+					.setImage(ItemData.imageUrl)
+					.setFooter({ text: `Booth item by ${ItemData.author}` });
+
 				await message.channel.send({ embeds: [embed] });
 				return;
 			}
@@ -3196,7 +3200,7 @@ client.on(Events.MessageCreate, async (message) =>
 				const embed = new EmbedBuilder()
 					.setColor("Blue")
 					.setAuthor({ name: `${mapData.artist} - ${mapData.title} by ${mapData.creator}`, iconURL: mapperIconURL, url: mapUrl })
-					.setDescription(`**Length**: ${Tools.formatTime(totalLength)} (${Tools.formatTime(totalHitLength)}) **BPM**: ${BPM} **Mods**: ${Mods.str}\n**Download**: [map](https://osu.ppy.sh/beatmapsets/${mapData.beatmapset_id}) | [Nerinyan](https://api.nerinyan.moe/d/${mapData.beatmapset_id}) | [Nerinyan (No Vid)](https://api.nerinyan.moe/d/${mapData.beatmapset_id}?nv=1) | [Beatconnect](https://beatconnect.io/b/${mapData.beatmapset_id})`)
+					.setDescription(`**Length**: ${Tools.formatTime(totalLength)} (${Tools.formatTime(totalHitLength)}) **BPM**: ${BPM} **Mods**: ${Mods.str}\n**Download**: [Map](https://osu.ppy.sh/beatmapsets/${mapData.beatmapset_id}) | [Nerinyan](https://api.nerinyan.moe/d/${mapData.beatmapset_id}) | [Nerinyan (No Vid)](https://api.nerinyan.moe/d/${mapData.beatmapset_id}?nv=1) | [Beatconnect](https://beatconnect.io/b/${mapData.beatmapset_id})`)
 					.addFields({ name: `${osuLibrary.Tools.modeEmojiConvert(mode)} [**__${mapData.version}__**]`, value: `▸**Difficulty:** ${sr[100].sr.toFixed(2)}★ ▸**Max Combo:** ${mapData.max_combo}x\n▸**OD:** ${Od} ▸**CS:** ${Cs} ▸**AR:** ${Ar} ▸**HP:** ${Hp}\n▸**PP**: ○ **95**%-${sr[95].pp.toFixed(2)} ○ **99**%-${sr[99].pp.toFixed(2)} ○ **100**%-${sr[100].pp.toFixed(2)}`, inline: false })
 					.setTimestamp()
 					.setImage(osuLibrary.URLBuilder.backgroundURL(mapData.beatmapset_id))
@@ -3546,6 +3550,34 @@ client.on(Events.MessageCreate, async (message) =>
 					};
 				} else {
 					allUser["Bancho"][username].name = osuid;
+				}
+				fs.writeJsonSync("./ServerDatas/PlayerData.json", allUser, { spaces: 4, replacer: null });
+				await message.reply(`${message.author.username}さんは${osuid}として保存されました!`);
+				allUser = null;
+				return;
+			}
+			
+			if (message.content.split(" ")[0] == "m!osureg") {
+				const username = message.author.id;
+				const osuid = message.content.split(" ")?.slice(1)?.join(" ");
+
+				if (osuid == "" || osuid == undefined) {
+					await message.reply("使い方: m!osureg [osu! Username]");
+					return;
+				}
+
+				const userData = await new osuLibrary.GetUserData(osuid, apikey).getDataWithoutMode();
+				if (!userData) {
+					await message.reply("ユーザーが見つかりませんでした。");
+					return;
+				}
+				let allUser = fs.readJsonSync("./ServerDatas/PlayerData.json");
+				if (!allUser["Mamestagram"][username]) {
+					allUser["Mamestagram"][username] = {
+						"name": osuid
+					};
+				} else {
+					allUser["Mamestagram"][username].name = osuid;
 				}
 				fs.writeJsonSync("./ServerDatas/PlayerData.json", allUser, { spaces: 4, replacer: null });
 				await message.reply(`${message.author.username}さんは${osuid}として保存されました!`);
@@ -4342,7 +4374,7 @@ function checkqualified() {
 						.setColor("Blue")
 						.setAuthor({ name: `🎉New Qualified ${mode} Map🎉` })
 						.setTitle(`${mapMaxInfo.artist} - ${mapMaxInfo.title} by ${mapMaxInfo.creator}`)
-						.setDescription(`**Download**: [map](https://osu.ppy.sh/beatmapsets/${mapMaxInfo.beatmapset_id}) | [Nerinyan](https://api.nerinyan.moe/d/${mapMaxInfo.beatmapset_id}) | [Nerinyan (No Vid)](https://api.nerinyan.moe/d/${mapMaxInfo.beatmapset_id}?nv=1) | [Beatconnect](https://beatconnect.io/b/${mapMaxInfo.beatmapset_id})`)
+						.setDescription(`**Download**: [Map](https://osu.ppy.sh/beatmapsets/${mapMaxInfo.beatmapset_id}) | [Nerinyan](https://api.nerinyan.moe/d/${mapMaxInfo.beatmapset_id}) | [Nerinyan (No Vid)](https://api.nerinyan.moe/d/${mapMaxInfo.beatmapset_id}?nv=1) | [Beatconnect](https://beatconnect.io/b/${mapMaxInfo.beatmapset_id})`)
 						.setThumbnail(`https://b.ppy.sh/thumb/${mapMaxInfo.beatmapset_id}l.jpg`)
 						.setURL(`https://osu.ppy.sh/beatmapsets/${mapMaxInfo.beatmapset_id}`)
 						.addFields({ name: "`Mapinfo`", value: `BPM: **${BPM}**\nLength: **${maptimestring}**\nCombo: **${Objectstring}**`, inline: true })
@@ -4503,7 +4535,7 @@ function checkranked() {
 						.setColor("Yellow")
 						.setAuthor({ name: `🎉New Ranked ${mode} Map🎉` })
 						.setTitle(`${mapMaxInfo.artist} - ${mapMaxInfo.title} by ${mapMaxInfo.creator}`)
-						.setDescription(`**Download**: [map](https://osu.ppy.sh/beatmapsets/${mapMaxInfo.beatmapset_id}) | [Nerinyan](https://api.nerinyan.moe/d/${mapMaxInfo.beatmapset_id}) | [Nerinyan (No Vid)](https://api.nerinyan.moe/d/${mapMaxInfo.beatmapset_id}?nv=1) | [Beatconnect](https://beatconnect.io/b/${mapMaxInfo.beatmapset_id})`)
+						.setDescription(`**Download**: [Map](https://osu.ppy.sh/beatmapsets/${mapMaxInfo.beatmapset_id}) | [Nerinyan](https://api.nerinyan.moe/d/${mapMaxInfo.beatmapset_id}) | [Nerinyan (No Vid)](https://api.nerinyan.moe/d/${mapMaxInfo.beatmapset_id}?nv=1) | [Beatconnect](https://beatconnect.io/b/${mapMaxInfo.beatmapset_id})`)
 						.setThumbnail(`https://b.ppy.sh/thumb/${mapMaxInfo.beatmapset_id}l.jpg`)
 						.setURL(`https://osu.ppy.sh/beatmapsets/${mapMaxInfo.beatmapset_id}`)
 						.addFields({ name: "`Mapinfo`", value: `BPM: **${BPM}**\nLength: **${maptimestring}**\nCombo: **${Objectstring}**`, inline: true })
@@ -4610,7 +4642,7 @@ function checkloved() {
 						.setColor("Blue")
 						.setAuthor({ name: `💓New Loved ${mode} Map💓` })
 						.setTitle(`${mapMaxInfo.artist} - ${mapMaxInfo.title} by ${mapMaxInfo.creator}`)
-						.setDescription(`**Download**: [map](https://osu.ppy.sh/beatmapsets/${mapMaxInfo.beatmapset_id}) | [Nerinyan](https://api.nerinyan.moe/d/${mapMaxInfo.beatmapset_id}) | [Nerinyan (No Vid)](https://api.nerinyan.moe/d/${mapMaxInfo.beatmapset_id}?nv=1) | [Beatconnect](https://beatconnect.io/b/${mapMaxInfo.beatmapset_id})`)
+						.setDescription(`**Download**: [Map](https://osu.ppy.sh/beatmapsets/${mapMaxInfo.beatmapset_id}) | [Nerinyan](https://api.nerinyan.moe/d/${mapMaxInfo.beatmapset_id}) | [Nerinyan (No Vid)](https://api.nerinyan.moe/d/${mapMaxInfo.beatmapset_id}?nv=1) | [Beatconnect](https://beatconnect.io/b/${mapMaxInfo.beatmapset_id})`)
 						.setThumbnail(`https://b.ppy.sh/thumb/${mapMaxInfo.beatmapset_id}l.jpg`)
 						.setURL(`https://osu.ppy.sh/beatmapsets/${mapMaxInfo.beatmapset_id}`)
 						.addFields({ name: "`Mapinfo`", value: `BPM: **${BPM}**\nLength: **${maptimestring}**\nCombo: **${Objectstring}**`, inline: true })
@@ -4696,7 +4728,7 @@ async function rankedintheday() {
 					const mindtpp = await minCalculator.calculateDT();
 					let srstring = maxsrpp.sr == minsrpp.sr ? `★${maxsrpp.sr.toFixed(2)} (DT ★${maxdtpp.sr.toFixed(2)})` : `★${minsrpp.sr.toFixed(2)} ~ ${maxsrpp.sr.toFixed(2)} (DT ★${mindtpp.sr.toFixed(2)} ~ ${maxdtpp.sr.toFixed(2)})`;
 					let ppstring = maxsrpp.pp == minsrpp.pp ? `${maxsrpp.pp.toFixed(2)}pp (DT ${maxdtpp.pp.toFixed(2)}pp)` : `${minsrpp.pp.toFixed(2)} ~ ${maxsrpp.pp.toFixed(2)}pp (DT ${mindtpp.pp.toFixed(2)} ~ ${maxdtpp.pp.toFixed(2)}pp)`;
-					sevenDayAgoQf.push({ name : `${count}. **${mapInfo.title} - ${mapInfo.artist}**`, value : `▸Mapped by **${mapInfo.creator}**\n▸SR: ${srstring}\n▸PP: ${ppstring}\n▸**Download** | [map](https://osu.ppy.sh/beatmapsets/${element.id}) | [Nerinyan](https://api.nerinyan.moe/d/${element.id}) | [Nerinyan (No Vid)](https://api.nerinyan.moe/d/${element.id}?nv=1) | [Beatconnect](https://beatconnect.io/b/${element.id})\n**Qualified**: ${year}年 ${month}月 ${day}日 ${Tools.formatNumber(hours)}:${Tools.formatNumber(minutes)}\n` });
+					sevenDayAgoQf.push({ name : `${count}. **${mapInfo.title} - ${mapInfo.artist}**`, value : `▸Mapped by **${mapInfo.creator}**\n▸SR: ${srstring}\n▸PP: ${ppstring}\n▸**Download** | [Map](https://osu.ppy.sh/beatmapsets/${element.id}) | [Nerinyan](https://api.nerinyan.moe/d/${element.id}) | [Nerinyan (No Vid)](https://api.nerinyan.moe/d/${element.id}?nv=1) | [Beatconnect](https://beatconnect.io/b/${element.id})\n**Qualified**: ${year}年 ${month}月 ${day}日 ${Tools.formatNumber(hours)}:${Tools.formatNumber(minutes)}\n` });
 				}
 			} catch (e) {
 				console.log(e);

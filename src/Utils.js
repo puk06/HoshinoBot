@@ -1,6 +1,7 @@
 const path = require("node:path");
 const fs = require("../node_modules/fs-extra");
 const axios = require("../node_modules/axios");
+const cheerio = require("../node_modules/cheerio");
 const ytdl = require("../node_modules/@distube/ytdl-core");
 const ffmpeg = require("../node_modules/fluent-ffmpeg");
 const readline = require("node:readline");
@@ -309,6 +310,21 @@ class Tools {
                 break;
         }
         return passedObjects;
+    }
+
+    static async getBoothItemInfo(url) {
+        const ItemData = await this.getAPIResponse(url)
+            .then(res => {
+                const $ = cheerio.load(res);
+                const title = $('title').text();
+                const author = $('a[data-product-list="from market_show via market_item_detail to shop_index"]').text();
+                const authorUrl = $().attr('href');
+                const authorIcon = $(`img[alt=${author}]`).attr('src');
+                const imageUrl = $('meta[name="twitter:image"]').attr('content');
+                const price = $('.variation-price.u-text-right').text();
+                return { title, author, authorUrl, authorIcon, imageUrl, price };
+            });
+        return ItemData;
     }
 }
 
