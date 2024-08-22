@@ -2359,7 +2359,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 					case "package.json": {
 						const data = await Tools.getAPIResponse(Base_URL + "package.json");
-						fs.writeFileSync("./package.json", data);
+						fs.writeJsonSync("./package.json", data, { spaces: 4, replacer: null });
 						await interaction.reply("package.jsonのアップデートが完了しました。");
 						break;
 					}
@@ -2372,7 +2372,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 						const data3 = await Tools.getAPIResponse(Base_URL + "src/Utils.js");
 						fs.writeFileSync("./src/Utils.js", data3);
 						const data4 = await Tools.getAPIResponse(Base_URL+ "package.json");
-						fs.writeFileSync("./package.json", data4);
+						fs.writeJsonSync("./package.json", data4, { spaces: 4, replacer: null });
 						await interaction.reply("全てのアップデートが完了しました。");
 						break;
 					}
