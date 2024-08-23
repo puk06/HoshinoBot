@@ -321,8 +321,13 @@ class Tools {
                 const authorUrl = $().attr('href');
                 const authorIcon = $(`img[alt=${author}]`).attr('src');
                 const imageUrl = $('meta[name="twitter:image"]').attr('content');
-                const price = $('.variation-price.u-text-right').text();
-                return { title, author, authorUrl, authorIcon, imageUrl, price };
+                let priceString = $('.variation-price.u-text-right').text();
+                const priceArray = priceString
+                    .split('¥')
+                    .filter((price) => price !== '')
+                    .map((price) => Number(price.trim().replace(/,/g, '')).toLocaleString() + "円\n");
+                priceString = priceArray.join("");
+                return { title, author, authorUrl, authorIcon, imageUrl, priceString };
             });
         return ItemData;
     }

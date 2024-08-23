@@ -3066,7 +3066,7 @@ client.on(Events.MessageCreate, async (message) =>
 					.setTitle(ItemData.title)
 					.setURL(message.content)
 					.setAuthor({ name: ItemData.author, iconURL: ItemData.authorIcon, url: ItemData.authorUrl })
-					.addFields({ name: "価格", value: `${ItemData.price}`, inline: true })
+					.addFields({ name: "価格", value: `${ItemData.priceString}`, inline: true })
 					.addFields({ name: "購入ページ", value: `[Booth](${message.content})`, inline: true })
 					.setImage(ItemData.imageUrl)
 					.setFooter({ text: `Booth item by ${ItemData.author}` });
