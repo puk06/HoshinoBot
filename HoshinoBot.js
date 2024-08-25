@@ -4137,33 +4137,10 @@ client.on(Events.MessageCreate, async (message) =>
 						helpMessage += "- `9: サーバーでの発言回数関連のコマンド`\n";
 						helpMessage += "- `10: その他のコマンド`\n";
 						helpMessage += "- `11: 管理者専用コマンド`\n";
+						await message.reply(helpMessage);
+						break;
 					}
 				}
-
-				const commandInfo = {
-					"h!help": "コマンドのヘルプを表示します。",
-					"!osureg [osu! Username]": "osu!のユーザー名を登録します。コマンドでユーザー名を省略することができるようになります！",
-					"!map [maplink] (mods) (acc)": "指定した譜面の情報を表示します。modsとaccは省略可能です。",
-					"!c (maplink) (username)": "ユーザーのそのマップでの記録(最大5個)を表示します。usernameは登録していれば省略可能です。マップリンクも省略可です。",
-					"!r(o, t, c, m) (username)": "ユーザーの最新のosu!std、taiko、catch、maniaの記録を表示します。usernameは登録していれば省略可能です。stdは!rでも!roでも実行可能です。",
-					"!wi[o, t, c, m] [pp] (username)": "ユーザーが指定したppを新しく取得したときのppを表示します。usernameは省略可能です。",
-					"!m [mods]": "直近に送信された譜面にmodsをつけてppを表示します。/linkコマンドで有効になります。",
-					"!skip": "osubgquiz、osubgquizpf、osuquiz、osuquizpfコマンドで使用できます。現在の問題をスキップします。",
-					"!hint": "osubgquiz、osubgquizpf、osuquiz、osuquizpfコマンドで使用できます。現在の問題のヒントを表示します。",
-					"!ero": "エロあるよ（笑）が10%の確率で出ます。",
-					"!nja": "10%の確率で出るのはナイジェリア人の男たちだった。",
-					"〇〇?": "クイズの答えを送信します。クイズが有効になっているときに使用できます。",
-					"osuマップリンク": "マップ情報を計算して表示します。/linkで有効化できます。",
-					"四則演算式(1+1, 1-1, 1*1, 1/1, 1^1など)": "計算機です。チャットに書かれると計算します。",
-					"時間計算(123.7時間、123.7分など)": "時間計算機です。チャットに書かれると時間を計算します。"
-				};
-			
-				let sendMessage = "__\*\*コマンド一覧\*\*\__\n";
-				for (const [key, value] of Object.entries(commandInfo)) {
-					sendMessage += `- \`\`\`${key} | ${value}\`\`\`\n`;
-				}
-
-				await message.reply(sendMessage);
 				return;
 			}
 
