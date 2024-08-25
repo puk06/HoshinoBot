@@ -3980,31 +3980,39 @@ client.on(Events.MessageCreate, async (message) =>
 			if (message.content.split(" ")[0] == "h!help") {
 				commandLogs(message, "ヘルプ", 1);
 				const Arg = message.content.split(" ")[1];
-				//カジノのコマンド
 				switch (Arg) {
-					case "casino(1ページ目)": {
+					case "1": {
 						let casinoMessage = "__\*\*カジノの遊び方(1ページ目)\*\*\__\n";
 						casinoMessage += "- `/medal`でコインからメダルに\n";
 						casinoMessage += "- `/coin`でメダルからコインに変えることができます。\n";
 						casinoMessage += "- `/slot`で遊ぶことができます。\n";
-						casinoMessage += "- `/slotgraph`でスランプのグラフが表示され\n";
+						casinoMessage += "- `/slotgraph`でスランプのグラフが表示されます。\n";
 						casinoMessage += "- `/slothistory`で当たりの履歴を見ることができます。\n";
 						casinoMessage += "**Typeがレートで、5コイン1メダル、20コイン1メダルから選べます**\n\n";
 						casinoMessage += "__\*\*コインフリップの遊び方\*\*\__\n";
 						casinoMessage += "- `/coinflip`でゲームを開始できます。\n";
-						casinoMessage += "- 参加したい人がいる場合、`/join`を入力することで参加できます。\n";
-						casinoMessage += "- BOTを追加したい場合、`/addbot`を入力することでBOTと戦うことができます。\n";
-
 						await message.reply(casinoMessage);
 						break;
 					}
 
-					case "casino(2ページ目)": {
-						let casinoMessage = "__\*\*カジノの遊び方(2ページ目)\*\*\__\n";
-						
+					case "2": {
+						let casinoMessage = "__\*\*カジノ全般で使えるコマンド\*\*\__\n";
+						casinoMessage += "- 参加したい場合、`/join`を入力することで参加できます。\n";
+						casinoMessage += "- ゲームをやめたい場合、`/leave`を入力することでゲームをやめることができます。\n";
+						casinoMessage += "- ゲームの途中でやめたい場合、`/cancel`を入力することでゲームを途中でやめることができます。\n";
+						casinoMessage += "- 現在のゲームにBOTを追加したい場合、`/addbot`を入力することでBOTと戦うことができます。\n";
+						casinoMessage += "- `/bank`で現在の銀行残高、スロットコインの所持量がわかります。\n";
+						casinoMessage += "- `/bankranking`で銀行残高のランキングが見れます。\n";
+						casinoMessage += "- `/lv`でカジノのレベルが見れます。\n"
+						casinoMessage += "- `/regcasino`でカジノに登録します。\n";
+						casinoMessage += "- `/send`で人にお金を送ることが出来ます。\n";
+						casinoMessage += "- `/dice`でサイコロが増えます。\n";
+						casinoMessage += "- `/roulette`でルーレットが引けます。\n";
+						await message.reply(casinoMessage);
+						break;
 					}
 
-					case "osu(!コマンド)": {
+					case "3": {
 						let osuMessage = "__\*\*osu!のコマンド一覧(!〇〇)\*\*\__\n";
 						osuMessage += "- `!osureg [osu! Username]`でosu!のユーザー名を登録します。スラッシュコマンドもあります\n";
 						osuMessage += "- `!map [maplink] (mods) (acc)`で指定した譜面の情報を表示します。modsとaccは省略可能です。\n";
@@ -4019,7 +4027,7 @@ client.on(Events.MessageCreate, async (message) =>
 						break
 					}
 
-					case "osu(スラッシュコマンド)1ページ目": {
+					case "4": {
 						let osuMessage = "__\*\*osu!のスラッシュコマンド一覧(1ページ目)\*\*\__\n";
 						osuMessage += "- `/osureg [Username]`でosu!のユーザー名を登録します。\n";
 						osuMessage += "- `/calculatepp [beatmapFile] [mode] (mods)`で送信されたosuファイルのPPを計算します。\n";
@@ -4028,12 +4036,13 @@ client.on(Events.MessageCreate, async (message) =>
 						osuMessage += "- `/qf (Mode)`で、送られたチャンネルをQF/Rankチェックチャンネルに変えます。\n";
 						osuMessage += "- `/qfmention`で、QFチェックチャンネルでメンションを送るかどうかを変更します。\n";
 						osuMessage += "- `/rankedmention (Mode)`で、Rankedチェックチャンネルでメンションを送るかどうかを変更します。\n";
-
+						osuMessage += "- `/preview [BeatmapLink]`で、送られたマップのプレビューリンクを表示します。\n";
+						osuMessage += "- `/srchart [BeatmapLink]`で、SRのチャート画像を表示します。\n";
 						await message.reply(osuMessage);
 						break;
 					}
 
-					case "osu(スラッシュコマンド)2ページ目": {
+					case "5": {
 						let osuMessage = "__\*\*osu!のスラッシュコマンド一覧(2ページ目)\*\*\__\n";
 						osuMessage += "- `/ifmod [BeatmapLink] [Mods] (Username) (Scoreの種類)`で、送られたマップのスコアのModsを変更してPPを計算します。\n";
 						osuMessage += "- `/lb [BeatmapLink] (Mods)`で、指定されたModsでのランキングを表示します。n";
@@ -4043,8 +4052,91 @@ client.on(Events.MessageCreate, async (message) =>
 						osuMessage += "- `/quizend`でクイズを終了します。\n";
 						osuMessage += "- `/osureg (Username)`でほしのbotにosu!のユーザー名を登録します。\n";
 						osuMessage += "- `/link`でチャンネル内でビートマップリンクが送られた時にマップ情報を表示します。\n";
+						osuMessage += "- `/osusearch [query] [mode]`でosu!のビートマップを検索します。\n";
 						await message.reply(osuMessage);
 						break;
+					}
+
+					case "6": {
+						let imageMessage = "__\*\*画像関連のコマンド\*\*\__\n";
+						imageMessage += "- `/kemo`でけも画像を表示します\n";
+						imageMessage += "- `/kemodelete`で特定のけも画像を消します。";
+						imageMessage += "- `/kemocount`でけも画像の数を表示します。\n";
+						imageMessage += "- `/pic`で指定したタグの画像を表示します。\n";
+						imageMessage += "- `/alltags`ですべてのタグの一覧を表示します。\n";
+						imageMessage += "- `/piccount`で指定したタグの画像の数を表示します。\n";
+						imageMessage += "- `/settag`で送られたチャンネルをpicタグに設定します。\n";
+						imageMessage += "- `/deltag`で送られたチャンネルのpicタグを消します。\n";
+						await message.reply(imageMessage);
+						break;
+					}
+
+					case "7": {
+						let quoteMessage = "__\*\*名言関連のコマンド\*\*\__\n";
+						quoteMessage += "- `/quote`で指定したタグの名言を表示します。\n";
+						quoteMessage += "- `/delquote`指定した名言を削除します。\n";
+						quoteMessage += "- `/allquotetags`ですべてのタグの一覧を表示します。\n";
+						quoteMessage += "- `/quotecount`で指定したタグの名言の数を表示します。\n";
+						quoteMessage += "- `/setquotetag`で送られたチャンネルをquoteタグに設定します。\n";
+						quoteMessage += "- `/delquotetag`で送られたチャンネルのquoteタグを消します。\n";
+						await message.reply(quoteMessage);
+						break;
+					}
+
+					case "8": {
+						let sbMessage = "__\*\*スカイブロック関連のコマンド\*\*\__\n";
+						sbMessage += "- `/ratchecker [file] (output)`で、送られたChattrigger ModuleにRatが含まれているかを確認します。\n";
+						await message.reply(sbMessage);
+						break;
+					}
+
+					case "9": {
+						let talkMessage = "__\*\*サーバーでの発言回数関連のコマンド\*\*\__\n";
+						talkMessage += "- `/talkcount`であなたがこのサーバーでどのくらい話したかを表示します。\n";
+						talkMessage += "- `/talkranking`でこのサーバーでの話した回数のランキングを表示します。\n";
+						talkMessage += "- `/talklevel`であなたのこのサーバーでの話した回数をレベルを表示します。\n";
+						talkMessage += "- `/talklevelranking`でこのサーバーでの話した回数のレベルランキングを表示します。\n";
+						await message.reply(talkMessage);
+						break;
+					}
+
+					case "10": {
+						let otherMessage = "__\*\*その他のコマンド\*\*\__\n";
+						otherMessage += "- `/tweetdownloader [URL]`でツイートの画像をダウンロードします。\n";
+						otherMessage += "- `/youtubedownloader [URL]`でYouTubeの動画をダウンロードします。\n";
+						otherMessage += "- `/loc [username] [repo]`で指定したユーザーの指定したリポジトリの行数を表示します。\n";
+						otherMessage += "- `/echo [Message]`で送られたメッセージを代わりに送ります。\n";
+						otherMessage += "- `/kawaii [tag]`でいい感じの画像をAPIから持ってきます。\n";
+						otherMessage += "- `!calc 四則演算式`で計算します。\n";
+						otherMessage += "- `時間計算(123.7時間、123.7分など)`で時間を計算します。\n";
+						await message.reply(otherMessage);
+						break;
+					}
+
+					case "11": {
+						let adminMessage = "__\*\*管理者専用コマンド\*\*\__\n";
+						adminMessage += "- `/update [File]`でBotを更新します。\n";
+						adminMessage += "- `/restart`でBotを再起動します。\n";
+						adminMessage += "- `/backup [Time]`でバックアップを復元します。\n";
+						adminMessage += "- `/backuplist`でバックアップのリストを表示します。\n";
+						adminMessage += "- `/backupcreate`でバックアップを作成します。\n";
+						await message.reply(adminMessage);
+						break;
+					}
+
+					default: {
+						let helpMessage = "__\*\*目次\*\*\__\n";
+						helpMessage += "- `1: カジノ`\n";
+						helpMessage += "- `2: カジノ(2ページ目)`\n";
+						helpMessage += "- `3: osu!`\n";
+						helpMessage += "- `4: osu!(スラッシュコマンド)`\n";
+						helpMessage += "- `5: osu!(スラッシュコマンド2)`\n";
+						helpMessage += "- `6: 画像関連のコマンド`\n";
+						helpMessage += "- `7: 名言関連のコマンド`\n";
+						helpMessage += "- `8: スカイブロック関連のコマンド`\n";
+						helpMessage += "- `9: サーバーでの発言回数関連のコマンド`\n";
+						helpMessage += "- `10: その他のコマンド`\n";
+						helpMessage += "- `11: 管理者専用コマンド`\n";
 					}
 				}
 
@@ -4244,18 +4336,18 @@ async function checkMap() {
 
 function checkqualified() {
 	return new Promise (async resolve => {
-		const modeArray = ["osu", "taiko", "catch", "mania"];
-		for (const mode of modeArray) {
+		const gameModes = ["osu", "taiko", "catch", "mania"];
+		for (const mode of gameModes) {
 			try {
 				
-				const qfdatalist = await v2.beatmaps.search({
+				const qualifiedBeatmaps = await v2.beatmaps.search({
 					mode: Tools.modeConvertSearch(mode),
 					section: "qualified"
 				});
-				if (qfdatalist.beatmapsets == undefined) continue;
+				if (qualifiedBeatmaps.beatmapsets == undefined) continue;
 				let qfarray = [];
-				for (let i = 0; i < Math.min(qfdatalist.beatmapsets.length, 15); i++) {
-					qfarray.push(qfdatalist.beatmapsets[i].id);
+				for (let i = 0; i < Math.min(qualifiedBeatmaps.beatmapsets.length, 15); i++) {
+					qfarray.push(qualifiedBeatmaps.beatmapsets[i].id);
 				}
 				let allBeatmaps = fs.readJsonSync("./ServerDatas/Beatmaps/Beatmaps.json");
 				const differentQFarray = Tools.findDifferentElements(allBeatmaps.Qualified[mode], qfarray);
@@ -4418,16 +4510,16 @@ function checkqualified() {
 
 function checkranked() {
 	return new Promise (async resolve => {
-		const modeArray = ["osu", "taiko", "catch", "mania"];
-		for (const mode of modeArray) {
-			const rankeddatalist = await v2.beatmaps.search({
+		const gameModes = ["osu", "taiko", "catch", "mania"];
+		for (const mode of gameModes) {
+			const rankedDataList = await v2.beatmaps.search({
 				mode: Tools.modeConvertSearch(mode),
 				section: "ranked"
 			});
-			if (rankeddatalist.beatmapsets == undefined) continue;
+			if (rankedDataList.beatmapsets == undefined) continue;
 			let rankedarray = [];
-			for (let i = 0; i < Math.min(rankeddatalist.beatmapsets.length, 15); i++) {
-				rankedarray.push(rankeddatalist.beatmapsets[i].id);
+			for (let i = 0; i < Math.min(rankedDataList.beatmapsets.length, 15); i++) {
+				rankedarray.push(rankedDataList.beatmapsets[i].id);
 			}
 			let allBeatmaps = fs.readJsonSync("./ServerDatas/Beatmaps/Beatmaps.json");
 			const differentrankedarray = Tools.findDifferentElements(allBeatmaps.Ranked[mode], rankedarray);
@@ -4437,12 +4529,12 @@ function checkranked() {
 			if (differentrankedarray == null) continue;
 			for (const differentranked of differentrankedarray) {
 				try {
-					let qfparsedjson = fs.readJsonSync(`./ServerDatas/Beatmaps/${mode}.json`);
-					let rankederrorstring = "取得できませんでした";
-					for (const element of qfparsedjson) {
+					let beatmapData = fs.readJsonSync(`./ServerDatas/Beatmaps/${mode}.json`);
+					let errorMessage = "取得できませんでした";
+					for (const element of beatmapData) {
 						if (element.id == differentranked) {
 							element.rankeddate = new Date();
-							fs.writeJsonSync(`./ServerDatas/Beatmaps/${mode}.json`, qfparsedjson, { spaces: 4, replacer: null });
+							fs.writeJsonSync(`./ServerDatas/Beatmaps/${mode}.json`, beatmapData, { spaces: 4, replacer: null });
 							const qfdate = new Date(element.qfdate);
 							const rankeddate = new Date(element.rankeddate);
 							const timeDifference = rankeddate - qfdate;
@@ -4457,16 +4549,16 @@ function checkranked() {
 							const hours = Math.floor((absDiff % oneDay) / oneHour);
 							const minutes = Math.floor((absDiff % oneHour) / oneMinute);
 							if (days == 0 && hours == 0) {
-								rankederrorstring = `${sign} ${minutes}分`;
+								errorMessage = `${sign} ${minutes}分`;
 							} else if (days == 0 && hours != 0) {
-								rankederrorstring = `${sign} ${hours}時間 ${minutes}分`;
+								errorMessage = `${sign} ${hours}時間 ${minutes}分`;
 							} else {
-								rankederrorstring = `${sign} ${days}日 ${hours}時間 ${minutes}分`;
+								errorMessage = `${sign} ${days}日 ${hours}時間 ${minutes}分`;
 							}
 							break;
 						}
 					}
-					qfparsedjson = null;
+					beatmapData = null;
 		
 					let rankedBeatmapsMaxSrId;
 					let rankedBeatmapsMinSrId;
@@ -4542,7 +4634,7 @@ function checkranked() {
 						.addFields({ name: "`Beatmap Nominator`", value: nominatorString, inline: true })
 						.addFields({ name: "`SR`", value: `**${srstring}**`, inline: false })
 						.addFields({ name: "`PP`", value: `**${ppstring}**`, inline: false })
-						.addFields({ name: "`Ranked 日時`", value: `**${dateString}** (誤差: **${rankederrorstring}**)`, inline: true });
+						.addFields({ name: "`Ranked 日時`", value: `**${dateString}** (誤差: **${errorMessage}**)`, inline: true });
 					let MapcheckChannels = fs.readJsonSync(`./ServerDatas/MapcheckChannels.json`);
 					for (const element of MapcheckChannels.Qualified[mode]) {
 						try {
@@ -4578,42 +4670,42 @@ function checkranked() {
 
 function checkloved() {
 	return new Promise(async resolve => {
-		const modeArray = ["osu", "taiko", "catch", "mania"];
-		for (const mode of modeArray) {
-			const loveddatalist = await v2.beatmaps.search({
+		const gameModes = ["osu", "taiko", "catch", "mania"];
+		for (const mode of gameModes) {
+			const lovedDataList = await v2.beatmaps.search({
 				mode: Tools.modeConvertSearch(mode),
 				section: "loved"
 			});
-			if (loveddatalist.beatmapsets == undefined) continue;
+			if (lovedDataList.beatmapsets == undefined) continue;
 			let lovedarray = [];
-			for (let i = 0; i < Math.min(loveddatalist.beatmapsets.length, 15); i++) {
-				lovedarray.push(loveddatalist.beatmapsets[i].id);
+			for (let i = 0; i < Math.min(lovedDataList.beatmapsets.length, 15); i++) {
+				lovedarray.push(lovedDataList.beatmapsets[i].id);
 			}
-			let allBeatmaps = fs.readJsonSync("./ServerDatas/Beatmaps/Beatmaps.json");
-			const differentlovedarray = Tools.findDifferentElements(allBeatmaps.Loved[mode], lovedarray);
-			allBeatmaps.Loved[mode] = lovedarray;
-			fs.writeJsonSync("./ServerDatas/Beatmaps/Beatmaps.json", allBeatmaps, { spaces: 4, replacer: null });
-			allBeatmaps = null;
+			let beatmapData = fs.readJsonSync("./ServerDatas/Beatmaps/Beatmaps.json");
+			const differentlovedarray = Tools.findDifferentElements(beatmapData.Loved[mode], lovedarray);
+			beatmapData.Loved[mode] = lovedarray;
+			fs.writeJsonSync("./ServerDatas/Beatmaps/Beatmaps.json", beatmapData, { spaces: 4, replacer: null });
+			beatmapData = null;
 			if (differentlovedarray == null) continue;
 			for (const differentloved of differentlovedarray) {
 				try {
-					let lovedBeatmapsMaxSrId;
-					let lovedBeatmapsMinSrId;
+					let maxStarRatingOfLovedBeatmaps;
+					let minStarRatingofLovedMaps;
 					await v2.beatmap.set.details(differentloved).then(res => {
 						const array = res.beatmaps;
 						array.sort((a, b) => a.difficulty_rating - b.difficulty_rating);
 						const maxRatingObj = array[array.length - 1];
 						const minRatingObj = array[0];
-						lovedBeatmapsMaxSrId = maxRatingObj.id;
-						lovedBeatmapsMinSrId = minRatingObj.id;
+						maxStarRatingOfLovedBeatmaps = maxRatingObj.id;
+						minStarRatingofLovedMaps = minRatingObj.id;
 					});
-					if (lovedBeatmapsMaxSrId == undefined || lovedBeatmapsMinSrId == undefined) continue;
+					if (maxStarRatingOfLovedBeatmaps == undefined || minStarRatingofLovedMaps == undefined) continue;
 
-					const mapMaxInfo = await new osuLibrary.GetMapData(lovedBeatmapsMaxSrId, apikey, Tools.modeConvertMap(mode)).getData();
-					const mapMinInfo = await new osuLibrary.GetMapData(lovedBeatmapsMinSrId, apikey, Tools.modeConvertMap(mode)).getData();
+					const mapMaxInfo = await new osuLibrary.GetMapData(maxStarRatingOfLovedBeatmaps, apikey, Tools.modeConvertMap(mode)).getData();
+					const mapMinInfo = await new osuLibrary.GetMapData(minStarRatingofLovedMaps, apikey, Tools.modeConvertMap(mode)).getData();
 
-					const maxCalculator = new osuLibrary.CalculatePPSR(lovedBeatmapsMaxSrId, 0, Tools.modeConvertMap(mode));
-					const minCalculator = new osuLibrary.CalculatePPSR(lovedBeatmapsMinSrId, 0, Tools.modeConvertMap(mode));
+					const maxCalculator = new osuLibrary.CalculatePPSR(maxStarRatingOfLovedBeatmaps, 0, Tools.modeConvertMap(mode));
+					const minCalculator = new osuLibrary.CalculatePPSR(minStarRatingofLovedMaps, 0, Tools.modeConvertMap(mode));
 					const maxsrpp = await maxCalculator.calculateSR();
 					const minsrpp = await minCalculator.calculateSR();
 					const maxdtpp = await maxCalculator.calculateDT();
@@ -4625,9 +4717,9 @@ function checkloved() {
 					let Objectstring = minCombo == maxCombo ? `${maxCombo}` : `${minCombo} ~ ${maxCombo}`;
 					const lengthsec = mapMaxInfo.hit_length;
 					const lengthsecDT = Math.round(Number(mapMaxInfo.hit_length) / 1.5);
-					const maptime = Tools.formatTime(lengthsec);
+					const formattedTime = Tools.formatTime(lengthsec);
 					const maptimeDT = Tools.formatTime(lengthsecDT);
-					const maptimestring = `${maptime} (DT ${maptimeDT})`;
+					const maptimestring = `${formattedTime} (DT ${maptimeDT})`;
 		
 					const now = new Date();
 					const month = now.getMonth() + 1;
@@ -4682,21 +4774,21 @@ function checkloved() {
 }
 
 async function rankedintheday() {
-	const modeArray = ["osu", "taiko", "catch", "mania"];
-	for (const mode of modeArray) {
-		let qfparsedjson = fs.readJsonSync(`./ServerDatas/Beatmaps/${mode}.json`);
+	const gameModes = ["osu", "taiko", "catch", "mania"];
+	for (const mode of gameModes) {
+		let beatmapJson = fs.readJsonSync(`./ServerDatas/Beatmaps/${mode}.json`);
 		const now = new Date();
-		const sevenDayAgoDate = new Date();
-		sevenDayAgoDate.setDate(sevenDayAgoDate.getDate() - 7);
-		const sevenDayAgoDateString = `${sevenDayAgoDate.getFullYear()}-${sevenDayAgoDate.getMonth() + 1}-${sevenDayAgoDate.getDate()}`;
-		let sevenDayAgoQf = [];
+		const lastWeekDate = new Date();
+		lastWeekDate.setDate(lastWeekDate.getDate() - 7);
+		const formattedDate = `${lastWeekDate.getFullYear()}-${lastWeekDate.getMonth() + 1}-${lastWeekDate.getDate()}`;
+		let previousWeekQueries = [];
 		let count = 0;
-		for (const element of qfparsedjson) {
+		for (const element of beatmapJson) {
 			if (count >= 10) break;
 			try {
-				const qfdate = new Date(element.qfdate);
-				const qfdateString = `${qfdate.getFullYear()}-${qfdate.getMonth() + 1}-${qfdate.getDate()}`;
-				if (qfdateString == sevenDayAgoDateString) {
+				const qfDateTime = new Date(element.qfdate);
+				const qfFormattedDate = `${qfDateTime.getFullYear()}-${qfDateTime.getMonth() + 1}-${qfDateTime.getDate()}`;
+				if (qfFormattedDate == formattedDate) {
 					if (element.rankeddate != "-") continue;
 					count++;
 					const date = new Date(element.qfdate);
@@ -4706,47 +4798,47 @@ async function rankedintheday() {
 					const hours = date.getHours();
 					const minutes = date.getMinutes();
 
-					let QFBeatmapsMaxSrId;
-					let QFBeatmapsMinSrId;
+					let MaxSrIdForQFBeatmaps;
+					let MinSrIdBeatmapsQF;
 					await v2.beatmap.set.details(element.id).then(res => {
-						const array = res.beatmaps;
-						array.sort((a, b) => a.difficulty_rating - b.difficulty_rating);
-						const maxRatingObj = array[array.length - 1];
-						const minRatingObj = array[0];
-						QFBeatmapsMaxSrId = maxRatingObj.id;
-						QFBeatmapsMinSrId = minRatingObj.id;
+						const beatmapsArray = res.beatmaps;
+						beatmapsArray.sort((a, b) => a.difficulty_rating - b.difficulty_rating);
+						const highestRatingObj = beatmapsArray[beatmapsArray.length - 1];
+						const minimumRatingObject = beatmapsArray[0];
+						MaxSrIdForQFBeatmaps = highestRatingObj.id;
+						MinSrIdBeatmapsQF = minimumRatingObject.id;
 					});
-					if (QFBeatmapsMaxSrId == undefined || QFBeatmapsMinSrId == undefined) continue;
+					if (MaxSrIdForQFBeatmaps == undefined || MinSrIdBeatmapsQF == undefined) continue;
 
-					const mapInfo = await new osuLibrary.GetMapData(QFBeatmapsMaxSrId, apikey, Tools.modeConvertMap(mode)).getData();
+					const mapInformation = await new osuLibrary.GetMapData(MaxSrIdForQFBeatmaps, apikey, Tools.modeConvertMap(mode)).getData();
 
-					const maxCalculator = new osuLibrary.CalculatePPSR(QFBeatmapsMaxSrId, 0, Tools.modeConvertMap(mode));
-					const minCalculator = new osuLibrary.CalculatePPSR(QFBeatmapsMinSrId, 0, Tools.modeConvertMap(mode));
-					const maxsrpp = await maxCalculator.calculateSR();
-					const minsrpp = await minCalculator.calculateSR();
-					const maxdtpp = await maxCalculator.calculateDT();
-					const mindtpp = await minCalculator.calculateDT();
-					let srstring = maxsrpp.sr == minsrpp.sr ? `★${maxsrpp.sr.toFixed(2)} (DT ★${maxdtpp.sr.toFixed(2)})` : `★${minsrpp.sr.toFixed(2)} ~ ${maxsrpp.sr.toFixed(2)} (DT ★${mindtpp.sr.toFixed(2)} ~ ${maxdtpp.sr.toFixed(2)})`;
-					let ppstring = maxsrpp.pp == minsrpp.pp ? `${maxsrpp.pp.toFixed(2)}pp (DT ${maxdtpp.pp.toFixed(2)}pp)` : `${minsrpp.pp.toFixed(2)} ~ ${maxsrpp.pp.toFixed(2)}pp (DT ${mindtpp.pp.toFixed(2)} ~ ${maxdtpp.pp.toFixed(2)}pp)`;
-					sevenDayAgoQf.push({ name : `${count}. **${mapInfo.title} - ${mapInfo.artist}**`, value : `▸Mapped by **${mapInfo.creator}**\n▸SR: ${srstring}\n▸PP: ${ppstring}\n▸**Download** | [Map](https://osu.ppy.sh/beatmapsets/${element.id}) | [Nerinyan](https://api.nerinyan.moe/d/${element.id}) | [Nerinyan (No Vid)](https://api.nerinyan.moe/d/${element.id}?nv=1) | [Beatconnect](https://beatconnect.io/b/${element.id})\n**Qualified**: ${year}年 ${month}月 ${day}日 ${Tools.formatNumber(hours)}:${Tools.formatNumber(minutes)}\n` });
+					const osuMaxPPCalculator = new osuLibrary.CalculatePPSR(MaxSrIdForQFBeatmaps, 0, Tools.modeConvertMap(mode));
+					const osuMinPPCalculator = new osuLibrary.CalculatePPSR(MinSrIdBeatmapsQF, 0, Tools.modeConvertMap(mode));
+					const maxStarRatingPPSR = await osuMaxPPCalculator.calculateSR();
+					const minStarRatingPPSR = await osuMinPPCalculator.calculateSR();
+					const maxdtpp = await osuMaxPPCalculator.calculateDT();
+					const mindtpp = await osuMinPPCalculator.calculateDT();
+					let srString = maxStarRatingPPSR.sr == minStarRatingPPSR.sr ? `★${maxStarRatingPPSR.sr.toFixed(2)} (DT ★${maxdtpp.sr.toFixed(2)})` : `★${minStarRatingPPSR.sr.toFixed(2)} ~ ${maxStarRatingPPSR.sr.toFixed(2)} (DT ★${mindtpp.sr.toFixed(2)} ~ ${maxdtpp.sr.toFixed(2)})`;
+					let ppString = maxStarRatingPPSR.pp == minStarRatingPPSR.pp ? `${maxStarRatingPPSR.pp.toFixed(2)}pp (DT ${maxdtpp.pp.toFixed(2)}pp)` : `${minStarRatingPPSR.pp.toFixed(2)} ~ ${maxStarRatingPPSR.pp.toFixed(2)}pp (DT ${mindtpp.pp.toFixed(2)} ~ ${maxdtpp.pp.toFixed(2)}pp)`;
+					previousWeekQueries.push({ name : `${count}. **${mapInformation.title} - ${mapInformation.artist}**`, value : `▸Mapped by **${mapInformation.creator}**\n▸SR: ${srString}\n▸PP: ${ppString}\n▸**Download** | [Map](https://osu.ppy.sh/beatmapsets/${element.id}) | [Nerinyan](https://api.nerinyan.moe/d/${element.id}) | [Nerinyan (No Vid)](https://api.nerinyan.moe/d/${element.id}?nv=1) | [Beatconnect](https://beatconnect.io/b/${element.id})\n**Qualified**: ${year}年 ${month}月 ${day}日 ${Tools.formatNumber(hours)}:${Tools.formatNumber(minutes)}\n` });
 				}
 			} catch (e) {
 				console.log(e);
 				continue;
 			}
 		}
-		qfparsedjson = null;
+		beatmapJson = null;
 
-		if (sevenDayAgoQf.length == 0) sevenDayAgoQf.push({ name : `**今日Ranked予定の${mode}譜面はありません**`, value : `チェック日時: ${now.getFullYear()}年 ${now.getMonth() + 1}月 ${now.getDate()}日 ${Tools.formatNumber(now.getHours())}:${Tools.formatNumber(now.getMinutes())}` });
+		if (previousWeekQueries.length == 0) previousWeekQueries.push({ name : `**今日Ranked予定の${mode}譜面はありません**`, value : `チェック日時: ${now.getFullYear()}年 ${now.getMonth() + 1}月 ${now.getDate()}日 ${Tools.formatNumber(now.getHours())}:${Tools.formatNumber(now.getMinutes())}` });
 
 		const embed = new EmbedBuilder()
 			.setColor("Yellow")
 			.setAuthor({ name: `🎉Daily Ranked Check🎉` })
 			.setTitle(`日付が変わりました！今日Ranked予定の${mode}マップのリストです！`)
-			.addFields(sevenDayAgoQf)
+			.addFields(previousWeekQueries)
 			.setFooter({ text: `このメッセージは毎日0時に送信されます(最大10マップ)。既にRankedされた譜面は表示されません。` });
-		let MapcheckChannels = fs.readJsonSync(`./ServerDatas/MapcheckChannels.json`);
-		for (const element of MapcheckChannels.Qualified[mode]) {
+		let MapCheckChannels = fs.readJsonSync(`./ServerDatas/MapcheckChannels.json`);
+		for (const element of MapCheckChannels.Qualified[mode]) {
 			try {
 				if (client.channels.cache?.get(element) == undefined) continue;
 				await client.channels.cache.get(element).send({ embeds: [embed] });
@@ -4754,7 +4846,7 @@ async function rankedintheday() {
 				continue;
 			}
 		}
-		MapcheckChannels = null;
+		MapCheckChannels = null;
 	}
 }
 

@@ -322,11 +322,11 @@ class Tools {
                 const authorIcon = $(`img[alt=${author}]`).attr('src');
                 const imageUrl = $('meta[name="twitter:image"]').attr('content');
                 let priceString = $('.variation-price.u-text-right').text();
-                const priceArray = priceString
+                priceString = priceString
                     .split('¥')
                     .filter((price) => price !== '')
-                    .map((price) => Number(price.trim().replace(/,/g, '')).toLocaleString() + "円\n");
-                priceString = priceArray.join("");
+                    .map((price) => Number(price.trim().replace(/,/g, '')).toLocaleString() + "円\n")
+                    .join("");
                 return { title, author, authorUrl, authorIcon, imageUrl, priceString };
             });
         return ItemData;
