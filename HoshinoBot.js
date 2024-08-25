@@ -4031,7 +4031,7 @@ client.on(Events.MessageCreate, async (message) =>
 						let osuMessage = "__\*\*osu!のスラッシュコマンド一覧(1ページ目)\*\*\__\n";
 						osuMessage += "- `/osureg [Username]`でosu!のユーザー名を登録します。\n";
 						osuMessage += "- `/calculatepp [beatmapFile] [mode] (mods)`で送信されたosuファイルのPPを計算します。\n";
-						osuMessage += "- `/loved`で、送られたチャンネルをLovedチェックチャンネルに変えます。\n";
+						osuMessage += "- `/loved (Mode)`で、送られたチャンネルをLovedチェックチャンネルに変えます。\n";
 						osuMessage += "- `/lovedmention (Mode)`で、Lovedチェックチャンネルでメンションを送るかどうかを変更します。\n";
 						osuMessage += "- `/qf (Mode)`で、送られたチャンネルをQF/Rankチェックチャンネルに変えます。\n";
 						osuMessage += "- `/qfmention`で、QFチェックチャンネルでメンションを送るかどうかを変更します。\n";
@@ -4060,11 +4060,11 @@ client.on(Events.MessageCreate, async (message) =>
 					case "6": {
 						let imageMessage = "__\*\*画像関連のコマンド\*\*\__\n";
 						imageMessage += "- `/kemo`でけも画像を表示します\n";
-						imageMessage += "- `/kemodelete`で特定のけも画像を消します。";
+						imageMessage += "- `/kemodelete [Index]`で特定のけも画像を消します。";
 						imageMessage += "- `/kemocount`でけも画像の数を表示します。\n";
-						imageMessage += "- `/pic`で指定したタグの画像を表示します。\n";
+						imageMessage += "- `/pic [Tag]`で指定したタグの画像を表示します。\n";
 						imageMessage += "- `/alltags`ですべてのタグの一覧を表示します。\n";
-						imageMessage += "- `/piccount`で指定したタグの画像の数を表示します。\n";
+						imageMessage += "- `/piccount [Tag]`で指定したタグの画像の数を表示します。\n";
 						imageMessage += "- `/settag`で送られたチャンネルをpicタグに設定します。\n";
 						imageMessage += "- `/deltag`で送られたチャンネルのpicタグを消します。\n";
 						await message.reply(imageMessage);
@@ -4073,10 +4073,10 @@ client.on(Events.MessageCreate, async (message) =>
 
 					case "7": {
 						let quoteMessage = "__\*\*名言関連のコマンド\*\*\__\n";
-						quoteMessage += "- `/quote`で指定したタグの名言を表示します。\n";
-						quoteMessage += "- `/delquote`指定した名言を削除します。\n";
+						quoteMessage += "- `/quote [Tag]`で指定したタグの名言を表示します。\n";
+						quoteMessage += "- `/delquote [Quote]`指定した名言を削除します。\n";
 						quoteMessage += "- `/allquotetags`ですべてのタグの一覧を表示します。\n";
-						quoteMessage += "- `/quotecount`で指定したタグの名言の数を表示します。\n";
+						quoteMessage += "- `/quotecount [Tag]`で指定したタグの名言の数を表示します。\n";
 						quoteMessage += "- `/setquotetag`で送られたチャンネルをquoteタグに設定します。\n";
 						quoteMessage += "- `/delquotetag`で送られたチャンネルのquoteタグを消します。\n";
 						await message.reply(quoteMessage);
