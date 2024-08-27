@@ -3156,7 +3156,7 @@ client.on(Events.MessageCreate, async (message) =>
 				}
 
 				const userplays = await Tools.getAPIResponse(
-					MAMESTAGRAMAPI_BASEURL + `get_player_scores?scope=best&mode=${currentMode}&id=${playerid}&limit=100`
+					MAMESTAGRAMAPI_BASEURL + `get_player_scores?scope=best&mode=${currentMode}&id=${playerid}&limit=50`
 				).then((data) => data.scores);
 
 				let BPranking = 1;
