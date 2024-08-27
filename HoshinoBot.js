@@ -19,6 +19,7 @@ const osuclientsecret = process.env.CLIENTSECRET;
 const BotadminId = process.env.BOTADMINID;
 const Furrychannel = process.env.FURRYCHANNEL;
 const SLOT_SETTING = Math.floor(Math.random() * 6) + 1;
+const MAMESTAGRAMAPI_BASEURL = "https://api.mamesosu.net/v1/";
 
 const client = new Client({
 	intents: [
@@ -42,13 +43,16 @@ client.on(Events.ClientReady, async () =>
 		await asciify("Hoshino Bot", { font: "larry3d" })
 			.then(msg => console.log(msg))
 			.catch(err => console.log(err));
+
 		client.user?.setPresence({
 			activities: [{
 				name: "ほしのBot Ver1.1.0を起動中",
 				type: ActivityType.Playing
 			}]
 		});
+
 		setInterval(checkMap, 60000);
+
 		let lastDate = new Date().getDate();
 		setInterval(async () => {
 			const currentDate = new Date().getDate();
@@ -283,10 +287,10 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					bankData[interaction.user.id].slot[Type == 5 ? 0 : 1] = USER_DATA;
 				}
 				fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
-				
+
 				const Status = Juggler.showStatus();
 				const Counter = Juggler.showCounter();
-				
+
 				if (slotFail) {
 					const Embed = new EmbedBuilder()
 						.setTitle(`スロット(${slotFailTimes} / ${Auto}回)`)
@@ -296,7 +300,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 						.addFields({ name: "Status", value: Status, inline: true })
 						.addFields({ name: "Counter", value: Counter, inline: true })
 						.setTimestamp();
-					
+
 					await interaction.reply({
 						content: "メダルが足りないため、スロットは中断されました。",
 						embeds: [Embed]
@@ -404,7 +408,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				bankData = null;
 				return;
 			}
-			
+
 			if (interaction.commandName == "join" || interaction.commandName == "addbot") {
 				let bankData = fs.readJsonSync("./ServerDatas/UserBankData.json");
 				if (!bankData[interaction.user.id] && interaction.commandName != "addbot") {
@@ -417,7 +421,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					await interaction.reply("このチャンネルでゲームが開始されていません。");
 					return;
 				}
-				
+
 				if (casinoData[interaction.channel.id].bet > bankData[interaction.user.id].balance && interaction.commandName != "addbot") {
 					await interaction.reply("所持金以上の金額が賭けられているため、参加できません。");
 					return;
@@ -861,7 +865,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					await interaction.reply("このタグは既に存在しています。");
 					return;
 				}
-				
+
 				const currentDir = fs.readdirSync("./Pictures/tag").filter(folder => fs.existsSync(`./Pictures/tag/${folder}/DataBase.json`));
 				for (const folder of currentDir) {
 					let dataBase = fs.readJsonSync(`./Pictures/tag/${folder}/DataBase.json`);
@@ -1067,7 +1071,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				if (allchannels.Channels.includes(channelid)) {
 					allchannels.Channels = allchannels.Channels.filter(item => item !== channelid);
 					fs.writeJsonSync("./ServerDatas/BeatmapLinkChannels.json", allchannels, { spaces: 4, replacer: null });
-					await interaction.reply(`このチャンネルにマップリンクが送信されてもマップ情報が表示されないようになりました。再度表示したい場合は/linkコマンドを使用してください。`);	
+					await interaction.reply(`このチャンネルにマップリンクが送信されてもマップ情報が表示されないようになりました。再度表示したい場合は/linkコマンドを使用してください。`);
 				} else {
 					allchannels.Channels.push(channelid);
 					fs.writeJsonSync("./ServerDatas/BeatmapLinkChannels.json", allchannels, { spaces: 4, replacer: null });
@@ -1132,7 +1136,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					await interaction.reply("入力されたModは存在しないか、指定できないModです。存在するMod、AutoなどのMod以外を指定するようにしてください。");
 					return;
 				}
-				
+
 				let mode;
 				let Mapinfo;
 				if (regex.test(maplink)) {
@@ -1140,19 +1144,19 @@ client.on(Events.InteractionCreate, async (interaction) =>
 						case "osu":
 							mode = 0;
 							break;
-	
+
 						case "taiko":
 							mode = 1;
 							break;
-	
+
 						case "fruits":
 							mode = 2;
 							break;
-	
+
 						case "mania":
 							mode = 3;
 							break;
-	
+
 						default:
 							await interaction.reply("リンク内のモードが不正です。");
 							return;
@@ -1405,15 +1409,15 @@ client.on(Events.InteractionCreate, async (interaction) =>
 						case "taiko":
 							mode = 1;
 							break;
-	
+
 						case "fruits":
 							mode = 2;
 							break;
-	
+
 						case "mania":
 							mode = 3;
 							break;
-	
+
 						default:
 							await interaction.reply("リンク内のモードが不正です。");
 							return;
@@ -1501,7 +1505,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const globalPP = globalPPwithoutBonusPP + bonusPP;
 				const globalPPDiff = globalPP - Number(playersInfo.pp_raw);
 				const globalPPDiffPrefix = globalPPDiff > 0 ? "+" : "";
-				
+
 				const playerUserURL = osuLibrary.URLBuilder.userURL(playersInfo?.user_id);
 				const mapperUserURL = osuLibrary.URLBuilder.userURL(mappersInfo?.user_id);
 				const mapperIconURL = osuLibrary.URLBuilder.iconURL(mappersInfo?.user_id);
@@ -1537,19 +1541,19 @@ client.on(Events.InteractionCreate, async (interaction) =>
 						case "osu":
 							mode = 0;
 							break;
-						
+
 						case "taiko":
 							mode = 1;
 							break;
-	
+
 						case "fruits":
 							mode = 2;
 							break;
-	
+
 						case "mania":
 							mode = 3;
 							break;
-	
+
 						default:
 							await interaction.reply("リンク内のモードが不正です。");
 							return;
@@ -1687,7 +1691,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 						timingpointflag = false;
 						hitobjectflag = true;
 					}
-					
+
 					if (hitobjectflag && !isNaN(Number(line.split(",")[2]))) {
 						const ms = Number(line.split(",")[2]);
 						const totalSeconds = Math.floor(ms / 1000);
@@ -1752,7 +1756,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 								return  `  ${ppstring}   `;
 							case 4:
 								return  `   ${ppstring}   `;
-							
+
 							default:
 								return ppstring;
 						}
@@ -1856,7 +1860,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					randommap.push(beatmapsetid.beatmapset_id);
 					randommaptitle.push(beatmapsetid.title);
 				}
-				
+
 				let randomjson = [];
 				const ifPerferct = interaction.commandName == "osubgquizpf";
 				for (let i = 0; i < randommap.length; i++) {
@@ -1930,7 +1934,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					randommap.push(beatmapsetid.beatmapset_id);
 					randommaptitle.push(beatmapsetid.title);
 				}
-				
+
 				let randomjson = [];
 				const ifPerferct = interaction.commandName == "osuquizpf";
 				for (let i = 0; i < randommap.length; i++) {
@@ -2160,7 +2164,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					await interaction.reply("このコマンドはBOT管理者のみ実行できます。");
 					return;
 				}
-				
+
 				const directory = "./Backups";
 				const sortedFiles = Tools.getFilesSortedByDate(directory).reverse();
 				const backupfileslist = [];
@@ -2212,7 +2216,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					serverJSONdata = null;
 					return;
 				}
-				
+
 				if (serverJSONdata[interaction.guildId][userid] == undefined) {
 					await interaction.reply("あなたはまだこのサーバーで喋ったことがないようです。");
 					serverJSONdata = null;
@@ -2258,7 +2262,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					serverJSONdata = null;
 					return;
 				}
-				
+
 				if (serverJSONdata[interaction.guildId][userid] == undefined) {
 					await interaction.reply("あなたはまだこのサーバーで喋ったことがないようです。");
 					serverJSONdata = null;
@@ -2531,7 +2535,7 @@ client.on(Events.MessageCreate, async (message) =>
 				}
 
 				const maplink = message.content.split(" ")[1];
-				
+
 				if (maplink == undefined) {
 					await message.reply("マップリンクを入力してください。");
 					return;
@@ -2571,7 +2575,7 @@ client.on(Events.MessageCreate, async (message) =>
 						case "mania":
 							mode = 3;
 							break;
-							
+
 						default:
 							await message.reply("リンク内のモードが不正です。");
 							return;
@@ -2687,7 +2691,7 @@ client.on(Events.MessageCreate, async (message) =>
 
 						case 7:
 							return `  ${value} `;
-						
+
 						case 8:
 							return ` ${value} `;
 
@@ -2853,6 +2857,7 @@ client.on(Events.MessageCreate, async (message) =>
 					Hp *= 0.5;
 					Ar *= 0.5;
 				}
+
 				Od = Math.max(0, Math.min(10, Od));
 				Cs = Math.max(0, Math.min(7, Cs));
 				Hp = Math.max(0, Math.min(10, Hp));
@@ -2946,7 +2951,7 @@ client.on(Events.MessageCreate, async (message) =>
 					.addFields({ name: "`PP`", value: `**${recentPp}** / ${ssPp.pp.toFixed(2)}PP`, inline: true })
 					.addFields({ name: "`Combo`", value: `**${userRecentData.maxcombo}**x / ${mapData.max_combo}x`,inline: true })
 					.addFields({ name: "`Hits`", value: formattedHits, inline: true });
-				
+
 				if (currentMode == 3 || userRecentData.maxcombo == mapData.max_combo) {
 					embed
 						.addFields({ name: "`Map Info`", value: `Length:\`${formattedLength} (${formattedHitLength})\` BPM:\`${BPM}\` Objects:\`${objectCount}\` \n  CS:\`${Cs}\` AR:\`${Ar}\` OD:\`${Od}\` HP:\`${Hp}\` Stars:\`${ssPp.sr.toFixed(2)}\``, inline: true })
@@ -2983,7 +2988,264 @@ client.on(Events.MessageCreate, async (message) =>
 				});
 				return;
 			}
-			
+
+			if (message.content.split(" ")[0].startsWith("m!r")) {
+				commandLogs(message, "recent mamestagram", 1);
+				let playerid;
+				if (message.content.split(" ")[1] == undefined) {
+					let allUser = fs.readJsonSync("./ServerDatas/PlayerData.json");
+					const userId = allUser["Mamestagram"][message.author.id]?.id;
+					if (userId == undefined) {
+						await message.reply("ユーザーIDが登録されていません。m!osuregで登録するか、Memestagram IDを入力してください。");
+						allUser = null;
+						return;
+					}
+					allUser = null;
+					playerid = userId;
+				} else {
+					playerid = message.content.split(" ")?.slice(1)?.join(" ");
+					if (/^<@\d+>$/.test(playerid)) {
+						let allUser = fs.readJsonSync("./ServerDatas/PlayerData.json");
+						const userId = RegExp(/^<@(\d+)>$/).exec(playerid)[1];
+						if (!allUser["Mamestagram"][userId]?.id) {
+							await message.reply("このDiscordのユーザーは登録されていません。m!osuregで登録してもらうか、Memestagram IDを入力してください。");
+							allUser = null;
+							return;
+						}
+						playerid = allUser["Mamestagram"][userId].id;
+						allUser = null;
+					}
+				}
+
+				if (playerid == "") {
+					await message.reply("ユーザーIDの前の空白が1つ多い可能性があります。");
+					return;
+				}
+
+				let currentMode;
+				switch (message.content.split(" ")[0]) {
+					case "m!r":
+					case "m!ro":
+						currentMode = 0;
+						break;
+
+					case "m!rt":
+						currentMode = 1;
+						break;
+
+					case "m!rc":
+						currentMode = 2;
+						break;
+
+					case "m!rm":
+						currentMode = 3;
+						break;
+
+					default:
+						await message.reply("使い方: m!r(o, t, c, m) (Mamestagram ID)");
+						return;
+				}
+
+				const userRecentData = await Tools.getAPIResponse(
+					MAMESTAGRAMAPI_BASEURL + `get_player_scores?id=${playerid}&scope=recent&mode=${currentMode}`
+				).then((data) => data.scores[0]);
+
+				if (userRecentData == undefined) {
+					await message.reply(`ID: ${playerid}に該当するユーザーには24時間以内にプレイした譜面がないようです。`);
+					return;
+				}
+
+				const mapData = await new osuLibrary.GetMapData(userRecentData.beatmap.id, apikey, currentMode).getData()
+				const playersdata = await Tools.getAPIResponse(
+					MAMESTAGRAMAPI_BASEURL + `get_player_info?id=${playerid}&scope=all`
+				).then((data) => data.player);
+				const mappersdata = await new osuLibrary.GetUserData(mapData.creator, apikey, currentMode).getData();
+				const mods = new osuLibrary.Mod(userRecentData.mods).get();
+				const recentAcc = Math.round(tools.accuracy({
+					300: userRecentData.n300,
+					100: userRecentData.n100,
+					50: userRecentData.n50,
+					0: userRecentData.nmiss,
+					geki: userRecentData.ngeki,
+					katu: userRecentData.nkatu
+				}, Tools.modeConvertAcc(currentMode)) * 100) / 100;
+				const recentPpData = new osuLibrary.CalculatePPSR(userRecentData.beatmap.id, mods.calc, currentMode);
+				await recentPpData.getMapData();
+				const passedObjects = Tools.calcPassedObjectMamesta(userRecentData, currentMode);
+				const recentScore = {
+					n300: Number(userRecentData.n300),
+					n100: Number(userRecentData.n100),
+					n50: Number(userRecentData.n50),
+					misses: Number(userRecentData.nmiss),
+					nGeki: Number(userRecentData.ngeki),
+					nKatu: Number(userRecentData.nkatu),
+					combo: Number(userRecentData.max_combo),
+					mods: mods.calc
+				};
+				const ssPp = await recentPpData.calculateSR();
+				let recentPp = await recentPpData.calculateScorePP(recentScore, passedObjects);
+				recentPp = Math.round(recentPp * 100) / 100;
+				const beatmap = await recentPpData.getMap();
+				const map = new rosu.Beatmap(new Uint8Array(Buffer.from(beatmap)));
+				const objectCount = await recentPpData.calcObject();
+				const { ifFCPP, ifFCHits, ifFCAcc } = osuLibrary.CalculateIfFC.calculate(recentScore, currentMode, passedObjects, mods.calc, map);
+				let totalLength = Number(mapData.total_length);
+				let hitLength = Number(mapData.hit_length);
+				let BPM = Number(mapData.bpm);
+
+				if (mods.array.includes("DT") || mods.array.includes("NC")) {
+					BPM *= 1.5;
+					totalLength /= 1.5;
+					hitLength /= 1.5;
+				} else if (mods.array.includes("HT")) {
+					BPM *= 0.75;
+					totalLength /= 0.75;
+					hitLength /= 0.75;
+				}
+
+				let Ar = Number(mapData.diff_approach);
+				let Od = Number(mapData.diff_overall);
+				let Cs = Number(mapData.diff_size);
+				let Hp = Number(mapData.diff_drain);
+
+				if (mods.array.includes("HR")) {
+					Od *= 1.4;
+					Cs *= 1.3;
+					Hp *= 1.4;
+					Ar *= 1.4;
+				} else if (mods.array.includes("EZ")) {
+					Od *= 0.5;
+					Cs *= 0.5;
+					Hp *= 0.5;
+					Ar *= 0.5;
+				}
+
+				Od = Math.max(0, Math.min(10, Od));
+				Cs = Math.max(0, Math.min(7, Cs));
+				Hp = Math.max(0, Math.min(10, Hp));
+				Ar = Math.max(0, Math.min(10, Ar));
+				Od = Math.round(Od * 10) / 10;
+				Cs = Math.round(Cs * 10) / 10;
+				Hp = Math.round(Hp * 10) / 10;
+				Ar = Math.round(Ar * 10) / 10;
+				const formattedLength = Tools.formatTime(totalLength);
+				const formattedHitLength = Tools.formatTime(hitLength);
+				const formattedHits = Tools.formatHits(recentScore, currentMode);
+				const formattedIfFCHits = Tools.formatHits(ifFCHits, currentMode);
+
+				const mapRankingData = await Tools.getAPIResponse(
+					MAMESTAGRAMAPI_BASEURL + `get_map_scores?id=${userRecentData.beatmap.id}&mode=${currentMode}&limit=50&scope=best`
+				).then((data) => data.scores);
+
+				let mapScores = [];
+				for (const element of mapRankingData) {
+					mapScores.push(Number(element.score));
+				}
+				let mapRanking = mapScores.length + 1;
+
+				if (Number(userRecentData.score) >= mapScores[mapScores.length - 1]) {
+					mapScores.sort((a, b) => a - b);
+					const score = Number(userRecentData.score);
+					for (const element of mapScores) {
+						if (score >= element) {
+							mapRanking--;
+						} else {
+							break;
+						}
+					}
+				}
+
+				const userplays = await Tools.getAPIResponse(
+					MAMESTAGRAMAPI_BASEURL + `get_player_scores?scope=best&mode=${currentMode}&id=${playerid}&limit=100`
+				).then((data) => data.scores);
+
+				let BPranking = 1;
+				let foundFlag = false;
+				for (const element of userplays) {
+					if (element.beatmap_id == userRecentData.beatmap_id && element.score == userRecentData.score) {
+						foundFlag = true;
+						break;
+					}
+					BPranking++;
+				}
+
+				if (!foundFlag) {
+					userplays.reverse();
+					BPranking = userplays.length + 1;
+					for (const element of userplays) {
+						if (recentPp > Number(element.pp)) {
+							BPranking--;
+						} else {
+							break;
+						}
+					}
+				}
+
+				let rankingString = "";
+				const mapStatus = osuLibrary.Tools.mapstatus(mapData.approved);
+				if (mapRanking <= 50 && BPranking <= 50 && userRecentData.grade != "F") {
+					rankingString = `**__Personal Best #${BPranking} and Global Top #${mapRanking}__**`;
+				} else if (mapRanking == 51 && BPranking <= 50 && userRecentData.grade != "F") {
+					rankingString = `**__Personal Best #${BPranking}__**`;
+				} else if (mapRanking <= 50 && BPranking > 50 && userRecentData.grade != "F") {
+					rankingString = `**__Global Top #${mapRanking}__**`;
+				} else {
+					rankingString = "`Result`";
+				}
+
+				const maplink = osuLibrary.URLBuilder.beatmapURL(mapData.beatmapset_id, currentMode, mapData.beatmap_id);
+				const playerIconUrl = osuLibrary.URLBuilder.mamestagramIconURL(playersdata?.info.id);
+				const playerUrl = osuLibrary.URLBuilder.mamestagramUserURL(playersdata?.info.id);
+				const mapperIconUrl = osuLibrary.URLBuilder.iconURL(mappersdata?.user_id);
+				const embed = new EmbedBuilder()
+					.setColor("Blue")
+					.setTitle(`${mapData.artist} - ${mapData.title} [${mapData.version}]`)
+					.setURL(maplink)
+					.setAuthor({ name: `${playersdata.info.name}: ${Number(playersdata.stats[currentMode].pp).toLocaleString()}pp (#${Number(playersdata.stats[currentMode].rank).toLocaleString()} ${playersdata.info.country.toUpperCase()}${Number(playersdata.stats[currentMode].country_rank).toLocaleString()})`, iconURL: playerIconUrl, url: playerUrl })
+					.addFields({ name: "`Grade`", value: `${Tools.rankconverter(userRecentData.grade)} + ${mods.str}`, inline: true })
+					.addFields({ name: "`Score`", value: `${Number(userRecentData.score).toLocaleString()}`, inline: true })
+					.addFields({ name: "`Acc`", value: `${recentAcc}%`, inline: true })
+					.addFields({ name: "`PP`", value: `**${recentPp}** / ${ssPp.pp.toFixed(2)}PP`, inline: true })
+					.addFields({ name: "`Combo`", value: `**${userRecentData.max_combo}**x / ${mapData.max_combo}x`,inline: true })
+					.addFields({ name: "`Hits`", value: formattedHits, inline: true });
+
+				if (currentMode == 3 || userRecentData.max_combo == mapData.max_combo) {
+					embed
+						.addFields({ name: "`Map Info`", value: `Length:\`${formattedLength} (${formattedHitLength})\` BPM:\`${BPM}\` Objects:\`${objectCount}\` \n  CS:\`${Cs}\` AR:\`${Ar}\` OD:\`${Od}\` HP:\`${Hp}\` Stars:\`${ssPp.sr.toFixed(2)}\``, inline: true })
+						.setImage(osuLibrary.URLBuilder.backgroundURL(mapData.beatmapset_id))
+						.setTimestamp()
+						.setFooter({ text: `${mapStatus} mapset of ${mapData.creator} (Bancho)`, iconURL: mapperIconUrl });
+				} else {
+					embed
+						.addFields({ name: "`If FC`", value: `**${ifFCPP.toFixed(2)}** / ${ssPp.pp.toFixed(2)}PP`, inline: true })
+						.addFields({ name: "`Acc`", value: `${ifFCAcc}%`, inline: true })
+						.addFields({ name: "`Hits`", value: formattedIfFCHits, inline: true })
+						.addFields({ name: "`Map Info`", value: `Length:\`${formattedLength} (${formattedHitLength})\` BPM:\`${BPM}\` Objects:\`${objectCount}\` \n  CS:\`${Cs}\` AR:\`${Ar}\` OD:\`${Od}\` HP:\`${Hp}\` Stars:\`${ssPp.sr.toFixed(2)}\``, inline: true })
+						.setImage(osuLibrary.URLBuilder.backgroundURL(mapData.beatmapset_id))
+						.setTimestamp()
+						.setFooter({ text: `${mapStatus} mapset of ${mapData.creator}`, iconURL: mapperIconUrl });
+				}
+
+				let ifFCMessage = `(**${ifFCPP.toFixed(2)}**pp for ${ifFCAcc}% FC)`;
+				if (currentMode == 3) ifFCMessage = "";
+				if (userRecentData.max_combo == mapData.max_combo) ifFCMessage = "**Full Combo!! Congrats!!**";
+				if (recentPp.toString().replace(".", "").includes("727")) ifFCMessage = "**WYSI!! WYFSI!!!!!**";
+
+				await message.channel.send({ embeds: [embed] }).then((sentMessage) => {
+					setTimeout(async () => {
+						const embednew = new EmbedBuilder()
+							.setColor("Blue")
+							.setTitle(`${mapData.artist} - ${mapData.title} [${mapData.version}] [${ssPp.sr.toFixed(2)}★]`)
+							.setThumbnail(osuLibrary.URLBuilder.thumbnailURL(mapData.beatmapset_id))
+							.setURL(maplink)
+							.setAuthor({ name: `${playersdata.info.name}: ${Number(playersdata.stats[currentMode].pp).toLocaleString()}pp (#${Number(playersdata.stats[currentMode].rank).toLocaleString()} ${playersdata.info.country.toUpperCase()}${Number(playersdata.stats[currentMode].country_rank).toLocaleString()})`, iconURL: playerIconUrl, url: playerUrl })
+							.addFields({ name: rankingString, value: `${Tools.rankconverter(userRecentData.grade)} + **${mods.str}**　**Score**: ${Number(userRecentData.score).toLocaleString()}　**Acc**: ${recentAcc}% \n **PP**: **${recentPp}** / ${ssPp.pp.toFixed(2)}pp　${ifFCMessage} \n **Combo**: **${userRecentData.max_combo}**x / ${mapData.max_combo}x　**Hits**: ${formattedHits}`, inline: true });
+						await sentMessage.edit({ embeds: [embednew] });
+					}, 20000);
+				});
+				return;
+			}
+
 			if (/^https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+#[a-z]+\/\d+$/.test(message.content) || /^https:\/\/osu\.ppy\.sh\/b\/\d+$/.test(message.content) || /^https:\/\/osu\.ppy\.sh\/beatmaps\/\d+$/.test(message.content)) {
 				const channelid = message.channel.id;
 				let allchannels = fs.readJsonSync("./ServerDatas/BeatmapLinkChannels.json");
@@ -3006,19 +3268,19 @@ client.on(Events.MessageCreate, async (message) =>
 						case "osu":
 							mode = 0;
 							break;
-	
+
 						case "taiko":
 							mode = 1;
 							break;
-	
+
 						case "fruits":
 							mode = 2;
 							break;
-	
+
 						case "mania":
 							mode = 3;
 							break;
-	
+
 						default:
 							return;
 					}
@@ -3055,7 +3317,7 @@ client.on(Events.MessageCreate, async (message) =>
 			if (/^https:\/\/booth\.pm\/ja\/items\/\d+$/.test(message.content)) {
 				const ItemData = await Tools.getBoothItemInfo(message.content)
 					.catch(() => null);
-				
+
 				if (ItemData == null) {
 					await message.reply("商品情報が取得できませんでした。");
 					return;
@@ -3103,7 +3365,7 @@ client.on(Events.MessageCreate, async (message) =>
 					await message.reply("Modsを入力してください。");
 					return;
 				}
-				
+
 				if (message.content.split(" ")[1] == "") {
 					await message.reply("Modsの前の空白が1つ多い可能性があります。");
 					return;
@@ -3115,7 +3377,7 @@ client.on(Events.MessageCreate, async (message) =>
 					await message.reply("Modが存在しないか、指定できないModです。");
 					return;
 				}
-				
+
 				let mode;
 				let mapData;
 				let mapUrl;
@@ -3124,19 +3386,19 @@ client.on(Events.MessageCreate, async (message) =>
 						case "osu":
 							mode = 0;
 							break;
-	
+
 						case "taiko":
 							mode = 1;
 							break;
-	
+
 						case "fruits":
 							mode = 2;
 							break;
-	
+
 						case "mania":
 							mode = 3;
 							break;
-	
+
 						default:
 							await message.reply("リンク内のモードが不正です。");
 							return;
@@ -3332,7 +3594,7 @@ client.on(Events.MessageCreate, async (message) =>
 						}
 					}
 				}
-				
+
 				if (playername == "") {
 					await message.reply("ユーザー名の前の空白が1つ多い可能性があります。");
 					return;
@@ -3346,7 +3608,7 @@ client.on(Events.MessageCreate, async (message) =>
 						case "osu":
 							mode = 0;
 							break;
-							
+
 						case "taiko":
 							mode = 1;
 							break;
@@ -3556,31 +3818,31 @@ client.on(Events.MessageCreate, async (message) =>
 				allUser = null;
 				return;
 			}
-			
+
 			if (message.content.split(" ")[0] == "m!osureg") {
 				const username = message.author.id;
 				const osuid = message.content.split(" ")?.slice(1)?.join(" ");
 
 				if (osuid == "" || osuid == undefined) {
-					await message.reply("使い方: m!osureg [osu! Username]");
+					await message.reply("使い方: m!osureg [Mamestagram ID]");
 					return;
 				}
 
-				const userData = await new osuLibrary.GetUserData(osuid, apikey).getDataWithoutMode();
-				if (!userData) {
-					await message.reply("ユーザーが見つかりませんでした。");
+				if (!RegExp(/^\d+$/).exec(osuid)) {
+					await message.reply("IDは数字のみで構成されている必要があります。");
 					return;
 				}
+
 				let allUser = fs.readJsonSync("./ServerDatas/PlayerData.json");
 				if (!allUser["Mamestagram"][username]) {
 					allUser["Mamestagram"][username] = {
-						"name": osuid
+						"id": osuid
 					};
 				} else {
-					allUser["Mamestagram"][username].name = osuid;
+					allUser["Mamestagram"][username].id = osuid
 				}
 				fs.writeJsonSync("./ServerDatas/PlayerData.json", allUser, { spaces: 4, replacer: null });
-				await message.reply(`${message.author.username}さんは${osuid}として保存されました!`);
+				await message.reply(`${message.author.username}さんはMamestagram ID: ${osuid}として保存されました!`);
 				allUser = null;
 				return;
 			}
@@ -3683,7 +3945,7 @@ client.on(Events.MessageCreate, async (message) =>
 				} else {
 					pp.pop();
 				}
-				
+
 				const userdata = await new osuLibrary.GetUserData(playername, apikey, mode).getData();
 				const scorepp = osuLibrary.CalculateGlobalPP.calculate(oldpp, Number(userdata.playcount));
 				const bonusPP = userdata.pp_raw - scorepp;
@@ -4022,12 +4284,21 @@ client.on(Events.MessageCreate, async (message) =>
 						osuMessage += "- `!m [mods]`で直近に送信された譜面にmodsをつけてppを表示します。/linkコマンドで有効になります。\n";
 						osuMessage += "- `!skip`はosubgquiz、osubgquizpf、osuquiz、osuquizpfコマンドで使用できます。現在の問題をスキップします。\n";
 						osuMessage += "- `!hint`はosubgquiz、osubgquizpf、osuquiz、osuquizpfコマンドで使用できます。現在の問題のヒントを表示します。\n";
-						
+
 						await message.reply(osuMessage);
 						break
 					}
 
 					case "4": {
+						let mamestaMessage = "__\*\*osu!(Mamestagram)のコマンド一覧\*\*\__\n";
+						mamestaMessage += "- `m!osureg [Mamestagram ID]`でMamestagramのIDを登録します。\n";
+						mamestaMessage += "- `m!r(o, t, c, m) (userid)`でユーザーの最新のosu!std、taiko、catch、maniaの記録を表示します。useridは登録していれば省略可能です。stdはm!rでもm!roでも実行可能です。\n";
+
+						await message.reply(mamestaMessage);
+						break
+					}
+
+					case "5": {
 						let osuMessage = "__\*\*osu!のスラッシュコマンド一覧(1ページ目)\*\*\__\n";
 						osuMessage += "- `/osureg [Username]`でosu!のユーザー名を登録します。\n";
 						osuMessage += "- `/calculatepp [beatmapFile] [mode] (mods)`で送信されたosuファイルのPPを計算します。\n";
@@ -4042,7 +4313,7 @@ client.on(Events.MessageCreate, async (message) =>
 						break;
 					}
 
-					case "5": {
+					case "6": {
 						let osuMessage = "__\*\*osu!のスラッシュコマンド一覧(2ページ目)\*\*\__\n";
 						osuMessage += "- `/ifmod [BeatmapLink] [Mods] (Username) (Scoreの種類)`で、送られたマップのスコアのModsを変更してPPを計算します。\n";
 						osuMessage += "- `/lb [BeatmapLink] (Mods)`で、指定されたModsでのランキングを表示します。n";
@@ -4057,7 +4328,7 @@ client.on(Events.MessageCreate, async (message) =>
 						break;
 					}
 
-					case "6": {
+					case "7": {
 						let imageMessage = "__\*\*画像関連のコマンド\*\*\__\n";
 						imageMessage += "- `/kemo`でけも画像を表示します\n";
 						imageMessage += "- `/kemodelete [Index]`で特定のけも画像を消します。";
@@ -4071,7 +4342,7 @@ client.on(Events.MessageCreate, async (message) =>
 						break;
 					}
 
-					case "7": {
+					case "8": {
 						let quoteMessage = "__\*\*名言関連のコマンド\*\*\__\n";
 						quoteMessage += "- `/quote [Tag]`で指定したタグの名言を表示します。\n";
 						quoteMessage += "- `/delquote [Quote]`指定した名言を削除します。\n";
@@ -4083,14 +4354,14 @@ client.on(Events.MessageCreate, async (message) =>
 						break;
 					}
 
-					case "8": {
+					case "9": {
 						let sbMessage = "__\*\*スカイブロック関連のコマンド\*\*\__\n";
 						sbMessage += "- `/ratchecker [file] (output)`で、送られたChattrigger ModuleにRatが含まれているかを確認します。\n";
 						await message.reply(sbMessage);
 						break;
 					}
 
-					case "9": {
+					case "10": {
 						let talkMessage = "__\*\*サーバーでの発言回数関連のコマンド\*\*\__\n";
 						talkMessage += "- `/talkcount`であなたがこのサーバーでどのくらい話したかを表示します。\n";
 						talkMessage += "- `/talkranking`でこのサーバーでの話した回数のランキングを表示します。\n";
@@ -4100,7 +4371,7 @@ client.on(Events.MessageCreate, async (message) =>
 						break;
 					}
 
-					case "10": {
+					case "11": {
 						let otherMessage = "__\*\*その他のコマンド\*\*\__\n";
 						otherMessage += "- `/tweetdownloader [URL]`でツイートの画像をダウンロードします。\n";
 						otherMessage += "- `/youtubedownloader [URL]`でYouTubeの動画をダウンロードします。\n";
@@ -4113,8 +4384,9 @@ client.on(Events.MessageCreate, async (message) =>
 						break;
 					}
 
-					case "11": {
+					case "12": {
 						let adminMessage = "__\*\*管理者専用コマンド\*\*\__\n";
+						adminMessage += "- `/slotsetting`で現在のスロットの設定が見れます。\n"
 						adminMessage += "- `/update [File]`でBotを更新します。\n";
 						adminMessage += "- `/restart`でBotを再起動します。\n";
 						adminMessage += "- `/backup [Time]`でバックアップを復元します。\n";
@@ -4129,14 +4401,16 @@ client.on(Events.MessageCreate, async (message) =>
 						helpMessage += "- `1: カジノ`\n";
 						helpMessage += "- `2: カジノ(2ページ目)`\n";
 						helpMessage += "- `3: osu!`\n";
-						helpMessage += "- `4: osu!(スラッシュコマンド)`\n";
-						helpMessage += "- `5: osu!(スラッシュコマンド2)`\n";
-						helpMessage += "- `6: 画像関連のコマンド`\n";
-						helpMessage += "- `7: 名言関連のコマンド`\n";
-						helpMessage += "- `8: スカイブロック関連のコマンド`\n";
-						helpMessage += "- `9: サーバーでの発言回数関連のコマンド`\n";
-						helpMessage += "- `10: その他のコマンド`\n";
-						helpMessage += "- `11: 管理者専用コマンド`\n";
+						helpMessage += "- `4: osu!(mamestagram)`\n";
+						helpMessage += "- `5: osu!(スラッシュコマンド)`\n";
+						helpMessage += "- `6: osu!(スラッシュコマンド2)`\n";
+						helpMessage += "- `7: 画像関連のコマンド`\n";
+						helpMessage += "- `8: 名言関連のコマンド`\n";
+						helpMessage += "- `9: スカイブロック関連のコマンド`\n";
+						helpMessage += "- `10: サーバーでの発言回数関連のコマンド`\n";
+						helpMessage += "- `11: その他のコマンド`\n";
+						helpMessage += "- `12: 管理者専用コマンド`\n";
+						helpMessage += "詳細は`h!help [ページ番号]`で確認できます。";
 						await message.reply(helpMessage);
 						break;
 					}
@@ -4145,7 +4419,7 @@ client.on(Events.MessageCreate, async (message) =>
 			}
 
 			if (message.content.split(" ")[0] == "!calc") {
-				commandLogs(message, "四則演算", 1);
+				commandLogs(message, "計算コマンド", 1);
 				const expression = message.content.split(" ").slice(1).join(" ");
 				try {
 					const result = MathJS.evaluate(expression);
@@ -4164,7 +4438,7 @@ client.on(Events.MessageCreate, async (message) =>
 				await message.reply(`${Math.floor(totalHours)}時間 ${Math.floor((totalHours - Math.floor(totalHours)) * 60)}分 ${Math.round(((totalHours - Math.floor(totalHours)) * 60 - Math.floor((totalHours - Math.floor(totalHours)) * 60)) * 60)}秒`);
 				return;
 			}
-			
+
 			if (/^\d+\.\d+分$/.test(message.content)) {
 				commandLogs(message, "時間計算", 1);
 				const totalminutes = Number(RegExp(/^\d+\.\d+/).exec(message.content)[0]);
@@ -4316,7 +4590,7 @@ function checkqualified() {
 		const gameModes = ["osu", "taiko", "catch", "mania"];
 		for (const mode of gameModes) {
 			try {
-				
+
 				const qualifiedBeatmaps = await v2.beatmaps.search({
 					mode: Tools.modeConvertSearch(mode),
 					section: "qualified"
@@ -4393,7 +4667,7 @@ function checkqualified() {
 					const minsrpp = await minCalculator.calculateSR();
 					const maxdtpp = await maxCalculator.calculateDT();
 					const mindtpp = await minCalculator.calculateDT();
-		
+
 					const BPM = `${mapMaxInfo.bpm}BPM (DT ${Math.round(Number(mapMaxInfo.bpm) * 1.5)}BPM)`;
 					const maxCombo = mapMaxInfo.max_combo;
 					const minCombo = mapMinInfo.max_combo;
@@ -4424,14 +4698,14 @@ function checkqualified() {
 					qfparsedjson = null;
 					let average = averagearray.reduce((sum, element) => sum + element, 0) / averagearray.length;
 					if (isNaN(average)) average = 604800000;
-		
+
 					const sevenDaysLater = new Date(now.getTime() + average);
 					const rankedmonth = sevenDaysLater.getMonth() + 1;
 					const rankedday = sevenDaysLater.getDate();
 					const rankedhours = sevenDaysLater.getHours();
 					const rankedminutes = sevenDaysLater.getMinutes();
 					const rankeddateString = `${rankedmonth}月${rankedday}日 ${Tools.formatNumber(rankedhours)}時${Tools.formatNumber(rankedminutes)}分`;
-		
+
 					let srstring = maxsrpp.sr == minsrpp.sr ? `★${maxsrpp.sr.toFixed(2)} (DT ★${maxdtpp.sr.toFixed(2)})` : `★${minsrpp.sr.toFixed(2)} ~ ${maxsrpp.sr.toFixed(2)} (DT ★${mindtpp.sr.toFixed(2)} ~ ${maxdtpp.sr.toFixed(2)})`;
 					let ppstring = maxsrpp.pp == minsrpp.pp ? `${maxsrpp.pp.toFixed(2)}pp (DT ${maxdtpp.pp.toFixed(2)}pp)` : `${minsrpp.pp.toFixed(2)} ~ ${maxsrpp.pp.toFixed(2)}pp (DT ${mindtpp.pp.toFixed(2)} ~ ${maxdtpp.pp.toFixed(2)}pp)`;
 
@@ -4536,7 +4810,7 @@ function checkranked() {
 						}
 					}
 					beatmapData = null;
-		
+
 					let rankedBeatmapsMaxSrId;
 					let rankedBeatmapsMinSrId;
 					let nominators = [];
@@ -4574,7 +4848,7 @@ function checkranked() {
 					const minsrpp = await minCalculator.calculateSR();
 					const maxdtpp = await maxCalculator.calculateDT();
 					const mindtpp = await minCalculator.calculateDT();
-		
+
 					const BPM = `${mapMaxInfo.bpm}BPM (DT ${Math.round(Number(mapMaxInfo.bpm) * 1.5)}BPM)`;
 					const maxCombo = mapMaxInfo.max_combo;
 					const minCombo = mapMinInfo.max_combo;
@@ -4584,17 +4858,17 @@ function checkranked() {
 					const maptime = Tools.formatTime(lengthsec);
 					const maptimeDT = Tools.formatTime(lengthsecDT);
 					const maptimestring = `${maptime} (DT ${maptimeDT})`;
-		
+
 					const now = new Date();
 					const month = now.getMonth() + 1;
 					const day = now.getDate();
 					const hours = now.getHours();
 					const minutes = now.getMinutes();
 					const dateString = `${month}月${day}日 ${Tools.formatNumber(hours)}時${Tools.formatNumber(minutes)}分`;
-		
+
 					let srstring = maxsrpp.sr == minsrpp.sr ? `★${maxsrpp.sr.toFixed(2)} (DT ★${maxdtpp.sr.toFixed(2)})` : `★${minsrpp.sr.toFixed(2)} ~ ${maxsrpp.sr.toFixed(2)} (DT ★${mindtpp.sr.toFixed(2)} ~ ${maxdtpp.sr.toFixed(2)})`;
 					let ppstring = maxsrpp.pp == minsrpp.pp ? `${maxsrpp.pp.toFixed(2)}pp (DT ${maxdtpp.pp.toFixed(2)}pp)` : `${minsrpp.pp.toFixed(2)} ~ ${maxsrpp.pp.toFixed(2)}pp (DT ${mindtpp.pp.toFixed(2)} ~ ${maxdtpp.pp.toFixed(2)}pp)`;
-					
+
 					let nominatorString = "";
 					for (const nominator of nominators) {
 						nominatorString += `**${nominator.username}** (#${nominator.rank})\n`;
@@ -4687,7 +4961,7 @@ function checkloved() {
 					const minsrpp = await minCalculator.calculateSR();
 					const maxdtpp = await maxCalculator.calculateDT();
 					const mindtpp = await minCalculator.calculateDT();
-		
+
 					const BPM = `${mapMaxInfo.bpm}BPM (DT ${Math.round(Number(mapMaxInfo.bpm) * 1.5)}BPM)`;
 					const maxCombo = mapMaxInfo.max_combo;
 					const minCombo = mapMinInfo.max_combo;
@@ -4697,7 +4971,7 @@ function checkloved() {
 					const formattedTime = Tools.formatTime(lengthsec);
 					const maptimeDT = Tools.formatTime(lengthsecDT);
 					const maptimestring = `${formattedTime} (DT ${maptimeDT})`;
-		
+
 					const now = new Date();
 					const month = now.getMonth() + 1;
 					const day = now.getDate();
@@ -4706,7 +4980,7 @@ function checkloved() {
 					const dateString = `${month}月${day}日 ${Tools.formatNumber(hours)}時${Tools.formatNumber(minutes)}分`;
 
 					let srstring = maxsrpp.sr == minsrpp.sr ? `★${maxsrpp.sr.toFixed(2)} (DT ★${maxdtpp.sr.toFixed(2)})` : `★${minsrpp.sr.toFixed(2)} ~ ${maxsrpp.sr.toFixed(2)} (DT ★${mindtpp.sr.toFixed(2)} ~ ${maxdtpp.sr.toFixed(2)})`;
-		
+
 					const embed = new EmbedBuilder()
 						.setColor("Blue")
 						.setAuthor({ name: `💓New Loved ${mode} Map💓` })

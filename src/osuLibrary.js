@@ -682,8 +682,6 @@ class Mod {
                 "num": 0,
                 "calc": 0
             };
-        } else {
-            this.mods = this.mods.toUpperCase();
         }
 
         if (/^\d+$/.test(this.mods)) {
@@ -725,6 +723,7 @@ class Mod {
                 "calc": !calc ? 0 : calc
             };
         } else {
+            this.mods = this.mods.toUpperCase();
             let activeMods = this.mods.match(/.{2}/g);
             const checkArray = ['NM', 'EZ', 'HT', 'NF', 'HR', 'HD', 'SD', 'DT', 'NC', 'FL', 'SO', 'PF', 'V2', 'TD', 'HD', 'FI', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7', 'V8', 'V9'];
             for (const element of activeMods) {
@@ -783,6 +782,16 @@ class URLBuilder {
     }
 
     /**
+     * Returns the mamestagram icon URL for a given user ID.
+     * @param {string} userId - The user ID.
+     * @returns {string} The mamestagram icon URL.
+     */
+    static mamestagramIconURL(userId) {
+        if (!userId) return "https://a.mamesosu.net/1";
+        return `https://a.mamesosu.net/${userId}`;
+    }
+
+    /**
      * Generates a beatmap URL based on the provided parameters.
      * @param {string} beatmapSetId - The ID of the beatmap set.
      * @param {string} mode - The mode of the beatmap.
@@ -804,6 +813,17 @@ class URLBuilder {
         return `https://osu.ppy.sh/users/${userId}`;
     }
 
+    /**
+     * Returns the URL of a user's profile on mamestagram based on their user ID.
+     * If no user ID is provided, the default URL for the mamestagram homepage is returned.
+     * @param {string} userId - The user ID of the osu! user.
+     * @returns {string} The URL of the user's profile on mamestagram.
+     */
+    static mamestagramUserURL(userId) {
+        if (!userId) return "https://web.mamesosu.net/profile/1"
+        return `https://web.mamesosu.net/profile/${userId}`;
+    }
+    
     /**
      * Returns the URL of the background image for a given beatmap set ID.
      * @param {string} beatmapSetId - The ID of the beatmap set.

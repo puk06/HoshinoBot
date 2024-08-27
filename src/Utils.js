@@ -312,6 +312,38 @@ class Tools {
         return passedObjects;
     }
 
+    /**
+     * Calculates the passed objects based on the given score and mode for Mamestagram.
+     * @param {object} score - The score object containing hit counts.
+     * @param {number} mode - The mode to determine the calculation.
+     * @returns {number} The number of passed objects.
+     */
+    static calcPassedObjectMamesta(score, mode) {
+        let passedObjects = 0;
+        switch (mode) {
+            case 0:
+                passedObjects = Number(score.n300) + Number(score.n100) + Number(score.n50) + Number(score.nmiss);
+                break;
+
+            case 1:
+                passedObjects = Number(score.n300) + Number(score.n100) + Number(score.nmiss);
+                break;
+
+            case 2:
+                passedObjects = Number(score.n300) + Number(score.n100) + Number(score.nmiss);
+                break;
+
+            case 3:
+                passedObjects = Number(score.ngeki) + Number(score.n300) + Number(score.nkatu) + Number(score.n100) + Number(score.nmiss);
+                break;
+                
+            default:
+                passedObjects = Number(score.n300) + Number(score.n100) + Number(score.n50) + Number(score.nmiss);
+                break;
+        }
+        return passedObjects;
+    }
+
     static async getBoothItemInfo(url) {
         const ItemData = await this.getAPIResponse(url)
             .then(res => {
