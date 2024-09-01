@@ -1,5 +1,5 @@
 //必要となるライブラリ
-const { Client, EmbedBuilder, Events, GatewayIntentBits, ActivityType, WebhookClient } = require("./node_modules/discord.js");
+const { Client, EmbedBuilder, Events, GatewayIntentBits, ActivityType } = require("./node_modules/discord.js");
 require("./node_modules/dotenv").config();
 const fs = require("./node_modules/fs-extra");
 const { tools, auth, v2 } = require("./node_modules/osu-api-extended");
@@ -186,6 +186,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					await interaction.reply("このコマンドはBot管理者専用です。");
 					return;
 				}
+				
 				await interaction.reply({
 					content: `現在のスロット設定は**${SLOT_SETTING}**です。`,
 					ephemeral: true
@@ -1265,71 +1266,71 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			}
 
 			if (interaction.commandName == "qfmention" || interaction.commandName == "lovedmention" || interaction.commandName == "rankedmention") {
-				const mode = interaction.options.get("mode").value;
-				const userid = interaction.user.id;
-				const serverid = interaction.guild.id;
-				let alluser = fs.readJsonSync(`./ServerDatas/MentionUser.json`);
+				const selectedMode = interaction.options.get("mode").value;
+				const userId = interaction.user.id;
+				const guildId = interaction.guild.id;
+				let mentionUserList = fs.readJsonSync(`./ServerDatas/MentionUser.json`);
 				switch (interaction.commandName) {
 					case "qfmention": {
-						if (alluser["Qualified"][serverid]?.[mode].includes(userid)) {
-							const newuser = alluser["Qualified"][serverid][mode].filter(item => item !== userid);
-							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, newuser, { spaces: 4, replacer: null });
-							await interaction.reply(`今度から${mode}でQualified検出されても、メンションが飛ばないようになりました。`);
+						if (mentionUserList["Qualified"][guildId]?.[selectedMode].includes(userId)) {
+							const updatedUserList = mentionUserList["Qualified"][guildId][selectedMode].filter(item => item !== userId);
+							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, updatedUserList, { spaces: 4, replacer: null });
+							await interaction.reply(`今度から${selectedMode}でQualified検出されても、メンションが飛ばないようになりました。`);
 						} else {
-							if (!alluser["Qualified"][serverid]) alluser["Qualified"][serverid] = {
+							if (!mentionUserList["Qualified"][guildId]) mentionUserList["Qualified"][guildId] = {
 								"osu": [],
 								"taiko": [],
 								"catch": [],
 								"mania": []
 							};
 
-							alluser["Qualified"][serverid][mode].push(userid);
-							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, alluser, { spaces: 4, replacer: null });
-							await interaction.reply(`今度から${mode}でQualifiedが検出されたらメンションが飛ぶようになりました.`);
+							mentionUserList["Qualified"][guildId][selectedMode].push(userId);
+							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, mentionUserList, { spaces: 4, replacer: null });
+							await interaction.reply(`今度から${selectedMode}でQualifiedが検出されたらメンションが飛ぶようになりました.`);
 						}
-						alluser = null;
+						mentionUserList = null;
 						return;
 					}
 
 					case "lovedmention": {
-						if (alluser["Loved"][serverid]?.[mode].includes(userid)) {
-							const newuser = alluser["Loved"][serverid][mode].filter(item => item !== userid);
-							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, newuser, { spaces: 4, replacer: null });
-							await interaction.reply(`今度から${mode}でLoved検出されても、メンションが飛ばないようになりました。`);
+						if (mentionUserList["Loved"][guildId]?.[selectedMode].includes(userId)) {
+							const updatedUserList = mentionUserList["Loved"][guildId][selectedMode].filter(item => item !== userId);
+							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, updatedUserList, { spaces: 4, replacer: null });
+							await interaction.reply(`今度から${selectedMode}でLoved検出されても、メンションが飛ばないようになりました。`);
 						} else {
-							if (!alluser["Loved"][serverid]) alluser["Loved"][serverid] = {
+							if (!mentionUserList["Loved"][guildId]) mentionUserList["Loved"][guildId] = {
 								"osu": [],
 								"taiko": [],
 								"catch": [],
 								"mania": []
 							};
 
-							alluser["Loved"][serverid][mode].push(userid);
-							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, alluser, { spaces: 4, replacer: null });
-							await interaction.reply(`今度から${mode}でlovedが検出されたらメンションが飛ぶようになりました。`);
+							mentionUserList["Loved"][guildId][selectedMode].push(userId);
+							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, mentionUserList, { spaces: 4, replacer: null });
+							await interaction.reply(`今度から${selectedMode}でlovedが検出されたらメンションが飛ぶようになりました。`);
 						}
-						alluser = null;
+						mentionUserList = null;
 						return;
 					}
 
 					case "rankedmention": {
-						if (alluser["Ranked"][serverid]?.[mode].includes(userid)) {
-							const newuser = alluser["Ranked"][serverid][mode].filter(item => item !== userid);
-							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, newuser, { spaces: 4, replacer: null });
-							await interaction.reply(`今度から${mode}でRanked検出されても、メンションが飛ばないようになりました。`);
+						if (mentionUserList["Ranked"][guildId]?.[selectedMode].includes(userId)) {
+							const updatedUserList = mentionUserList["Ranked"][guildId][selectedMode].filter(item => item !== userId);
+							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, updatedUserList, { spaces: 4, replacer: null });
+							await interaction.reply(`今度から${selectedMode}でRanked検出されても、メンションが飛ばないようになりました。`);
 						} else {
-							if (!alluser["Ranked"][serverid]) alluser["Ranked"][serverid] = {
+							if (!mentionUserList["Ranked"][guildId]) mentionUserList["Ranked"][guildId] = {
 								"osu": [],
 								"taiko": [],
 								"catch": [],
 								"mania": []
 							};
 
-							alluser["Ranked"][serverid][mode].push(userid);
-							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, alluser, { spaces: 4, replacer: null });
-							await interaction.reply(`今度から${mode}でRankedが検出されたらメンションが飛ぶようになりました。`);
+							mentionUserList["Ranked"][guildId][selectedMode].push(userId);
+							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, mentionUserList, { spaces: 4, replacer: null });
+							await interaction.reply(`今度から${selectedMode}でRankedが検出されたらメンションが飛ぶようになりました。`);
 						}
-						alluser = null;
+						mentionUserList = null;
 						return;
 					}
 				}
