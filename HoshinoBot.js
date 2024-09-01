@@ -1274,7 +1274,8 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					case "qfmention": {
 						if (mentionUserList["Qualified"][guildId]?.[selectedMode].includes(userId)) {
 							const updatedUserList = mentionUserList["Qualified"][guildId][selectedMode].filter(item => item !== userId);
-							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, updatedUserList, { spaces: 4, replacer: null });
+							mentionUserList["Qualified"][guildId][selectedMode] = updatedUserList;
+							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, mentionUserList, { spaces: 4, replacer: null });
 							await interaction.reply(`今度から${selectedMode}でQualified検出されても、メンションが飛ばないようになりました。`);
 						} else {
 							if (!mentionUserList["Qualified"][guildId]) mentionUserList["Qualified"][guildId] = {
@@ -1295,7 +1296,8 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					case "lovedmention": {
 						if (mentionUserList["Loved"][guildId]?.[selectedMode].includes(userId)) {
 							const updatedUserList = mentionUserList["Loved"][guildId][selectedMode].filter(item => item !== userId);
-							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, updatedUserList, { spaces: 4, replacer: null });
+							mentionUserList["Loved"][guildId][selectedMode] = updatedUserList;
+							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, mentionUserList, { spaces: 4, replacer: null });
 							await interaction.reply(`今度から${selectedMode}でLoved検出されても、メンションが飛ばないようになりました。`);
 						} else {
 							if (!mentionUserList["Loved"][guildId]) mentionUserList["Loved"][guildId] = {
@@ -1316,7 +1318,8 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					case "rankedmention": {
 						if (mentionUserList["Ranked"][guildId]?.[selectedMode].includes(userId)) {
 							const updatedUserList = mentionUserList["Ranked"][guildId][selectedMode].filter(item => item !== userId);
-							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, updatedUserList, { spaces: 4, replacer: null });
+							mentionUserList["Ranked"][guildId][selectedMode] = updatedUserList;
+							fs.writeJsonSync(`./ServerDatas/MentionUser.json`, mentionUserList, { spaces: 4, replacer: null });
 							await interaction.reply(`今度から${selectedMode}でRanked検出されても、メンションが飛ばないようになりました。`);
 						} else {
 							if (!mentionUserList["Ranked"][guildId]) mentionUserList["Ranked"][guildId] = {
