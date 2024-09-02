@@ -4733,22 +4733,25 @@ function checkqualified() {
 					let MapcheckChannels = fs.readJsonSync(`./ServerDatas/MapcheckChannels.json`);
 					for (const element of MapcheckChannels.Qualified[mode]) {
 						try {
-							if (client.channels.cache?.get(element) == undefined) continue;
-							await client.channels.cache.get(element).send({ embeds: [embed] });
-							const membersdata = await client.channels.cache.get(element).guild.members.fetch();
+							const channel = client.channels.cache.get(element);
+							if (channel == undefined) continue;
+							await channel.send({ embeds: [embed] });
+							const membersdata = await channel.guild.members.fetch();
 							let mentionstring = [];
 							let allUser = fs.readJsonSync(`./ServerDatas/MentionUser.json`);
 							const mentionUser = allUser["Qualified"][element]?.[mode];
 							allUser = null;
 							if (mentionUser == undefined) continue;
 							for (const user of mentionUser) {
+								console.log(user);
 								if (membersdata.get(user) == undefined) continue;
 								mentionstring.push(`<@${user}>`);
 							}
 							if (mentionstring.length != 0) {
-								await client.channels.cache.get(element).send(`${mentionstring.join(" ")}\n新しい${mode}のQualified譜面が出ました！`);
+								await channel.send(`${mentionstring.join(" ")}\n新しい${mode}のQualified譜面が出ました！`);
 							}
-						} catch {
+						} catch (e) {
+							console.log(e);
 							continue;
 						}
 					}
@@ -4893,22 +4896,25 @@ function checkranked() {
 					let MapcheckChannels = fs.readJsonSync(`./ServerDatas/MapcheckChannels.json`);
 					for (const element of MapcheckChannels.Qualified[mode]) {
 						try {
-							if (client.channels.cache?.get(element) == undefined) continue;
-							await client.channels.cache.get(element).send({ embeds: [embed] });
-							const membersdata = await client.channels.cache.get(element).guild.members.fetch();
+							const channel = client.channels.cache.get(element);
+							if (channel == undefined) continue;
+							await channel.send({ embeds: [embed] });
+							const membersdata = await channel.guild.members.fetch();
 							let mentionstring = [];
 							let allUser = fs.readJsonSync(`./ServerDatas/MentionUser.json`);
 							const mentionUser = allUser["Ranked"][element]?.[mode];
 							allUser = null;
 							if (mentionUser == undefined) continue;
 							for (const user of mentionUser) {
+								console.log(user);
 								if (membersdata.get(user) == undefined) continue;
 								mentionstring.push(`<@${user}>`);
 							}
 							if (mentionstring.length != 0) {
-								await client.channels.cache.get(element).send(`${mentionstring.join(" ")}\n新しい${mode}のRanked譜面が出ました！`);
+								await channel.send(`${mentionstring.join(" ")}\n新しい${mode}のRanked譜面が出ました！`);
 							}
-						} catch {
+						} catch (e) {
+							console.log(e);
 							continue;
 						}
 					}
@@ -4997,23 +5003,26 @@ function checkloved() {
 						.addFields({ name: "`loved 日時`", value: `**${dateString}**`, inline: true });
 					let MapcheckChannels = fs.readJsonSync(`./ServerDatas/MapcheckChannels.json`);
 					for (const element of MapcheckChannels.Loved[mode]) {
-						if (client.channels.cache?.get(element) == undefined) continue;
 						try {
-							await client.channels.cache.get(element).send({ embeds: [embed] })
-							const membersdata = await client.channels.cache.get(element).guild.members.fetch()
+							const channel = client.channels.cache.get(element);
+							if (channel == undefined) continue;
+							await channel.send({ embeds: [embed] });
+							const membersdata = await channel.guild.members.fetch();
 							let mentionstring = [];
 							let allUser = fs.readJsonSync(`./ServerDatas/MentionUser.json`);
 							const mentionUser = allUser["Loved"][element]?.[mode];
 							allUser = null;
 							if (mentionUser == undefined) continue;
 							for (const user of mentionUser) {
+								console.log(user);
 								if (membersdata.get(user) == undefined) continue;
 								mentionstring.push(`<@${user}>`);
 							}
 							if (mentionstring.length != 0) {
-								await client.channels.cache.get(element).send(`${mentionstring.join(" ")}\n新しい${mode}のLoved譜面が出ました！`);
+								await channel.send(`${mentionstring.join(" ")}\n新しい${mode}のLoved譜面が出ました！`);
 							}
-						} catch {
+						} catch (e) {
+							console.log(e);
 							continue;
 						}
 					}
