@@ -898,6 +898,23 @@ class Tools {
 }
 
 /**
+ * A utility class that provides various tools and functions.
+ * @class
+ */
+class GetRank {
+    /**
+     * Retrieves the rank of a user based on their performance points (PP) and game mode.
+     * @param {number} pp - The performance points (PP) of the user.
+     * @param {number} mode - The game mode (0: osu!, 1: Taiko, 2: Catch the Beat, 3: osu!mania).
+     * @returns {Promise<object>} A promise that resolves to the rank of the user.
+     */
+    static async get(pp, mode) {
+        const apikey = process.env.OSUDAILY;
+        return await Utils.getAPIResponse(`https://osudaily.net/api/pp.php?k=${apikey}&v=${pp}&t=pp&m=${mode}`);
+    }
+}
+
+/**
  * Calculates the global performance points (PP) based on the given scores and user play count.
  * @class
  */
@@ -1220,6 +1237,7 @@ module.exports = {
     Mod,
     URLBuilder,
     Tools,
+    GetRank,
     CalculateGlobalPP,
     SRChart
 };

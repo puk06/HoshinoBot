@@ -186,7 +186,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					await interaction.reply("このコマンドはBot管理者専用です。");
 					return;
 				}
-				
+
 				await interaction.reply({
 					content: `現在のスロット設定は**${SLOT_SETTING}**です。`,
 					ephemeral: true
@@ -3974,12 +3974,18 @@ client.on(Events.MessageCreate, async (message) =>
 					}
 				}
 
+				const NearestUser = await osuLibrary.GetRank.get(globalPP, mode);
+				let nearestRank = Number(NearestUser.rank);
+
+				let rankDiff = Number(userdata.pp_rank) - nearestRank;
+				let rankPrefix = rankDiff > 0 ? "+" : "";
+
 				const playerIconURL = osuLibrary.URLBuilder.iconURL(userdata?.user_id);
 				const playerUserURL = osuLibrary.URLBuilder.userURL(userdata?.user_id);
 				const embed = new EmbedBuilder()
 					.setColor("Blue")
 					.setTitle(`What if ${playername} got a new ${enteredpp}pp score?`)
-					.setDescription(`A ${enteredpp}pp play would be ${playername}'s #${bpRanking} best play.\nTheir pp would change by **+${(Math.round((globalPP - Number(userdata.pp_raw)) * 100) / 100).toLocaleString()}** to **${(Math.round(globalPP * 100) / 100).toLocaleString()}pp**.`)
+					.setDescription(`A ${enteredpp}pp play would be ${playername}'s #${bpRanking} best play.\nTheir pp would change by **+${(Math.round((globalPP - Number(userdata.pp_raw)) * 100) / 100).toLocaleString()}** to **${(Math.round(globalPP * 100) / 100).toLocaleString()}pp** and they would reach approx. rank #${nearestRank} (${rankPrefix + rankDiff}).`)
 					.setThumbnail(playerIconURL)
 					.setAuthor({ name: `${userdata.username}: ${Number(userdata.pp_raw).toLocaleString()}pp (#${Number(userdata.pp_rank).toLocaleString()} ${userdata.country}${Number(userdata.pp_country_rank).toLocaleString()})`, iconURL: playerIconURL, url: playerUserURL });
 				await message.channel.send({ embeds: [embed] });
@@ -5104,8 +5110,9 @@ async function rankedintheday() {
 		let MapCheckChannels = fs.readJsonSync(`./ServerDatas/MapcheckChannels.json`);
 		for (const element of MapCheckChannels.Qualified[mode]) {
 			try {
-				if (client.channels.cache?.get(element) == undefined) continue;
-				await client.channels.cache.get(element).send({ embeds: [embed] });
+                const channel = client.channels.cache?.get(element);
+				if (channel == undefined) continue;
+				await channel.send({ embeds: [embed] });
 			} catch {
 				continue;
 			}
