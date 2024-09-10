@@ -1650,8 +1650,8 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const PPbefore = await calculator.calculateScorePP(score);
 				const SSPPbefore = await calculator.calculateSR();
 				
-				const mapData = await calculator.getMap();
-				const map = new rosu.Beatmap(mapData);
+				const map = await calculator.getMap()
+					.then(map => new rosu.Beatmap(map));
 				const passedObjects = Tools.calcPassedObject(playersScore, mode);
 				const IfFC = osuLibrary.CalculateIfFC.calculate(score, mode, passedObjects, mods.calc, map);
 				const PPafter = IfFC.ifFCPP;
