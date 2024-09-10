@@ -1744,7 +1744,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					playername = usernameArg;
 				}
 
-				let mode = 1;
+				let mode = replay.info.rulesetId;
 				let mapInfo = await new osuLibrary.GetMapData(replay.info.beatmapHashMD5, apikey, mode).getDataFromHash();
 				const maplink = osuLibrary.URLBuilder.beatmapURL(mapInfo.beatmapset_id, mode, mapInfo.beatmap_id);
 				let mapUrl = maplink;
