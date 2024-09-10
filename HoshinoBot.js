@@ -1736,7 +1736,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				});
 				const replay = await new ScoreDecoder().decodeFromBuffer(replayData);
 				replayData = null;
-				replyMessage.edit("Replayデータの解析が完了しました。");
+				replayMessage.edit("Replayデータの解析が完了しました。");
 
 				let playername = replay.info.username;
 				const usernameArg = interaction.options.get("username")?.value;
