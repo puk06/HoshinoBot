@@ -1730,11 +1730,13 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					return;
 				}
 
+				const replayMessage = await interaction.reply("Replayデータの解析中です...");
 				let replayData = await Tools.getAPIResponse(replayFile.url, {
 					responseType: "arraybuffer"
 				});
 				const replay = await new ScoreDecoder().decodeFromBuffer(replayData);
 				replayData = null;
+				replyMessage.edit("Replayデータの解析が完了しました。");
 
 				let playername = replay.info.username;
 				const usernameArg = interaction.options.get("username")?.value;
@@ -1795,7 +1797,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const userplays = await Tools.getAPIResponse(
 					`https://osu.ppy.sh/api/get_user_best?k=${apikey}&type=string&m=${mode}&u=${playername}&limit=100`
 				);
-				await interaction.reply("GlobalPPの計算中です...");
+				await replayMessage.edit("GlobalPPの計算中です...");
 				let pp = [];
 				let ppForBonusPP = [];
 				let foundFlag = false;
