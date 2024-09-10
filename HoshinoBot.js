@@ -21,6 +21,11 @@ const Furrychannel = process.env.FURRYCHANNEL;
 const SLOT_SETTING = Math.floor(Math.random() * 6) + 1;
 const MAMESTAGRAMAPI_BASEURL = "https://api.mamesosu.net/v1/";
 
+const osuBeatmapUrlRegex = /^https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+#[a-z]+\/\d+$/;
+const osuBeatmapUrlRegex2 = /^https:\/\/osu\.ppy\.sh\/b\/\d+$/;
+const osuBeatmapUrlRegex3 = /^https:\/\/osu\.ppy\.sh\/beatmaps\/\d+$/;
+const osuBeatmapsetRegex = /^https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+$/;
+
 const client = new Client({
 	intents: [
 		GatewayIntentBits.Guilds,
@@ -1083,11 +1088,8 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			}
 
 			if (interaction.commandName == "check") {
-				const regex = /^https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+#[a-z]+\/\d+$/;
-				const regex2 = /^https:\/\/osu\.ppy\.sh\/b\/\d+$/;
-				const regex3 = /^https:\/\/osu\.ppy\.sh\/beatmaps\/\d+$/;
 				const maplink = interaction.options.get("beatmaplink").value;
-				if (!(regex.test(maplink) || regex2.test(maplink) || regex3.test(maplink))) {
+				if (!(osuBeatmapUrlRegex.test(maplink) || osuBeatmapUrlRegex2.test(maplink) || osuBeatmapUrlRegex3.test(maplink))) {
 					await interaction.reply("ビートマップリンクの形式が間違っています。");
 					return;
 				}
@@ -1122,10 +1124,8 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 			if (interaction.commandName == "lb") {
 				let maplink = interaction.options.get("beatmaplink").value;
-				const regex = /^https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+#[a-z]+\/\d+$/;
-				const regex2 = /^https:\/\/osu\.ppy\.sh\/b\/\d+$/;
-				const regex3 = /^https:\/\/osu\.ppy\.sh\/beatmaps\/\d+$/;
-				if (!(regex.test(maplink) || regex2.test(maplink) || regex3.test(maplink))) {
+
+				if (!(osuBeatmapUrlRegex.test(maplink) || osuBeatmapUrlRegex2.test(maplink) || osuBeatmapUrlRegex3.test(maplink))) {
 					await interaction.reply(`ビートマップリンクの形式が間違っています。`);
 					return;
 				}
@@ -1140,7 +1140,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 				let mode;
 				let Mapinfo;
-				if (regex.test(maplink)) {
+				if (osuBeatmapUrlRegex.test(maplink)) {
 					switch (maplink.split("/")[4].split("#")[1]) {
 						case "osu":
 							mode = 0;
@@ -1341,22 +1341,18 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 			if (interaction.commandName == "bg") {
 				const maplink = interaction.options.get("beatmaplink").value;
-				const regex = /^https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+#[a-z]+\/\d+$/;
-				const regex2 = /^https:\/\/osu\.ppy\.sh\/b\/\d+$/;
-				const regex3 = /^https:\/\/osu\.ppy\.sh\/beatmaps\/\d+$/;
-				const regex4 = /^https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+$/;
 				let BeatmapsetId
 				switch (true) {
-					case regex.test(maplink): {
+					case osuBeatmapUrlRegex.test(maplink): {
 						BeatmapsetId = maplink.split("/")[4].split("#")[0];
 						break;
 					}
-					case regex3.test(maplink) || regex2.test(maplink): {
+					case osuBeatmapUrlRegex3.test(maplink) || osuBeatmapUrlRegex2.test(maplink): {
 						const mapInfo = await new osuLibrary.GetMapData(maplink, apikey).getDataWithoutMode();
 						BeatmapsetId = mapInfo.beatmapset_id;
 						break;
 					}
-					case regex4.test(maplink): {
+					case osuBeatmapsetRegex.test(maplink): {
 						BeatmapsetId = maplink.split("/")[maplink.split("/").length - 1];
 						break;
 					}
@@ -1387,10 +1383,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				let scoreSearchMode = interaction.options.get("score")?.value;
 				scoreSearchMode = !scoreSearchMode ? 1 : Number(scoreSearchMode);
 
-				const regex = /^https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+#[a-z]+\/\d+$/;
-				const regex2 = /^https:\/\/osu\.ppy\.sh\/b\/\d+$/;
-				const regex3 = /^https:\/\/osu\.ppy\.sh\/beatmaps\/\d+$/;
-				if (!(regex.test(maplink) || regex2.test(maplink) || regex3.test(maplink))) {
+				if (!(osuBeatmapUrlRegex.test(maplink) || osuBeatmapUrlRegex2.test(maplink) || osuBeatmapUrlRegex3.test(maplink))) {
 					await interaction.reply(`ビートマップリンクの形式が間違っています。`);
 					return;
 				}
@@ -1405,7 +1398,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				let mode;
 				let mapInfo;
 				let mapUrl;
-				if (!regex.test(maplink)) {
+				if (!osuBeatmapUrlRegex.test(maplink)) {
 					switch (maplink.split("/")[4].split("#")[1]) {
 						case "osu":
 							mode = 0;
@@ -1561,10 +1554,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				let scoreSearchMode = interaction.options.get("score")?.value;
 				scoreSearchMode = !scoreSearchMode ? 1 : Number(scoreSearchMode);
 
-				const regex = /^https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+#[a-z]+\/\d+$/;
-				const regex2 = /^https:\/\/osu\.ppy\.sh\/b\/\d+$/;
-				const regex3 = /^https:\/\/osu\.ppy\.sh\/beatmaps\/\d+$/;
-				if (!(regex.test(maplink) || regex2.test(maplink) || regex3.test(maplink))) {
+				if (!(osuBeatmapUrlRegex.test(maplink) || osuBeatmapUrlRegex2.test(maplink) || osuBeatmapUrlRegex3.test(maplink))) {
 					await interaction.reply(`ビートマップリンクの形式が間違っています。`);
 					return;
 				}
@@ -1572,7 +1562,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				let mode;
 				let mapInfo;
 				let mapUrl;
-				if (!regex.test(maplink)) {
+				if (!osuBeatmapUrlRegex.test(maplink)) {
 					switch (maplink.split("/")[4].split("#")[1]) {
 						case "osu":
 							mode = 0;
@@ -1651,7 +1641,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const SSPPbefore = await calculator.calculateSR();
 				
 				const map = await calculator.getMap()
-					.then(map => new rosu.Beatmap(map));
+					.then(map => new rosu.Beatmap(map))
 				const passedObjects = Tools.calcPassedObject(playersScore, mode);
 				const IfFC = osuLibrary.CalculateIfFC.calculate(score, mode, passedObjects, mods.calc, map);
 				const PPafter = IfFC.ifFCPP;
@@ -1716,17 +1706,15 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 			if (interaction.commandName == "srchart") {
 				const maplink = interaction.options.get("beatmaplink").value;
-				const regex = /^https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+#[a-z]+\/\d+$/;
-				const regex2 = /^https:\/\/osu\.ppy\.sh\/b\/\d+$/;
-				const regex3 = /^https:\/\/osu\.ppy\.sh\/beatmaps\/\d+$/;
-				if (!(regex.test(maplink) || regex2.test(maplink) || regex3.test(maplink))) {
+
+				if (!(osuBeatmapUrlRegex.test(maplink) || osuBeatmapUrlRegex2.test(maplink) || osuBeatmapUrlRegex3.test(maplink))) {
 					await interaction.reply(`ビートマップリンクの形式が間違っています。`);
 					return;
 				}
 
 				let mode;
 				let mapdata;
-				if (regex.test(maplink)) {
+				if (osuBeatmapUrlRegex.test(maplink)) {
 					switch (maplink.split("/")[4].split("#")[1]) {
 						case "osu":
 							mode = 0;
@@ -1770,10 +1758,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			if (interaction.commandName == "preview") {
 				const maplink = interaction.options.get("beatmaplink").value;
 
-				const regex = /^https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+#[a-z]+\/\d+$/;
-				const regex2 = /^https:\/\/osu\.ppy\.sh\/b\/\d+$/;
-				const regex3 = /^https:\/\/osu\.ppy\.sh\/beatmaps\/\d+$/;
-				if (!(regex.test(maplink) || regex2.test(maplink) || regex3.test(maplink))) {
+				if (!(osuBeatmapUrlRegex.test(maplink) || osuBeatmapUrlRegex2.test(maplink) || osuBeatmapUrlRegex3.test(maplink))) {
 					await interaction.reply(`ビートマップリンクの形式が間違っています。`);
 					return;
 				}
@@ -2736,11 +2721,7 @@ client.on(Events.MessageCreate, async (message) =>
 					return;
 				}
 
-				const regex = /^https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+#[a-z]+\/\d+$/;
-				const regex2 = /^https:\/\/osu\.ppy\.sh\/b\/\d+$/;
-				const regex3 = /^https:\/\/osu\.ppy\.sh\/beatmaps\/\d+$/;
-
-				if (!(regex.test(maplink) || regex2.test(maplink) || regex3.test(maplink))) {
+				if (!(osuBeatmapUrlRegex.test(maplink) || osuBeatmapUrlRegex2.test(maplink) || osuBeatmapUrlRegex3.test(maplink))) {
 					await message.reply(`ビートマップリンクの形式が間違っています。`);
 					return;
 				}
@@ -2748,7 +2729,7 @@ client.on(Events.MessageCreate, async (message) =>
 				let mode;
 				let mapInfo;
 				let mapUrl;
-				if (regex.test(maplink)) {
+				if (osuBeatmapUrlRegex.test(maplink)) {
 					switch (maplink.split("/")[4].split("#")[1]) {
 						case "osu":
 							mode = 0;
@@ -3442,10 +3423,8 @@ client.on(Events.MessageCreate, async (message) =>
 				if (!allchannels.Channels.includes(channelid)) return;
 				allchannels = null;
 				commandLogs(message, "マップリンク", 1);
-				const regex = /^https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+#[a-z]+\/\d+$/;
-				const regex2 = /^https:\/\/osu\.ppy\.sh\/b\/\d+$/;
-				const regex3 = /^https:\/\/osu\.ppy\.sh\/beatmaps\/\d+$/;
-				if (!(regex.test(message.content) || regex2.test(message.content) || regex3.test(message.content))) {
+
+				if (!(osuBeatmapUrlRegex.test(message.content) || osuBeatmapUrlRegex2.test(message.content) || osuBeatmapUrlRegex3.test(message.content))) {
 					await message.reply(`ビートマップリンクの形式が間違っています。`);
 					return;
 				}
@@ -3453,7 +3432,7 @@ client.on(Events.MessageCreate, async (message) =>
 				let mode;
 				let mapData;
 				let mapUrl;
-				if (regex.test(message.content)) {
+				if (osuBeatmapUrlRegex.test(message.content)) {
 					switch (message.content.split("#")[1].split("/")[0]) {
 						case "osu":
 							mode = 0;
@@ -3536,13 +3515,11 @@ client.on(Events.MessageCreate, async (message) =>
 
 				const messageData = await message.channel.messages.fetch();
 				const messages = Array.from(messageData.values());
-				const regex = /^https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+#[a-z]+\/\d+$/;
-				const regex2 = /^https:\/\/osu\.ppy\.sh\/b\/\d+$/;
-				const regex3 = /^https:\/\/osu\.ppy\.sh\/beatmaps\/\d+$/;
+
 				let maplinks = messages.map(message => {
-					if (regex.test(message.content) || regex2.test(message.content) || regex3.test(message.content)) return message.content;
-					if (regex.test(message.embeds[0]?.data?.url) || regex2.test(message.embeds[0]?.data?.url) || regex3.test(message.embeds[0]?.data?.url)) return message.embeds[0].data.url;
-					if (regex.test(message.embeds[0]?.author?.url) || regex2.test(message.embeds[0]?.author?.url) || regex3.test(message.embeds[0]?.author?.url)) return message.embeds[0].data.author.url;
+					if (osuBeatmapUrlRegex.test(message.content) || osuBeatmapUrlRegex2.test(message.content) || osuBeatmapUrlRegex3.test(message.content)) return message.content;
+					if (osuBeatmapUrlRegex.test(message.embeds[0]?.data?.url) || osuBeatmapUrlRegex2.test(message.embeds[0]?.data?.url) || osuBeatmapUrlRegex3.test(message.embeds[0]?.data?.url)) return message.embeds[0].data.url;
+					if (osuBeatmapUrlRegex.test(message.embeds[0]?.author?.url) || osuBeatmapUrlRegex2.test(message.embeds[0]?.author?.url) || osuBeatmapUrlRegex3.test(message.embeds[0]?.author?.url)) return message.embeds[0].data.author.url;
 				});
 				maplinks = maplinks.filter(link => link != undefined);
 				if (maplinks[0] == undefined) {
@@ -3571,7 +3548,7 @@ client.on(Events.MessageCreate, async (message) =>
 				let mode;
 				let mapData;
 				let mapUrl;
-				if (regex.test(recentmaplink)) {
+				if (osuBeatmapUrlRegex.test(recentmaplink)) {
 					switch (recentmaplink.split("#")[1].split("/")[0]) {
 						case "osu":
 							mode = 0;
@@ -3663,12 +3640,10 @@ client.on(Events.MessageCreate, async (message) =>
 
 			if (message.content.split(" ")[0] == "!c") {
 				commandLogs(message, "compare", 1);
-				const regex = /^https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+#[a-z]+\/\d+$/;
-				const regex2 = /^https:\/\/osu\.ppy\.sh\/b\/\d+$/;
-				const regex3 = /^https:\/\/osu\.ppy\.sh\/beatmaps\/\d+$/;
+
 				let playername;
 				let maplink;
-				if (regex.test(message.content.split(" ")[1]) || regex2.test(message.content.split(" ")[1]) || regex3.test(message.content.split(" ")[1])) {
+				if (osuBeatmapUrlRegex.test(message.content.split(" ")[1]) || osuBeatmapUrlRegex2.test(message.content.split(" ")[1]) || osuBeatmapUrlRegex3.test(message.content.split(" ")[1])) {
 					maplink = message.content.split(" ")[1];
 					if (message.content.split(" ")[2] == undefined) {
 						let allUser = fs.readJsonSync("./ServerDatas/PlayerData.json");
@@ -3708,9 +3683,9 @@ client.on(Events.MessageCreate, async (message) =>
 						const messageData = await message.channel.messages.fetch();
 						const messages = Array.from(messageData.values());
 						let maplinks = messages.map(message => {
-							if (regex.test(message.content) || regex2.test(message.content) || regex3.test(message.content)) return message.content;
-							if (regex.test(message.embeds[0]?.data?.url) || regex2.test(message.embeds[0]?.data?.url) || regex3.test(message.embeds[0]?.data?.url)) return message.embeds[0].data.url;
-							if (regex.test(message.embeds[0]?.author?.url) || regex2.test(message.embeds[0]?.author?.url) || regex3.test(message.embeds[0]?.data?.url)) return message.embeds[0].data.author.url;
+							if (osuBeatmapUrlRegex.test(message.content) || osuBeatmapUrlRegex2.test(message.content) || osuBeatmapUrlRegex3.test(message.content)) return message.content;
+							if (osuBeatmapUrlRegex.test(message.embeds[0]?.data?.url) || osuBeatmapUrlRegex2.test(message.embeds[0]?.data?.url) || osuBeatmapUrlRegex3.test(message.embeds[0]?.data?.url)) return message.embeds[0].data.url;
+							if (osuBeatmapUrlRegex.test(message.embeds[0]?.author?.url) || osuBeatmapUrlRegex2.test(message.embeds[0]?.author?.url) || osuBeatmapUrlRegex3.test(message.embeds[0]?.data?.url)) return message.embeds[0].data.author.url;
 						});
 						maplinks = maplinks.filter(link => link != undefined);
 						if (maplinks[0] == undefined) {
@@ -3726,9 +3701,9 @@ client.on(Events.MessageCreate, async (message) =>
 						}
 
 						maplink = ((messageData) => {
-							if (regex.test(messageData.content) || regex2.test(messageData.content) || regex3.test(messageData.content)) return messageData.content;
-							if (regex.test(messageData.embeds[0]?.data?.url) || regex2.test(messageData.embeds[0]?.data?.url) || regex3.test(messageData.embeds[0]?.data?.url)) return messageData.embeds[0].data.url;
-							if (regex.test(messageData.embeds[0]?.author?.url) || regex2.test(messageData.embeds[0]?.author?.url) || regex3.test(messageData.embeds[0]?.data?.url)) return messageData.embeds[0].data.author.url;
+							if (osuBeatmapUrlRegex.test(messageData.content) || osuBeatmapUrlRegex2.test(messageData.content) || osuBeatmapUrlRegex3.test(messageData.content)) return messageData.content;
+							if (osuBeatmapUrlRegex.test(messageData.embeds[0]?.data?.url) || osuBeatmapUrlRegex2.test(messageData.embeds[0]?.data?.url) || osuBeatmapUrlRegex3.test(messageData.embeds[0]?.data?.url)) return messageData.embeds[0].data.url;
+							if (osuBeatmapUrlRegex.test(messageData.embeds[0]?.author?.url) || osuBeatmapUrlRegex2.test(messageData.embeds[0]?.author?.url) || osuBeatmapUrlRegex3.test(messageData.embeds[0]?.data?.url)) return messageData.embeds[0].data.author.url;
 							return undefined;
 						})(messageData);
 
@@ -3754,9 +3729,9 @@ client.on(Events.MessageCreate, async (message) =>
 						const messageData = await message.channel.messages.fetch();
 						const messages = Array.from(messageData.values());
 						let maplinks = messages.map(message => {
-							if (regex.test(message.content) || regex2.test(message.content) || regex3.test(message.content)) return message.content;
-							if (regex.test(message.embeds[0]?.data?.url) || regex2.test(message.embeds[0]?.data?.url) || regex3.test(message.embeds[0]?.data?.url)) return message.embeds[0].data.url;
-							if (regex.test(message.embeds[0]?.author?.url) || regex2.test(message.embeds[0]?.author?.url) || regex3.test(message.embeds[0]?.data?.url)) return message.embeds[0].data.author.url;
+							if (osuBeatmapUrlRegex.test(message.content) || osuBeatmapUrlRegex2.test(message.content) || osuBeatmapUrlRegex3.test(message.content)) return message.content;
+							if (osuBeatmapUrlRegex.test(message.embeds[0]?.data?.url) || osuBeatmapUrlRegex2.test(message.embeds[0]?.data?.url) || osuBeatmapUrlRegex3.test(message.embeds[0]?.data?.url)) return message.embeds[0].data.url;
+							if (osuBeatmapUrlRegex.test(message.embeds[0]?.author?.url) || osuBeatmapUrlRegex2.test(message.embeds[0]?.author?.url) || osuBeatmapUrlRegex3.test(message.embeds[0]?.data?.url)) return message.embeds[0].data.author.url;
 						});
 						maplinks = maplinks.filter(link => link != undefined);
 						if (maplinks[0] == undefined) {
@@ -3772,9 +3747,9 @@ client.on(Events.MessageCreate, async (message) =>
 						}
 
 						maplink = ((messageData) => {
-							if (regex.test(messageData.content) || regex2.test(messageData.content) || regex3.test(messageData.content)) return messageData.content;
-							if (regex.test(messageData.embeds[0]?.data?.url) || regex2.test(messageData.embeds[0]?.data?.url) || regex3.test(messageData.embeds[0]?.data?.url)) return messageData.embeds[0].data.url;
-							if (regex.test(messageData.embeds[0]?.author?.url) || regex2.test(messageData.embeds[0]?.author?.url) || regex3.test(messageData.embeds[0]?.data?.url)) return messageData.embeds[0].data.author.url;
+							if (osuBeatmapUrlRegex.test(messageData.content) || osuBeatmapUrlRegex2.test(messageData.content) || osuBeatmapUrlRegex3.test(messageData.content)) return messageData.content;
+							if (osuBeatmapUrlRegex.test(messageData.embeds[0]?.data?.url) || osuBeatmapUrlRegex2.test(messageData.embeds[0]?.data?.url) || osuBeatmapUrlRegex3.test(messageData.embeds[0]?.data?.url)) return messageData.embeds[0].data.url;
+							if (osuBeatmapUrlRegex.test(messageData.embeds[0]?.author?.url) || osuBeatmapUrlRegex2.test(messageData.embeds[0]?.author?.url) || osuBeatmapUrlRegex3.test(messageData.embeds[0]?.data?.url)) return messageData.embeds[0].data.author.url;
 							return undefined;
 						})(messageData);
 
@@ -3793,7 +3768,7 @@ client.on(Events.MessageCreate, async (message) =>
 				let mapData;
 				let mode;
 				let mapUrl;
-				if (regex.test(maplink)) {
+				if (osuBeatmapUrlRegex.test(maplink)) {
 					switch (maplink.split("#")[1].split("/")[0]) {
 						case "osu":
 							mode = 0;
