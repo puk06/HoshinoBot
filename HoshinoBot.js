@@ -1736,7 +1736,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				});
 				const replay = await new ScoreDecoder().decodeFromBuffer(replayData);
 				replayData = null;
-				replayMessage.edit("Replayデータの解析が完了しました。");
+				await replayMessage.edit("Replayデータの解析が完了しました。");
 
 				let playername = replay.info.username;
 				const usernameArg = interaction.options.get("username")?.value;
@@ -1797,6 +1797,20 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const userplays = await Tools.getAPIResponse(
 					`https://osu.ppy.sh/api/get_user_best?k=${apikey}&type=string&m=${mode}&u=${playername}&limit=100`
 				);
+
+				if (userplays.length == 0) {
+					await replayMessage.edit("ユーザーが見つかりませんでした。");
+					const embed = new EmbedBuilder()
+						.setColor("Blue")
+						.setTitle(`${mapInfo.artist} - ${mapInfo.title} [${mapInfo.version}]`)
+						.setDescription(`Played by ${playername}`)
+						.addFields({ name: `Mods: ${mods.str} Acc: ${acc}% Miss: ${playersScore.countmiss}`, value: `**PP:** **${PPbefore.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp → **${PPafter.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp`, inline: true })
+						.setURL(mapUrl)
+						.setAuthor({ name: `Mapped by ${mapInfo.creator}`, url: osuLibrary.URLBuilder.userURL(mappersInfo?.user_id) });
+					await interaction.channel.send({ embeds: [embed] });
+					return;
+				}
+
 				await replayMessage.edit("GlobalPPの計算中です...");
 				let pp = [];
 				let ppForBonusPP = [];
