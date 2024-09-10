@@ -159,6 +159,21 @@ class GetMapData {
         });
     }
 
+    getDataFromHash() {
+        return new Promise(async (resolve, reject) => {
+            await Utils.getAPIResponse(`https://osu.ppy.sh/api/get_beatmaps?k=${this.apikey}&h=${this.maplink}&a=1`)
+                .then(res => {
+                    if (res.length === 0) {
+                        reject(new Error("No data found"));
+                    }
+                    resolve(res[0]);
+                })
+                .catch(error => {
+                    reject(error);
+                });
+        });
+    }
+
     /**
      * Retrieves map data from the osu! API without specifying the game mode.
      * @returns {Promise<object>} A promise that resolves to the map data.

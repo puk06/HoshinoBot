@@ -14,6 +14,7 @@
     "fs-extra": "11.2.0",
     "mathjs": "^13.0.3",
     "osu-api-extended": "2.7.0",
+    "osu-parsers": "^4.1.7",
     "rosu-pp-js": "1.0.2"
   },
   "devDependencies": {

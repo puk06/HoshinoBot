@@ -9,6 +9,7 @@ const path = require("node:path");
 const asciify = require("node:util").promisify(require("./node_modules/asciify"));
 const osuLibrary = require("./src/osuLibrary.js");
 const { Tools, ImJugglerEX, RatChecker, TwitterDownloader, YoutubeDownloader } = require("./src/Utils.js");
+const { ScoreDecoder } = require("osu-parsers");
 const AdmZip = require("./node_modules/adm-zip");
 const MathJS = require("./node_modules/mathjs");
 
@@ -1484,14 +1485,23 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				await interaction.reply("GlobalPPの計算中です...");
 				let pp = [];
 				let ppForBonusPP = [];
+				let foundFlag = false;
 				for (const element of userplays) {
 					ppForBonusPP.push(Number(element.pp));
 					if (mapInfo.beatmap_id == element.beatmap_id && PPafter > Number(userplays[userplays.length - 1].pp)) {
 						pp.push(Math.round(PPafter * 100) / 100);
+						foundFlag = true;
 						continue;
 					}
 					pp.push(Number(element.pp));
 				}
+
+				if (!foundFlag) {
+					pp.push(Math.round(PPafter * 100) / 100);
+					pp.sort((a, b) => b - a);
+					pp.pop();
+				}
+
 				pp.sort((a, b) => b - a);
 				ppForBonusPP.sort((a, b) => b - a);
 
@@ -1652,13 +1662,157 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				await interaction.reply("GlobalPPの計算中です...");
 				let pp = [];
 				let ppForBonusPP = [];
+				let foundFlag = false;
 				for (const element of userplays) {
 					ppForBonusPP.push(Number(element.pp));
 					if (mapInfo.beatmap_id == element.beatmap_id && PPafter > Number(userplays[userplays.length - 1].pp)) {
 						pp.push(Math.round(PPafter * 100) / 100);
+						foundFlag = true;
 						continue;
 					}
 					pp.push(Number(element.pp));
+				}
+
+				if (!foundFlag) {
+					pp.push(Math.round(PPafter * 100) / 100);
+					pp.sort((a, b) => b - a);
+					pp.pop();
+				}
+
+				pp.sort((a, b) => b - a);
+				ppForBonusPP.sort((a, b) => b - a);
+
+				const playcount = Number(playersInfo.playcount);
+				const globalPPOld = osuLibrary.CalculateGlobalPP.calculate(ppForBonusPP, playcount);
+				const globalPPwithoutBonusPP = osuLibrary.CalculateGlobalPP.calculate(pp, playcount);
+				const bonusPP = Number(playersInfo.pp_raw) - globalPPOld;
+				const globalPP = globalPPwithoutBonusPP + bonusPP;
+				const globalPPDiff = globalPP - Number(playersInfo.pp_raw);
+				const globalPPDiffPrefix = globalPPDiff > 0 ? "+" : "";
+
+				const rankData = await osuLibrary.GetRank.get(globalPP, mode);
+				let rankAfter = rankData.rank;
+				if (rankData.pp < globalPP) {
+					rankAfter = rankData.rank - 1;
+				}
+				const rankDataBefore = playersInfo.pp_rank;
+				const rankDiff = rankDataBefore - rankAfter;
+				const rankDiffPrefix = rankDiff > 0 ? "+" : "";
+
+				let rankMessage = `**#${rankDataBefore}** → **#${rankAfter}** (${rankDiffPrefix + rankDiff})`;
+				if (rankDiff == 0) {
+					rankMessage = "ランクに変動はありません。";
+				}
+
+				const playerUserURL = osuLibrary.URLBuilder.userURL(playersInfo?.user_id);
+				const mapperUserURL = osuLibrary.URLBuilder.userURL(mappersInfo?.user_id);
+				const mapperIconURL = osuLibrary.URLBuilder.iconURL(mappersInfo?.user_id);
+				const backgroundURL = osuLibrary.URLBuilder.backgroundURL(maplink);
+
+				const embed = new EmbedBuilder()
+					.setColor("Blue")
+					.setTitle(`${mapInfo.artist} - ${mapInfo.title} [${mapInfo.version}]`)
+					.setDescription(`Played by [${playersInfo.username}](${playerUserURL})`)
+					.addFields({ name: `Mods: ${mods.str} Acc: ${acc}% Miss: ${playersScore.countmiss}`, value: `**PP:** **${PPbefore.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp → **${PPafter.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp`, inline: true })
+					.addFields({ name: `GlobalPP`, value: `**${Number(playersInfo.pp_raw).toLocaleString()}**pp → **${(Math.round(globalPP * 10) / 10).toLocaleString()}**pp (${globalPPDiffPrefix + (globalPPDiff).toFixed(1)})`, inline: false })
+					.addFields({ name: `Rank`, value: rankMessage, inline: false })
+					.setURL(mapUrl)
+					.setAuthor({ name: `Mapped by ${mapInfo.creator}`, iconURL: mapperIconURL, url: mapperUserURL })
+					.setImage(backgroundURL);
+				await interaction.channel.send({ embeds: [embed] });
+				return;
+			}
+
+			if (interaction.commandName == "iffcreplay") {
+				const replayFile = interaction.options.get("replayfile").attachment;
+				if (!replayFile.name.endsWith(".osr")) {
+					await interaction.reply("OSRファイルを添付してください。");
+					return;
+				}
+
+				let replayData = await Tools.getAPIResponse(replayFile.url, {
+					responseType: "arraybuffer"
+				});
+				const replay = await new ScoreDecoder().decodeFromBuffer(replayData);
+				replayData = null;
+
+				let playername = replay.info.username;
+				const usernameArg = interaction.options.get("username")?.value;
+				if (usernameArg != null || usernameArg != undefined) {
+					playername = usernameArg;
+				}
+
+				let mode = 1;
+				let mapInfo = await new osuLibrary.GetMapData(replay.info.beatmapHashMD5, apikey, mode).getDataFromHash();
+				const maplink = osuLibrary.URLBuilder.beatmapURL(mapInfo.beatmapset_id, mode, mapInfo.beatmap_id);
+				let mapUrl = maplink;
+
+				const playersInfo = await new osuLibrary.GetUserData(playername, apikey, mode).getData();
+				const mappersInfo = await new osuLibrary.GetUserData(mapInfo.creator, apikey, mode).getData();
+
+				const playersScore = {
+					count300: replay.info.count300,
+					count100: replay.info.count100,
+					count50: replay.info.count50,
+					countmiss: replay.info.countMiss,
+					countgeki: replay.info.countGeki,
+					countkatu: replay.info.countKatu,
+					maxcombo: replay.info.maxCombo,
+					enabled_mods: replay.info.rawMods
+				};
+
+				const acc = Math.round(tools.accuracy({
+					300: playersScore.count300,
+					100: playersScore.count100,
+					50: playersScore.count50,
+					0: playersScore.countmiss,
+					geki : playersScore.countgeki,
+					katu: playersScore.countkatu
+				}, Tools.modeConvertAcc(mode)) * 100) / 100;
+
+				const mods = new osuLibrary.Mod(playersScore.enabled_mods).get();
+
+				let score = {
+					n300: Number(playersScore.count300),
+					n100: Number(playersScore.count100),
+					n50: Number(playersScore.count50),
+					misses: Number(playersScore.countmiss),
+					nGeki: Number(playersScore.countgeki),
+					nKatu: Number(playersScore.countkatu),
+					combo: Number(playersScore.maxcombo)
+				};
+
+				const calculator = new osuLibrary.CalculatePPSR(maplink, mods.calc, mode);
+				const PPbefore = await calculator.calculateScorePP(score);
+				const SSPPbefore = await calculator.calculateSR();
+				
+				const map = await calculator.getMap()
+					.then(map => new rosu.Beatmap(map))
+				const passedObjects = Tools.calcPassedObject(playersScore, mode);
+				const IfFC = osuLibrary.CalculateIfFC.calculate(score, mode, passedObjects, mods.calc, map);
+				const PPafter = IfFC.ifFCPP;
+
+				const userplays = await Tools.getAPIResponse(
+					`https://osu.ppy.sh/api/get_user_best?k=${apikey}&type=string&m=${mode}&u=${playername}&limit=100`
+				);
+				await interaction.reply("GlobalPPの計算中です...");
+				let pp = [];
+				let ppForBonusPP = [];
+				let foundFlag = false;
+				for (const element of userplays) {
+					ppForBonusPP.push(Number(element.pp));
+					if (mapInfo.beatmap_id == element.beatmap_id && PPafter > Number(userplays[userplays.length - 1].pp)) {
+						pp.push(Math.round(PPafter * 100) / 100);
+						foundFlag = true;
+						continue;
+					}
+					pp.push(Number(element.pp));
+				}
+
+				if (!foundFlag) {
+					pp.push(Math.round(PPafter * 100) / 100);
+					pp.sort((a, b) => b - a);
+					pp.pop();
 				}
 				pp.sort((a, b) => b - a);
 				ppForBonusPP.sort((a, b) => b - a);

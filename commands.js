@@ -502,6 +502,23 @@ module.exports = [
     },
     {
         data: new SlashCommandBuilder()
+            .setName("iffcreplay")
+            .setDescription("送られたリプレイのユーザーの記録のIFFCの時のランキングを計算します。")
+            .addAttachmentOption(option =>
+                option
+                    .setName("replayfile")
+                    .setDescription("リプレイファイル")
+                    .setRequired(true)
+            )
+            .addStringOption(option =>
+                option
+                    .setName("username")
+                    .setDescription("ユーザー名")
+                    .setRequired(false)
+            )
+    },
+    {
+        data: new SlashCommandBuilder()
             .setName("srchart")
             .setDescription("送られたマップのSRグラフを表示します。")
             .addStringOption(option =>
