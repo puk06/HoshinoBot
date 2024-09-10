@@ -1530,7 +1530,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					.setTitle(`${mapInfo.artist} - ${mapInfo.title} [${mapInfo.version}]`)
 					.setDescription(`Played by [${playersInfo.username}](${playerUserURL})`)
 					.addFields({ name: `Mods: ${modsBefore.str} → ${mods.str} Acc: ${acc}% Miss: ${playersScore.countmiss}`, value: `**PP:** **${PPbefore.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp → **${PPafter.toFixed(2)}**/${SSPPafter.pp.toFixed(2)}pp`, inline: true })
-					.addFields({ name: `GLobalPP`, value: `**${Number(playersInfo.pp_raw).toLocaleString()}**pp → **${(Math.round(globalPP * 10) / 10).toLocaleString()}**pp (${globalPPDiffPrefix + (globalPPDiff).toFixed(1)})`, inline: false })
+					.addFields({ name: `GlobalPP`, value: `**${Number(playersInfo.pp_raw).toLocaleString()}**pp → **${(Math.round(globalPP * 10) / 10).toLocaleString()}**pp (${globalPPDiffPrefix + (globalPPDiff).toFixed(1)})`, inline: false })
 					.addFields({ name: `Rank`, value: rankMessage, inline: false })
 					.setURL(mapUrl)
 					.setAuthor({ name: `Mapped by ${mapInfo.creator}`, iconURL: mapperIconURL, url: mapperUserURL })
@@ -1539,7 +1539,6 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				return;
 			}
 
-			//iffccommand
 			if (interaction.commandName == "iffc") {
 				let playername = interaction.options.get("username")?.value;
 				if (playername == undefined) {
@@ -1698,7 +1697,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					.setTitle(`${mapInfo.artist} - ${mapInfo.title} [${mapInfo.version}]`)
 					.setDescription(`Played by [${playersInfo.username}](${playerUserURL})`)
 					.addFields({ name: `Mods: ${mods.str} Acc: ${acc}% Miss: ${playersScore.countmiss}`, value: `**PP:** **${PPbefore.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp → **${PPafter.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp`, inline: true })
-					.addFields({ name: `GLobalPP`, value: `**${Number(playersInfo.pp_raw).toLocaleString()}**pp → **${(Math.round(globalPP * 10) / 10).toLocaleString()}**pp (${globalPPDiffPrefix + (globalPPDiff).toFixed(1)})`, inline: false })
+					.addFields({ name: `GlobalPP`, value: `**${Number(playersInfo.pp_raw).toLocaleString()}**pp → **${(Math.round(globalPP * 10) / 10).toLocaleString()}**pp (${globalPPDiffPrefix + (globalPPDiff).toFixed(1)})`, inline: false })
 					.addFields({ name: `Rank`, value: rankMessage, inline: false })
 					.setURL(mapUrl)
 					.setAuthor({ name: `Mapped by ${mapInfo.creator}`, iconURL: mapperIconURL, url: mapperUserURL })
