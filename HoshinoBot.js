@@ -1511,11 +1511,15 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const globalPPDiffPrefix = globalPPDiff > 0 ? "+" : "";
 
 				const rankData = await osuLibrary.GetRank.get(globalPP, mode);
+				let rankAfter = rankData.rank;
+				if (rankData.pp < globalPP) {
+					rankAfter = rankData.rank - 1;
+				}
 				const rankDataBefore = playersInfo.pp_rank;
-				const rankDiff = rankData.rank - rankDataBefore;
+				const rankDiff = rankDataBefore - rankAfter;
 				const rankDiffPrefix = rankDiff > 0 ? "+" : "";
 
-				let rankMessage = `**#${rankDataBefore}** → **#${rankData.rank}** (${rankDiffPrefix + rankDiff})`;
+				let rankMessage = `**#${rankDataBefore}** → **#${rankAfter}** (${rankDiffPrefix + rankDiff})`;
 				if (rankDiff == 0) {
 					rankMessage = "ランクに変動はありません。";
 				}
@@ -1678,11 +1682,15 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const globalPPDiffPrefix = globalPPDiff > 0 ? "+" : "";
 
 				const rankData = await osuLibrary.GetRank.get(globalPP, mode);
+				let rankAfter = rankData.rank;
+				if (rankData.pp < globalPP) {
+					rankAfter = rankData.rank - 1;
+				}
 				const rankDataBefore = playersInfo.pp_rank;
-				const rankDiff = rankData.rank - rankDataBefore;
+				const rankDiff = rankDataBefore - rankAfter;
 				const rankDiffPrefix = rankDiff > 0 ? "+" : "";
 
-				let rankMessage = `**#${rankDataBefore}** → **#${rankData.rank}** (${rankDiffPrefix + rankDiff})`;
+				let rankMessage = `**#${rankDataBefore}** → **#${rankAfter}** (${rankDiffPrefix + rankDiff})`;
 				if (rankDiff == 0) {
 					rankMessage = "ランクに変動はありません。";
 				}
@@ -4153,6 +4161,12 @@ client.on(Events.MessageCreate, async (message) =>
 				}
 
 				const NearestUser = await osuLibrary.GetRank.get(globalPP, mode);
+				let rankAfter = NearestUser.rank;
+
+				if (NearestUser.pp < globalPP) {
+					rankAfter = NearestUser.rank - 1;
+				}
+
 				let nearestRank = Number(NearestUser.rank);
 
 				let rankDiff = Number(userdata.pp_rank) - nearestRank;
@@ -4163,7 +4177,7 @@ client.on(Events.MessageCreate, async (message) =>
 				const embed = new EmbedBuilder()
 					.setColor("Blue")
 					.setTitle(`What if ${playername} got a new ${enteredpp}pp score?`)
-					.setDescription(`A ${enteredpp}pp play would be ${playername}'s #${bpRanking} best play.\nTheir pp would change by **+${(Math.round((globalPP - Number(userdata.pp_raw)) * 100) / 100).toLocaleString()}** to **${(Math.round(globalPP * 100) / 100).toLocaleString()}pp** and they would reach approx. rank #${nearestRank} (${rankPrefix + rankDiff}).`)
+					.setDescription(`A ${enteredpp}pp play would be ${playername}'s #${bpRanking} best play.\nTheir pp would change by **+${(Math.round((globalPP - Number(userdata.pp_raw)) * 100) / 100).toLocaleString()}** to **${(Math.round(globalPP * 100) / 100).toLocaleString()}pp** and they would reach approx. rank #${rankAfter} (${rankPrefix + rankDiff}).`)
 					.setThumbnail(playerIconURL)
 					.setAuthor({ name: `${userdata.username}: ${Number(userdata.pp_raw).toLocaleString()}pp (#${Number(userdata.pp_rank).toLocaleString()} ${userdata.country}${Number(userdata.pp_country_rank).toLocaleString()})`, iconURL: playerIconURL, url: playerUserURL });
 				await message.channel.send({ embeds: [embed] });
