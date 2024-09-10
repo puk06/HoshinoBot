@@ -4517,7 +4517,8 @@ client.on(Events.MessageCreate, async (message) =>
 
 					case "6": {
 						let osuMessage = "__\*\*osu!のスラッシュコマンド一覧(2ページ目)\*\*\__\n";
-						osuMessage += "- `/ifmod [BeatmapLink] [Mods] (Username) (Scoreの種類)`で、送られたマップのスコアのModsを変更してPPを計算します。\n";
+						osuMessage += "- `/ifmod [BeatmapLink] [Mods] (Username) (Scoreの種類)`で、送られたマップのスコアのModsを変更してPP、ランクを計算します。\n";
+						osuMessage += "- `/iffc [BeatmapLink] (Username) (Scoreの種類)`で、送られたマップのスコアのIFFCの時のPP、ランクを計算します。\n";
 						osuMessage += "- `/lb [BeatmapLink] (Mods)`で、指定されたModsでのランキングを表示します。n";
 						osuMessage += "- `/link`で、直近に送信された譜面のリンクを表示します。\n";
 						osuMessage += "- `/osubgquiz | /osubgquizpf (Username) (Mode)`で、指定されたユーザーのosu!のBPからBGクイズを出します。PFは完答のみ正解扱いになります。\n";
