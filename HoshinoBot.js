@@ -1510,6 +1510,16 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const globalPPDiff = globalPP - Number(playersInfo.pp_raw);
 				const globalPPDiffPrefix = globalPPDiff > 0 ? "+" : "";
 
+				const rankData = await osuLibrary.GetRank.get(globalPP, mode);
+				const rankDataBefore = playersInfo.pp_rank;
+				const rankDiff = rankData.rank - rankDataBefore;
+				const rankDiffPrefix = rankDiff > 0 ? "+" : "";
+
+				let rankMessage = `**#${rankDataBefore}** → **#${rankData.rank}** (${rankDiffPrefix + rankDiff})`;
+				if (rankDiff == 0) {
+					rankMessage = "ランクに変動はありません。";
+				}
+
 				const playerUserURL = osuLibrary.URLBuilder.userURL(playersInfo?.user_id);
 				const mapperUserURL = osuLibrary.URLBuilder.userURL(mappersInfo?.user_id);
 				const mapperIconURL = osuLibrary.URLBuilder.iconURL(mappersInfo?.user_id);
@@ -1520,7 +1530,176 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					.setTitle(`${mapInfo.artist} - ${mapInfo.title} [${mapInfo.version}]`)
 					.setDescription(`Played by [${playersInfo.username}](${playerUserURL})`)
 					.addFields({ name: `Mods: ${modsBefore.str} → ${mods.str} Acc: ${acc}% Miss: ${playersScore.countmiss}`, value: `**PP:** **${PPbefore.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp → **${PPafter.toFixed(2)}**/${SSPPafter.pp.toFixed(2)}pp`, inline: true })
-					.addFields({ name: `Rank`, value: `**${Number(playersInfo.pp_raw).toLocaleString()}**pp (#${Number(playersInfo.pp_rank).toLocaleString()}) → **${(Math.round(globalPP * 10) / 10).toLocaleString()}**pp ${globalPPDiffPrefix + (globalPPDiff).toFixed(1)}`, inline: false })
+					.addFields({ name: `GLobalPP`, value: `**${Number(playersInfo.pp_raw).toLocaleString()}**pp → **${(Math.round(globalPP * 10) / 10).toLocaleString()}**pp (${globalPPDiffPrefix + (globalPPDiff).toFixed(1)})`, inline: false })
+					.addFields({ name: `Rank`, value: rankMessage, inline: false })
+					.setURL(mapUrl)
+					.setAuthor({ name: `Mapped by ${mapInfo.creator}`, iconURL: mapperIconURL, url: mapperUserURL })
+					.setImage(backgroundURL);
+				await interaction.channel.send({ embeds: [embed] });
+				return;
+			}
+
+			//iffccommand
+			if (interaction.commandName == "iffc") {
+				let playername = interaction.options.get("username")?.value;
+				if (playername == undefined) {
+					let allUser = fs.readJsonSync("./ServerDatas/PlayerData.json");
+					const username = allUser["Bancho"][interaction.user.id]?.name;
+					if (username == undefined) {
+						await interaction.reply("ユーザー名が登録されていません。/osureg、!osuregで登録するか、ユーザー名を入力してください。");
+						allUser = null;
+						return;
+					}
+					playername = username;
+					allUser = null;
+				}
+
+				const maplink = interaction.options.get("beatmaplink")?.value;
+				let scoreSearchMode = interaction.options.get("score")?.value;
+				scoreSearchMode = !scoreSearchMode ? 1 : Number(scoreSearchMode);
+
+				const regex = /^https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+#[a-z]+\/\d+$/;
+				const regex2 = /^https:\/\/osu\.ppy\.sh\/b\/\d+$/;
+				const regex3 = /^https:\/\/osu\.ppy\.sh\/beatmaps\/\d+$/;
+				if (!(regex.test(maplink) || regex2.test(maplink) || regex3.test(maplink))) {
+					await interaction.reply(`ビートマップリンクの形式が間違っています。`);
+					return;
+				}
+
+				let mode;
+				let mapInfo;
+				let mapUrl;
+				if (!regex.test(maplink)) {
+					switch (maplink.split("/")[4].split("#")[1]) {
+						case "osu":
+							mode = 0;
+							break;
+						case "taiko":
+							mode = 1;
+							break;
+
+						case "fruits":
+							mode = 2;
+							break;
+
+						case "mania":
+							mode = 3;
+							break;
+
+						default:
+							await interaction.reply("リンク内のモードが不正です。");
+							return;
+					}
+					mapInfo = await new osuLibrary.GetMapData(maplink, apikey, mode).getData();
+					mapUrl = maplink;
+				} else {
+					mapInfo = await new osuLibrary.GetMapData(maplink, apikey).getDataWithoutMode();
+					mode = Number(mapInfo.mode);
+					mapUrl = osuLibrary.URLBuilder.beatmapURL(mapInfo.beatmapset_id, mode, mapInfo.beatmap_id);
+				}
+
+				let playersScore = await new osuLibrary.GetUserScore(playername, apikey, mode).getScoreDataWithoutMods(mapInfo.beatmap_id);
+
+				if (playersScore.length == 0) {
+					await interaction.reply(`${playername}さんのスコアが見つかりませんでした。`);
+					return;
+				}
+
+				if (scoreSearchMode == 1) {
+					let maxPP = 0;
+					let maxPPIndex = 0;
+					for (let i = 0; i < playersScore.length; i++) {
+						if (Number(playersScore[i].pp) > maxPP) {
+							maxPP = Number(playersScore[i].pp);
+							maxPPIndex = i;
+						}
+					}
+					playersScore = playersScore[maxPPIndex];
+				} else {
+					playersScore = playersScore[0];
+				}
+
+				const playersInfo = await new osuLibrary.GetUserData(playername, apikey, mode).getData();
+				const mappersInfo = await new osuLibrary.GetUserData(mapInfo.creator, apikey, mode).getData();
+
+				const acc = Math.round(tools.accuracy({
+					300: playersScore.count300,
+					100: playersScore.count100,
+					50: playersScore.count50,
+					0: playersScore.countmiss,
+					geki : playersScore.countgeki,
+					katu: playersScore.countkatu
+				}, Tools.modeConvertAcc(mode)) * 100) / 100;
+
+				const mods = new osuLibrary.Mod(playersScore.enabled_mods).get();
+
+				let score = {
+					n300: Number(playersScore.count300),
+					n100: Number(playersScore.count100),
+					n50: Number(playersScore.count50),
+					misses: Number(playersScore.countmiss),
+					nGeki: Number(playersScore.countgeki),
+					nKatu: Number(playersScore.countkatu),
+					combo: Number(playersScore.maxcombo)
+				};
+
+				const calculator = new osuLibrary.CalculatePPSR(maplink, mods.calc, mode);
+				const PPbefore = await calculator.calculateScorePP(score);
+				const SSPPbefore = await calculator.calculateSR();
+				
+				const mapData = await calculator.getMap();
+				const map = new rosu.Beatmap(mapData);
+				const passedObjects = Tools.calcPassedObject(playersScore, mode);
+				const IfFC = osuLibrary.CalculateIfFC.calculate(score, mode, passedObjects, mods.calc, map);
+				const PPafter = IfFC.ifFCPP;
+
+				const userplays = await Tools.getAPIResponse(
+					`https://osu.ppy.sh/api/get_user_best?k=${apikey}&type=string&m=${mode}&u=${playername}&limit=100`
+				);
+				await interaction.reply("GlobalPPの計算中です...");
+				let pp = [];
+				let ppForBonusPP = [];
+				for (const element of userplays) {
+					ppForBonusPP.push(Number(element.pp));
+					if (mapInfo.beatmap_id == element.beatmap_id && PPafter > Number(userplays[userplays.length - 1].pp)) {
+						pp.push(Math.round(PPafter * 100) / 100);
+						continue;
+					}
+					pp.push(Number(element.pp));
+				}
+				pp.sort((a, b) => b - a);
+				ppForBonusPP.sort((a, b) => b - a);
+
+				const playcount = Number(playersInfo.playcount);
+				const globalPPOld = osuLibrary.CalculateGlobalPP.calculate(ppForBonusPP, playcount);
+				const globalPPwithoutBonusPP = osuLibrary.CalculateGlobalPP.calculate(pp, playcount);
+				const bonusPP = Number(playersInfo.pp_raw) - globalPPOld;
+				const globalPP = globalPPwithoutBonusPP + bonusPP;
+				const globalPPDiff = globalPP - Number(playersInfo.pp_raw);
+				const globalPPDiffPrefix = globalPPDiff > 0 ? "+" : "";
+
+				const rankData = await osuLibrary.GetRank.get(globalPP, mode);
+				const rankDataBefore = playersInfo.pp_rank;
+				const rankDiff = rankData.rank - rankDataBefore;
+				const rankDiffPrefix = rankDiff > 0 ? "+" : "";
+
+				let rankMessage = `**#${rankDataBefore}** → **#${rankData.rank}** (${rankDiffPrefix + rankDiff})`;
+				if (rankDiff == 0) {
+					rankMessage = "ランクに変動はありません。";
+				}
+
+				const playerUserURL = osuLibrary.URLBuilder.userURL(playersInfo?.user_id);
+				const mapperUserURL = osuLibrary.URLBuilder.userURL(mappersInfo?.user_id);
+				const mapperIconURL = osuLibrary.URLBuilder.iconURL(mappersInfo?.user_id);
+				const backgroundURL = osuLibrary.URLBuilder.backgroundURL(maplink);
+
+				const embed = new EmbedBuilder()
+					.setColor("Blue")
+					.setTitle(`${mapInfo.artist} - ${mapInfo.title} [${mapInfo.version}]`)
+					.setDescription(`Played by [${playersInfo.username}](${playerUserURL})`)
+					.addFields({ name: `Mods: ${mods.str} Acc: ${acc}% Miss: ${playersScore.countmiss}`, value: `**PP:** **${PPbefore.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp → **${PPafter.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp`, inline: true })
+					.addFields({ name: `GLobalPP`, value: `**${Number(playersInfo.pp_raw).toLocaleString()}**pp → **${(Math.round(globalPP * 10) / 10).toLocaleString()}**pp (${globalPPDiffPrefix + (globalPPDiff).toFixed(1)})`, inline: false })
+					.addFields({ name: `Rank`, value: rankMessage, inline: false })
 					.setURL(mapUrl)
 					.setAuthor({ name: `Mapped by ${mapInfo.creator}`, iconURL: mapperIconURL, url: mapperUserURL })
 					.setImage(backgroundURL);

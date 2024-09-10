@@ -475,6 +475,33 @@ module.exports = [
     },
     {
         data: new SlashCommandBuilder()
+            .setName("iffc")
+            .setDescription("送られたマップのユーザーの最高記録のIFFCの時のランキングを計算します。")
+            .addStringOption(option =>
+                option
+                    .setName("beatmaplink")
+                    .setDescription("マップリンク")
+                    .setRequired(true)
+            )
+            .addStringOption(option =>
+                option
+                    .setName("username")
+                    .setDescription("ユーザー名")
+                    .setRequired(false)
+            )
+            .addStringOption(option =>
+                option
+                    .setName("score")
+                    .setDescription("モード")
+                    .addChoices(
+                        { name: "Top Score", value: "0" },
+                        { name: "Top PP", value: "1" }
+                    )
+                    .setRequired(false)
+            )
+    },
+    {
+        data: new SlashCommandBuilder()
             .setName("srchart")
             .setDescription("送られたマップのSRグラフを表示します。")
             .addStringOption(option =>

@@ -946,7 +946,7 @@ class CalculateIfFC {
      * @param {number} mode - The game mode (0: osu!, 1: Taiko, 2: Catch the Beat, 3: osu!mania).
      * @param {number} passedObjects - The number of objects passed.
      * @param {number} calcmods - The calculation mods applied.
-     * @param {object} map - The map information.
+     * @param {object} map - The map data.
      * @returns {object} - The calculated performance (ifFCPP), hit counts (ifFCHits), and accuracy (ifFCAcc).
      */
     static calculate(score, mode, passedObjects, calcmods, map) {
