@@ -1821,11 +1821,14 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const PPafter = IfFC.ifFCPP;
 				const IfFCACC = Math.round(IfFC.ifFCAcc * 100) / 100;
 
+				let error = false;
 				const userplays = await Tools.getAPIResponse(
 					`https://osu.ppy.sh/api/get_user_best?k=${apikey}&type=string&m=${mode}&u=${playername}&limit=100`
-				);
+				).catch(async () => {
+					error = true;
+				});
 
-				if (userplays.length == 0) {
+				if (error || userplays.length == 0) {
 					await replayMessage.edit("ユーザーが見つかりませんでした。");
 					const embed = new EmbedBuilder()
 						.setColor("Blue")
