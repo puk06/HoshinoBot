@@ -1712,7 +1712,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 				const MapStatus = osuLibrary.Tools.mapstatus(mapInfo.approved);
 				if (!(MapStatus == "Ranked" || MapStatus == "Approved")) {
-					rankMessage += " (If Ranked)";
+					rankMessage += "\n**If Ranked**";
 				}
 
 				const playerUserURL = osuLibrary.URLBuilder.userURL(playersInfo?.user_id);
@@ -1884,7 +1884,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 				const MapStatus = osuLibrary.Tools.mapstatus(mapInfo.approved);
 				if (!(MapStatus == "Ranked" || MapStatus == "Approved")) {
-					rankMessage += " (If Ranked)";
+					rankMessage += "\n**If Ranked**";
 				}
 
 				const playerUserURL = osuLibrary.URLBuilder.userURL(playersInfo?.user_id);
