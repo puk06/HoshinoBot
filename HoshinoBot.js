@@ -12,6 +12,7 @@ const { Tools, ImJugglerEX, RatChecker, TwitterDownloader, YoutubeDownloader } =
 const { ScoreDecoder } = require("osu-parsers");
 const AdmZip = require("./node_modules/adm-zip");
 const MathJS = require("./node_modules/mathjs");
+const { rank } = require("osu-api-extended/dist/utility/tools/index.js");
 
 const apikey = process.env.APIKEY;
 const token = process.env.TOKEN;
@@ -1704,6 +1705,11 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					rankMessage = "ランクに変動はありません。";
 				}
 
+				const MapStatus = osuLibrary.Tools.mapstatus(mapInfo.approved);
+				if (!(MapStatus == "Ranked" || MapStatus == "Approved")) {
+					rankMessage += " (If Ranked)";
+				}
+
 				const playerUserURL = osuLibrary.URLBuilder.userURL(playersInfo?.user_id);
 				const mapperUserURL = osuLibrary.URLBuilder.userURL(mappersInfo?.user_id);
 				const mapperIconURL = osuLibrary.URLBuilder.iconURL(mappersInfo?.user_id);
@@ -1734,9 +1740,19 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				let replayData = await Tools.getAPIResponse(replayFile.url, {
 					responseType: "arraybuffer"
 				});
-				const replay = await new ScoreDecoder().decodeFromBuffer(replayData);
+				const replay = await new ScoreDecoder()
+					.decodeFromBuffer(replayData)
+					.then(async (replay) => {
+						await replayMessage.edit("Replayデータの解析が完了しました。");
+						return replay;
+					})
+					.catch(async () => {
+						await replayMessage.edit("Replayデータの解析に失敗しました。");
+						return null;
+					});
 				replayData = null;
-				await replayMessage.edit("Replayデータの解析が完了しました。");
+
+				if (!replay) return;
 
 				let playername = replay.info.username;
 				const usernameArg = interaction.options.get("username")?.value;
@@ -1853,6 +1869,11 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				let rankMessage = `**#${rankDataBefore}** → **#${rankAfter}** (${rankDiffPrefix + rankDiff})`;
 				if (rankDiff == 0) {
 					rankMessage = "ランクに変動はありません。";
+				}
+
+				const MapStatus = osuLibrary.Tools.mapstatus(mapInfo.approved);
+				if (!(MapStatus == "Ranked" || MapStatus == "Approved")) {
+					rankMessage += " (If Ranked)";
 				}
 
 				const playerUserURL = osuLibrary.URLBuilder.userURL(playersInfo?.user_id);
