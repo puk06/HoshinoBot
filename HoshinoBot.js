@@ -12,7 +12,6 @@ const { Tools, ImJugglerEX, RatChecker, TwitterDownloader, YoutubeDownloader } =
 const { ScoreDecoder } = require("osu-parsers");
 const AdmZip = require("./node_modules/adm-zip");
 const MathJS = require("./node_modules/mathjs");
-const { rank } = require("osu-api-extended/dist/utility/tools/index.js");
 
 const apikey = process.env.APIKEY;
 const token = process.env.TOKEN;
@@ -1602,6 +1601,11 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					mapUrl = osuLibrary.URLBuilder.beatmapURL(mapInfo.beatmapset_id, mode, mapInfo.beatmap_id);
 				}
 
+				if (mode == 3) {
+					await interaction.reply("Maniaはこのコマンドに対応していません。");
+					return;
+				}
+
 				let playersScore = await new osuLibrary.GetUserScore(playername, apikey, mode).getScoreDataWithoutMods(mapInfo.beatmap_id);
 
 				if (playersScore.length == 0) {
@@ -1761,7 +1765,12 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					playername = usernameArg;
 				}
 
-				let mode = replay.info.rulesetId;
+				const mode = replay.info.rulesetId;
+				if (mode == 3) {
+					await interaction.reply("Maniaはこのコマンドに対応していません。");
+					return;
+				}
+
 				let mapInfo = await new osuLibrary.GetMapData(replay.info.beatmapHashMD5, apikey, mode).getDataFromHash();
 				const maplink = osuLibrary.URLBuilder.beatmapURL(mapInfo.beatmapset_id, mode, mapInfo.beatmap_id);
 				let mapUrl = maplink;
