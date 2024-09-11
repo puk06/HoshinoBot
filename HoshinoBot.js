@@ -1775,9 +1775,6 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const maplink = osuLibrary.URLBuilder.beatmapURL(mapInfo.beatmapset_id, mode, mapInfo.beatmap_id);
 				let mapUrl = maplink;
 
-				const playersInfo = await new osuLibrary.GetUserData(playername, apikey, mode).getData();
-				const mappersInfo = await new osuLibrary.GetUserData(mapInfo.creator, apikey, mode).getData();
-
 				const playersScore = {
 					count300: replay.info.count300,
 					count100: replay.info.count100,
@@ -1821,9 +1818,11 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const PPafter = IfFC.ifFCPP;
 				const IfFCACC = Math.round(IfFC.ifFCAcc * 100) / 100;
 
+				const mappersInfo = await new osuLibrary.GetUserData(mapInfo.creator, apikey, mode).getData();
+
 				let error = false;
 				const userplays = await Tools.getAPIResponse(
-					`https://osu.ppy.sh/api/get_user_best?k=${apikey}&type=string&m=${mode}&u=${encodeURIComponent(playername)}&limit=100`
+					`https://osu.ppy.sh/api/get_user_best?k=${apikey}&type=string&m=${mode}&u=${playername}&limit=100`
 				).catch(async () => {
 					error = true;
 				});
@@ -1863,6 +1862,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				pp.sort((a, b) => b - a);
 				ppForBonusPP.sort((a, b) => b - a);
 
+				const playersInfo = await new osuLibrary.GetUserData(playername, apikey, mode).getData();
 				const playcount = Number(playersInfo.playcount);
 				const globalPPOld = osuLibrary.CalculateGlobalPP.calculate(ppForBonusPP, playcount);
 				const globalPPwithoutBonusPP = osuLibrary.CalculateGlobalPP.calculate(pp, playcount);
