@@ -1656,6 +1656,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const passedObjects = Tools.calcPassedObject(playersScore, mode);
 				const IfFC = osuLibrary.CalculateIfFC.calculate(score, mode, passedObjects, mods.calc, map);
 				const PPafter = IfFC.ifFCPP;
+				const IfFCacc = Math.round(IfFC.ifFCAcc * 100) / 100;
 
 				const userplays = await Tools.getAPIResponse(
 					`https://osu.ppy.sh/api/get_user_best?k=${apikey}&type=string&m=${mode}&u=${playername}&limit=100`
@@ -1719,7 +1720,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					.setColor("Blue")
 					.setTitle(`${mapInfo.artist} - ${mapInfo.title} [${mapInfo.version}]`)
 					.setDescription(`Played by [${playersInfo.username}](${playerUserURL})`)
-					.addFields({ name: `Mods: ${mods.str} Acc: ${acc}% Miss: ${playersScore.countmiss}`, value: `**PP:** **${PPbefore.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp → **${PPafter.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp`, inline: true })
+					.addFields({ name: `Mods: ${mods.str} Acc: ${acc} → ${IfFCACC}% Miss: ${playersScore.countmiss} → 0`, value: `**PP:** **${PPbefore.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp → **${PPafter.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp`, inline: true })
 					.addFields({ name: `GlobalPP`, value: `**${Number(playersInfo.pp_raw).toLocaleString()}**pp → **${(Math.round(globalPP * 10) / 10).toLocaleString()}**pp (${globalPPDiffPrefix + (globalPPDiff).toFixed(1)})`, inline: false })
 					.addFields({ name: `Rank`, value: rankMessage, inline: false })
 					.setURL(mapUrl)
@@ -1809,6 +1810,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const passedObjects = Tools.calcPassedObject(playersScore, mode);
 				const IfFC = osuLibrary.CalculateIfFC.calculate(score, mode, passedObjects, mods.calc, map);
 				const PPafter = IfFC.ifFCPP;
+				const IfFCACC = Math.round(IfFC.ifFCAcc * 100) / 100;
 
 				const userplays = await Tools.getAPIResponse(
 					`https://osu.ppy.sh/api/get_user_best?k=${apikey}&type=string&m=${mode}&u=${playername}&limit=100`
@@ -1820,7 +1822,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 						.setColor("Blue")
 						.setTitle(`${mapInfo.artist} - ${mapInfo.title} [${mapInfo.version}]`)
 						.setDescription(`Played by ${playername}`)
-						.addFields({ name: `Mods: ${mods.str} Acc: ${acc}% Miss: ${playersScore.countmiss}`, value: `**PP:** **${PPbefore.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp → **${PPafter.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp`, inline: true })
+						.addFields({ name: `Mods: ${mods.str} Acc: ${acc} → ${IfFCACC}% Miss: ${playersScore.countmiss} → 0`, value: `**PP:** **${PPbefore.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp → **${PPafter.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp`, inline: true })
 						.setURL(mapUrl)
 						.setAuthor({ name: `Mapped by ${mapInfo.creator}`, url: osuLibrary.URLBuilder.userURL(mappersInfo?.user_id) });
 					await interaction.channel.send({ embeds: [embed] });
@@ -1885,7 +1887,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					.setColor("Blue")
 					.setTitle(`${mapInfo.artist} - ${mapInfo.title} [${mapInfo.version}]`)
 					.setDescription(`Played by [${playersInfo.username}](${playerUserURL})`)
-					.addFields({ name: `Mods: ${mods.str} Acc: ${acc}% Miss: ${playersScore.countmiss}`, value: `**PP:** **${PPbefore.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp → **${PPafter.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp`, inline: true })
+					.addFields({ name: `Mods: ${mods.str} Acc: ${acc} → ${IfFCACC}% Miss: ${playersScore.countmiss} → 0`, value: `**PP:** **${PPbefore.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp → **${PPafter.toFixed(2)}**/${SSPPbefore.pp.toFixed(2)}pp`, inline: true })
 					.addFields({ name: `GlobalPP`, value: `**${Number(playersInfo.pp_raw).toLocaleString()}**pp → **${(Math.round(globalPP * 10) / 10).toLocaleString()}**pp (${globalPPDiffPrefix + (globalPPDiff).toFixed(1)})`, inline: false })
 					.addFields({ name: `Rank`, value: rankMessage, inline: false })
 					.setURL(mapUrl)
