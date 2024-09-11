@@ -1660,7 +1660,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const passedObjects = Tools.calcPassedObject(playersScore, mode);
 				const IfFC = osuLibrary.CalculateIfFC.calculate(score, mode, passedObjects, mods.calc, map);
 				const PPafter = IfFC.ifFCPP;
-				const IfFCacc = Math.round(IfFC.ifFCAcc * 100) / 100;
+				const IfFCACC = Math.round(IfFC.ifFCAcc * 100) / 100;
 
 				const userplays = await Tools.getAPIResponse(
 					`https://osu.ppy.sh/api/get_user_best?k=${apikey}&type=string&m=${mode}&u=${playername}&limit=100`
@@ -1823,7 +1823,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 				let error = false;
 				const userplays = await Tools.getAPIResponse(
-					`https://osu.ppy.sh/api/get_user_best?k=${apikey}&type=string&m=${mode}&u=${playername}&limit=100`
+					`https://osu.ppy.sh/api/get_user_best?k=${apikey}&type=string&m=${mode}&u=${encodeURIComponent(playername)}&limit=100`
 				).catch(async () => {
 					error = true;
 				});
