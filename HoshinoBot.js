@@ -4,6 +4,7 @@ require("./node_modules/dotenv").config();
 const fs = require("./node_modules/fs-extra");
 const { tools, auth, v2 } = require("./node_modules/osu-api-extended");
 const rosu = require("./node_modules/rosu-pp-js");
+const axios = require("./node_modules/axios");
 const { Readable } = require("node:stream");
 const path = require("node:path");
 const asciify = require("node:util").promisify(require("./node_modules/asciify"));
@@ -81,6 +82,29 @@ client.on(Events.ClientReady, async () =>
 			serverJSONdata = null;
 		}, 10000);
 		setInterval(makeBackup, 3600000);
+
+		//for ikakun4
+		setInterval(async () => {
+			const url = "https://www.suruga-ya.jp/product/detail/186109884";
+			const options = {
+				headers: {
+					"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+				}
+			};
+			
+			let res = await axios.get(url, options)
+				.then(res => res.data)
+				.catch(err => console.log(err));
+			
+			if (!res.includes("申し訳ございません。品切れ中です。")) {
+				const userIds = ["493343411982696448", "380680740607754240"];
+				for (const id of userIds) {
+					await client.users.cache.get(id).send(`<@${id}> Cyclickが品切れじゃないかも！\nリンク: ${url}`)
+						.catch(err => console.log(err));
+				}
+			}
+			res = null;
+		}, 1000 * 60 * 5);
 
 		let bankData = fs.readJsonSync("./ServerDatas/UserBankData.json");
 		for (const key in bankData) {
@@ -2819,6 +2843,10 @@ client.on(Events.MessageCreate, async (message) =>
 		try {
 			try {
 				if (message.author.bot) return;
+				if (message.channel.type === "DM") {
+					console.log(`DM受信: ${message.author.username}(${message.author.id}): ${message.content}`);
+				}
+
 				let serverJSONdata = fs.readJsonSync("./ServerDatas/talkcount.json");
 				if (serverJSONdata[message.guildId] == undefined) {
 					serverJSONdata[message.guildId] = {};
