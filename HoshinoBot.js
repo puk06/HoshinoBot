@@ -258,14 +258,13 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 				
 				function convertOmittedAttribute(attribute) {
-					if (attribute == null) return null;
-					return OmittedAttribute.get(attribute);
+					return OmittedAttribute.get(attribute?.toLowerCase());
 				}
 
 				const level = attribute1[attribute1.length - 1];
 				if (!isNaN(level) && level >= 1 && level <= 10) {
 					attribute1level = level;
-					attribute1 = attribute1.slice(0, -1);
+					attribute1 = attribute1.slice(0, -1).trim();
 				}
 
 				const omittedAttribute1 = convertOmittedAttribute(attribute1);
@@ -278,7 +277,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				const level2 = attribute2?.[attribute2?.length - 1];
 				if (!isNaN(level2) && level2 >= 1 && level2 <= 10) {
 					attribute2level = level2;
-					attribute2 = attribute2.split(" ").slice(0, attribute2.split(" ").length - 1).join(" ");
+					attribute2 = attribute2.slice(0, -1).trim();
 				}
 
 				const omittedAttribute2 = convertOmittedAttribute(attribute2);
