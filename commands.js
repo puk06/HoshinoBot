@@ -4,6 +4,23 @@ const fs = require("./node_modules/fs-extra");
 module.exports = [
     {
         data: new SlashCommandBuilder()
+            .setName("ap")
+            .setDescription("テスト: Attributeの値段を計算します。")
+            .addStringOption(option =>
+                option
+                    .setName("attribute1")
+                    .setDescription("属性1")
+                    .setRequired(true)
+            )
+            .addStringOption(option =>
+                option
+                    .setName("attribute2")
+                    .setDescription("属性2")
+                    .setRequired(false)
+            )
+    },
+    {
+        data: new SlashCommandBuilder()
             .setName("coin")
             .setDescription("スロット用のメダルをコインに換金できます。")
             .addNumberOption(option =>

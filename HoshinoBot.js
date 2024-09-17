@@ -20,6 +20,7 @@ const osuclientid = process.env.CLIENTID;
 const osuclientsecret = process.env.CLIENTSECRET;
 const BotadminId = process.env.BOTADMINID;
 const Furrychannel = process.env.FURRYCHANNEL;
+const KuudraAPIKey = process.env.KUUDRAAPIKEY;
 const SLOT_SETTING = Math.floor(Math.random() * 6) + 1;
 const MAMESTAGRAMAPI_BASEURL = "https://api.mamesosu.net/v1/";
 
@@ -210,6 +211,142 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			}
 			if (!interaction.isCommand()) return;
 			commandLogs(interaction, interaction.commandName, 0);
+
+			//apコマンド
+			if (interaction.commandName == "ap") {
+				let attribute1 = interaction.options.get("attribute1").value;
+				let attribute1level = null;
+
+				const level = attribute1.split(" ")[attribute1.split(" ").length - 1];
+				if (!isNaN(level) && level >= 1 && level <= 10) {
+					attribute1level = level;
+					attribute1 = attribute1.split(" ").slice(0, attribute1.split(" ").length - 1).join(" ");
+				}
+
+				let attribute2 = interaction.options.get("attribute2")?.value;
+				let attribute2level = null;
+				const level2 = attribute2?.split(" ")[attribute2.split(" ").length - 1];
+				if (!isNaN(level2) && level2 >= 1 && level2 <= 10) {
+					attribute2level = level2;
+					attribute2 = attribute2.split(" ").slice(0, attribute2.split(" ").length - 1).join(" ");
+				}
+
+				const apiUrl = "https://first-constantly-silkworm.ngrok-free.app/";
+				let url = `${apiUrl}?searchType=all&apiKey=${KuudraAPIKey}&attribute1=${encodeURIComponent(attribute1)}`;
+				if (attribute2) url += `&attribute2=${encodeURIComponent(attribute2)}`;
+				if (attribute1level) url += `&attribute1level=${attribute1level}`;
+				if (attribute2level) url += `&attribute2level=${attribute2level}`;
+
+				let res = await axios.get(url)
+					.then(res => res.data)
+					.catch(err => console.log(err));
+
+				if (res.items.length == 0) {
+					await interaction.reply("アイテムが見つかりませんでした。");
+					return;
+				}
+
+				function getLowestItem(items) {
+					if (items.length == 0) return null;
+					let lowest = items[0];
+					for (let i = 1; i < items.length; i++) {
+						if (items[i].price < lowest.price) {
+							lowest = items[i];
+						}
+					}
+					return lowest;
+				}
+
+				function getArmorName(item) {
+					if (item.includes("Crimson")) return "Crimson";
+					if (item.includes("Hollow")) return "Hollow";
+					if (item.includes("Terror")) return "Terror";
+					if (item.includes("Fervor")) return "Fervor";
+					if (item.includes("Aurora")) return "Aurora";
+				}
+
+				const Helmet = res.items.filter(item => item.itemName.includes("Helmet")).sort((a, b) => a.price - b.price);
+				const Chestplate = res.items.filter(item => item.itemName.includes("Chestplate")).sort((a, b) => a.price - b.price);
+				const Leggings = res.items.filter(item => item.itemName.includes("Leggings")).sort((a, b) => a.price - b.price);
+				const Boots = res.items.filter(item => item.itemName.includes("Boots")).sort((a, b) => a.price - b.price);
+
+				function numToString(num) {
+					if (num == undefined) {
+						return "N/A";
+					} else if (num >= 1e9) {
+						return (num / 1e9).toFixed(2) + "b";
+					} else if (num >= 1e6) {
+						return (num / 1e6).toFixed(2) + "m";
+					} else if (num >= 1e3) {
+						return (num / 1e3).toFixed(2) + "k";
+					}
+					return num;
+				}
+
+				let title = "";
+				if (attribute2) {
+					if (attribute1level && attribute2level) {
+						title = `Cheapest Auctions for ${attribute1} ${attribute1level} and ${attribute2} ${attribute2level}`;
+					} else if (attribute1level) {
+						title = `Cheapest Auctions for ${attribute1} ${attribute1level} and ${attribute2}`;
+					} else if (attribute2level) {
+						title = `Cheapest Auctions for ${attribute1} and ${attribute2} ${attribute2level}`;
+					} else {
+						title = `Cheapest Auctions for ${attribute1} and ${attribute2}`;
+					}
+				} else {
+					if (attribute1level) {
+						title = `Cheapest Auctions for ${attribute1} ${attribute1level}`;
+					} else {
+						title = `Cheapest Auctions for ${attribute1}`;
+					}
+				}
+
+				const Embed = new EmbedBuilder()
+					.setTitle(title)
+					.setDescription("Use `/viewauction` ingame to open the auction.")
+					.setColor("Blue");
+
+				//name: Cheapest Helmets
+				const HelmetsMessage = [];
+				for (let i = 0; i < Math.min(5, Helmet.length); i++) {
+					HelmetsMessage.push(`**${getArmorName(Helmet[i].itemName)}**: ${numToString(Helmet[i].price)} \`/viewauction ${Helmet[i].uuid}\``);
+				}
+
+				//name: Cheapest Chestplates
+				const ChestplatesMessage = [];
+				for (let i = 0; i < Math.min(5, Chestplate.length); i++) {
+					ChestplatesMessage.push(`**${getArmorName(Chestplate[i].itemName)}**: ${numToString(Chestplate[i].price)} \`/viewauction ${Chestplate[i].uuid}\``);
+				}
+
+				//name: Cheapest Leggings
+				const LeggingsMessage = [];
+				for (let i = 0; i < Math.min(5, Leggings.length); i++) {
+					LeggingsMessage.push(`**${getArmorName(Leggings[i].itemName)}**: ${numToString(Leggings[i].price)} \`/viewauction ${Leggings[i].uuid}\``);
+				}
+
+				//name: Cheapest Boots
+				let BootsMessage = [];
+				for (let i = 0; i < Math.min(5, Boots.length); i++) {
+					BootsMessage.push(`**${getArmorName(Boots[i].itemName)}**: ${numToString(Boots[i].price)} \`/viewauction ${Boots[i].uuid}\``);
+				}
+
+				if (HelmetsMessage.length == 0) HelmetsMessage.push("No Helmets found.");
+				if (ChestplatesMessage.length == 0) ChestplatesMessage.push("No Chestplates found.");
+				if (LeggingsMessage.length == 0) LeggingsMessage.push("No Leggings found.");
+				if (BootsMessage.length == 0) BootsMessage.push("No Boots found.");
+
+				Embed.addFields(
+					{ name: "Cheapest Helmets", value: HelmetsMessage.join("\n") },
+					{ name: "Cheapest Chestplates", value: ChestplatesMessage.join("\n") },
+					{ name: "Cheapest Leggings", value: LeggingsMessage.join("\n") },
+					{ name: "Cheapest Boots", value: BootsMessage.join("\n") }
+				);
+
+				await interaction.reply({ embeds: [Embed] });
+				return;
+			}
+
 
 			if (interaction.commandName == "slotsetting") {
 				if (interaction.user.id !== BotadminId) {
