@@ -23,6 +23,45 @@ const Furrychannel = process.env.FURRYCHANNEL;
 const KuudraAPIKey = process.env.KUUDRAAPIKEY;
 const SLOT_SETTING = Math.floor(Math.random() * 6) + 1;
 const MAMESTAGRAMAPI_BASEURL = "https://api.mamesosu.net/v1/";
+const OmittedAttribute = new Map([
+    ["mp", "Mana_Pool"],
+    ["mr", "Mana_Regeneration"],
+    ["lr", "Life_Regeneration"],
+    ["lrec", "Life_Recovery"],
+    ["mf", "Magic_Find"],
+    ["as", "Attack_Speed"],
+    ["sp", "Speed"],
+    ["exp", "Experience"],
+    ["ms", "Mana_Steal"],
+    ["ls", "Life_Steal"],
+    ["mt", "Midas_Touch"],
+    ["cb", "Combo"],
+    ["wr", "Warrior"],
+    ["ar", "Arachno"],
+    ["el", "Elite"],
+    ["ud", "Undead"],
+    ["en", "Ender"],
+    ["ig", "Ignition"],
+    ["bz", "Blazing"],
+    ["ar_res", "Arachno_Resistance"],
+    ["bz_res", "Blazing_Resistance"],
+    ["en_res", "Ender_Resistance"],
+    ["ud_res", "Undead_Resistance"],
+    ["ft", "Fortitude"],
+    ["dom", "Dominance"],
+    ["vet", "Veteran"],
+    ["vit", "Vitality"],
+    ["ll", "Lifeline"],
+    ["bz", "Breeze"],
+    ["in", "Infection"],
+    ["bz_f", "Blazing_Fortune"],
+    ["f_exp", "Fishing_Experience"],
+    ["d_hook", "Double_Hook"],
+    ["fm", "Fisherman"],
+    ["f_sp", "Fishing_Speed"],
+    ["ht", "Hunter"],
+    ["th", "Trophy_Hunter"]
+]);
 
 const osuBeatmapUrlRegex = /^https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+#[a-z]+\/\d+$/;
 const osuBeatmapUrlRegex2 = /^https:\/\/osu\.ppy\.sh\/b\/\d+$/;
@@ -217,18 +256,34 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				let attribute1 = interaction.options.get("attribute1").value;
 				let attribute1level = null;
 
-				const level = attribute1.split(" ")[attribute1.split(" ").length - 1];
+				
+				function convertOmittedAttribute(attribute) {
+					if (attribute == null) return null;
+					return OmittedAttribute.get(attribute);
+				}
+
+				const level = attribute1[attribute1.length - 1];
 				if (!isNaN(level) && level >= 1 && level <= 10) {
 					attribute1level = level;
-					attribute1 = attribute1.split(" ").slice(0, attribute1.split(" ").length - 1).join(" ");
+					attribute1 = attribute1.slice(0, -1);
+				}
+
+				const omittedAttribute1 = convertOmittedAttribute(attribute1);
+				if (omittedAttribute1) {
+					attribute1 = omittedAttribute1;
 				}
 
 				let attribute2 = interaction.options.get("attribute2")?.value;
 				let attribute2level = null;
-				const level2 = attribute2?.split(" ")[attribute2.split(" ").length - 1];
+				const level2 = attribute2?.[attribute2?.length - 1];
 				if (!isNaN(level2) && level2 >= 1 && level2 <= 10) {
 					attribute2level = level2;
 					attribute2 = attribute2.split(" ").slice(0, attribute2.split(" ").length - 1).join(" ");
+				}
+
+				const omittedAttribute2 = convertOmittedAttribute(attribute2);
+				if (omittedAttribute2) {
+					attribute2 = omittedAttribute2;
 				}
 
 				const apiUrl = "https://first-constantly-silkworm.ngrok-free.app/";
@@ -244,17 +299,6 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				if (res.items.length == 0) {
 					await interaction.reply("アイテムが見つかりませんでした。");
 					return;
-				}
-
-				function getLowestItem(items) {
-					if (items.length == 0) return null;
-					let lowest = items[0];
-					for (let i = 1; i < items.length; i++) {
-						if (items[i].price < lowest.price) {
-							lowest = items[i];
-						}
-					}
-					return lowest;
 				}
 
 				function getArmorName(item) {
@@ -294,12 +338,10 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					} else {
 						title = `Cheapest Auctions for ${attribute1} and ${attribute2}`;
 					}
+				} else if (attribute1level) {
+					title = `Cheapest Auctions for ${attribute1} ${attribute1level}`;
 				} else {
-					if (attribute1level) {
-						title = `Cheapest Auctions for ${attribute1} ${attribute1level}`;
-					} else {
-						title = `Cheapest Auctions for ${attribute1}`;
-					}
+					title = `Cheapest Auctions for ${attribute1}`;
 				}
 
 				const Embed = new EmbedBuilder()
@@ -326,7 +368,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				}
 
 				//name: Cheapest Boots
-				let BootsMessage = [];
+				const BootsMessage = [];
 				for (let i = 0; i < Math.min(5, Boots.length); i++) {
 					BootsMessage.push(`**${getArmorName(Boots[i].itemName)}**: ${numToString(Boots[i].price)} \`/viewauction ${Boots[i].uuid}\``);
 				}
@@ -344,6 +386,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				);
 
 				await interaction.reply({ embeds: [Embed] });
+				res = null;
 				return;
 			}
 
