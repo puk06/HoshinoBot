@@ -285,7 +285,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					attribute2 = omittedAttribute2;
 				}
 
-				const apiUrl = "https://first-constantly-silkworm.ngrok-free.app/";
+				const apiUrl = "https://first-constantly-silkworm.ngrok-free.app/kuudra/";
 				let url = `${apiUrl}?searchType=all&apiKey=${KuudraAPIKey}&attribute1=${encodeURIComponent(attribute1)}`;
 				if (attribute2) url += `&attribute2=${encodeURIComponent(attribute2)}`;
 				if (attribute1level) url += `&attribute1level=${attribute1level}`;
