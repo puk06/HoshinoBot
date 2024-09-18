@@ -269,7 +269,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 				const omittedAttribute1 = convertOmittedAttribute(attribute1);
 				if (omittedAttribute1) {
-					attribute1 = omittedAttribute1;
+					attribute1 = omittedAttribute1.replace(/_/g, " ");
 				}
 
 				let attribute2 = interaction.options.get("attribute2")?.value;
@@ -282,7 +282,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 				const omittedAttribute2 = convertOmittedAttribute(attribute2);
 				if (omittedAttribute2) {
-					attribute2 = omittedAttribute2;
+					attribute2 = omittedAttribute2.replace(/_/g, " ");
 				}
 
 				const apiUrl = "https://first-constantly-silkworm.ngrok-free.app/kuudra/";
