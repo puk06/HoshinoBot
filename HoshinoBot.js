@@ -3049,11 +3049,13 @@ client.on(Events.MessageCreate, async (message) =>
 					"246950299397390337",
 					"716907056283779123",
 					"1123185120715735042",
-					"1149391812050550835"
+					"1149391812050550835",
+					"953878610035499069",
+					"762649215897567262"
 				];
 				const allowedServer = "1149985859106521109";
 
-				if (allowedUser.includes(message.author.id)) {
+				if (!allowedUser.includes(message.author.id)) {
 					await message.reply("このコマンドは管理者のみ実行できます。");
 					return;
 				}
