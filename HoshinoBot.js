@@ -3081,10 +3081,23 @@ client.on(Events.MessageCreate, async (message) =>
 
 				await member.voice.setChannel(channel)
 					.then(() => {
+						const username = member.displayName;
+						const channelname = channel.name;
 						const embed = new EmbedBuilder()
 							.setColor("Green")
 							.setTitle("ユーザーの移動")
-							.setDescription(`ユーザー: ${member.displayName}(${member.id})を${channel.name}に移動しました。`)
+							.addFields(
+								{
+									name: "ユーザー",
+									value: username,
+									inline: true
+								},
+								{
+									name: "移動先",
+									value: channelname,
+									inline: true
+								}
+							)
 							.setTimestamp();
 						message.channel.send({ embeds: [embed] });
 					})
@@ -3092,7 +3105,7 @@ client.on(Events.MessageCreate, async (message) =>
 						const embed = new EmbedBuilder()
 							.setColor("Red")
 							.setTitle("ユーザーの移動")
-							.setDescription(`ユーザー: ${member.displayName}(${member.id})の移動に失敗しました。`)
+							.setDescription(`ユーザー: ${member.displayName}の移動に失敗しました。`)
 							.setTimestamp();
 						message.channel.send({ embeds: [embed] });
 					});
