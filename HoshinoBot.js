@@ -253,7 +253,63 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			if (!interaction.isCommand()) return;
 			commandLogs(interaction, interaction.commandName, 0);
 
-			//apコマンド
+			if (interaction.commandName == "movevc") {
+				const allowedUser = [
+					"246950299397390337",
+					"716907056283779123",
+					"1123185120715735042",
+					"1149391812050550835",
+					"953878610035499069",
+					"762649215897567262"
+				];
+				const allowedServer = "1149985859106521109";
+
+				const member = interaction.options.getMember("user");
+				const channel = interaction.options.getChannel("channel");
+
+				if (!allowedUser.includes(interaction.user.id)) {
+					await message.reply("このコマンドは管理者のみ実行できます。");
+					return;
+				}
+
+				if (interaction.guildId != allowedServer) {
+					await message.reply("このコマンドはこのサーバーでは使用できません。");
+					return;
+				}
+
+				await member.voice.setChannel(channel)
+					.then(async () => {
+						const username = member?.displayName;
+						const channelname = channel?.name;
+						const embed = new EmbedBuilder()
+							.setColor("Green")
+							.setTitle("ユーザーの移動")
+							.addFields(
+								{
+									name: "ユーザー",
+									value: username,
+									inline: false
+								},
+								{
+									name: "移動先",
+									value: channelname,
+									inline: false
+								}
+							)
+							.setTimestamp();
+						await interaction.reply({ embeds: [embed] });
+					})
+					.catch(async () => {
+						const embed = new EmbedBuilder()
+							.setColor("Red")
+							.setTitle("ユーザーの移動")
+							.setDescription(`ユーザー: ${username}の移動に失敗しました。`)
+							.setTimestamp();
+							await interaction.reply({ embeds: [embed] });
+					});
+				return;
+			}
+
 			if (interaction.commandName == "ap") {
 				let attribute1 = interaction.options.get("attribute1").value;
 				let attribute1level = null;
@@ -390,7 +446,6 @@ client.on(Events.InteractionCreate, async (interaction) =>
 				res = null;
 				return;
 			}
-
 
 			if (interaction.commandName == "slotsetting") {
 				if (interaction.user.id !== BotadminId) {
@@ -3042,74 +3097,6 @@ client.on(Events.MessageCreate, async (message) =>
 				serverJSONdata = null;
 			} catch (e) {
 				console.log(e);
-			}
-
-			if (message.content.split(" ")[0] == "!movevc") {
-				const allowedUser = [
-					"246950299397390337",
-					"716907056283779123",
-					"1123185120715735042",
-					"1149391812050550835",
-					"953878610035499069",
-					"762649215897567262"
-				];
-				const allowedServer = "1149985859106521109";
-
-				if (!allowedUser.includes(message.author.id)) {
-					await message.reply("このコマンドは管理者のみ実行できます。");
-					return;
-				}
-
-				if (message.guildId != allowedServer) {
-					await message.reply("このコマンドはこのサーバーでは使用できません。");
-					return;
-				}
-
-				const member = await client.guilds.cache.get(allowedServer)?.members.fetch(message.content.split(" ")[1]);
-
-				if (member == undefined) {
-					await message.reply("ユーザーが見つかりませんでした。");
-					return;
-				}
-
-				const channel = await client.channels.fetch(message.content.split(" ")[2]);
-
-				if (channel == undefined) {
-					await message.reply("チャンネルが見つかりませんでした。");
-					return;
-				}
-
-				await member.voice.setChannel(channel)
-					.then(() => {
-						const username = member.displayName;
-						const channelname = channel.name;
-						const embed = new EmbedBuilder()
-							.setColor("Green")
-							.setTitle("ユーザーの移動")
-							.addFields(
-								{
-									name: "ユーザー",
-									value: username,
-									inline: true
-								},
-								{
-									name: "移動先",
-									value: channelname,
-									inline: true
-								}
-							)
-							.setTimestamp();
-						message.channel.send({ embeds: [embed] });
-					})
-					.catch(() => {
-						const embed = new EmbedBuilder()
-							.setColor("Red")
-							.setTitle("ユーザーの移動")
-							.setDescription(`ユーザー: ${member.displayName}の移動に失敗しました。`)
-							.setTimestamp();
-						message.channel.send({ embeds: [embed] });
-					});
-				return;
 			}
 
 			if (message.content.split(" ")[0] == "!tdw") {

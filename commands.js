@@ -4,6 +4,23 @@ const fs = require("./node_modules/fs-extra");
 module.exports = [
     {
         data: new SlashCommandBuilder()
+            .setName("movevc")
+            .setDescription("ユーザーを指定したボイスチャンネルに移動させます。")
+            .addUserOption(option =>
+                option
+                    .setName("user")
+                    .setDescription("ユーザー")
+                    .setRequired(true)
+            )
+            .addChannelOption(option =>
+                option
+                    .setName("channel")
+                    .setDescription("移動先のボイスチャンネル")
+                    .setRequired(true)
+            )
+    },
+    {
+        data: new SlashCommandBuilder()
             .setName("ap")
             .setDescription("テスト: Attributeの値段を計算します。")
             .addStringOption(option =>
