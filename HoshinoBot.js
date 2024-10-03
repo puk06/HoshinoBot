@@ -132,18 +132,20 @@ client.on(Events.ClientReady, async () =>
 				}
 			};
 			
-			let res = await axios.get(url, options)
-				.then(res => res.data)
+			await axios.get(url, options)
+				.then(async res => {
+					if (res.status !== 200) return;
+					let data = res.data;
+					if (!data.includes("申し訳ございません。品切れ中です。")) {
+						const userIds = ["493343411982696448", "380680740607754240"];
+						for (const id of userIds) {
+							await client.users.cache.get(id).send(`<@${id}> Cyclickが品切れじゃないかも！\nリンク: ${url}`)
+								.catch(err => console.log(err));
+						}
+					}
+					data = null;
+				})
 				.catch(err => console.log(err));
-			
-			if (!res.includes("申し訳ございません。品切れ中です。")) {
-				const userIds = ["493343411982696448", "380680740607754240"];
-				for (const id of userIds) {
-					await client.users.cache.get(id).send(`<@${id}> Cyclickが品切れじゃないかも！\nリンク: ${url}`)
-						.catch(err => console.log(err));
-				}
-			}
-			res = null;
 		}, 1000 * 60 * 5);
 
 		let bankData = fs.readJsonSync("./ServerDatas/UserBankData.json");
@@ -3030,6 +3032,7 @@ client.on(Events.MessageCreate, async (message) =>
 				if (serverJSONdata[message.guildId] == undefined) {
 					serverJSONdata[message.guildId] = {};
 				}
+
 				if (serverJSONdata[message.guildId][message.author.id] == undefined) {
 					serverJSONdata[message.guildId][message.author.id] = 1;
 				} else if (!message.content.startsWith("!")) {
@@ -3039,6 +3042,59 @@ client.on(Events.MessageCreate, async (message) =>
 				serverJSONdata = null;
 			} catch (e) {
 				console.log(e);
+			}
+
+			if (message.content.split(" ")[0] == "!movevc") {
+				const allowedUser = [
+					"246950299397390337",
+					"716907056283779123",
+					"1123185120715735042",
+					"1149391812050550835"
+				];
+				const allowedServer = "1149985859106521109";
+
+				if (allowedUser.includes(message.author.id)) {
+					await message.reply("このコマンドは管理者のみ実行できます。");
+					return;
+				}
+
+				if (message.guildId != allowedServer) {
+					await message.reply("このコマンドはこのサーバーでは使用できません。");
+					return;
+				}
+
+				const member = await client.guilds.cache.get(allowedServer)?.members.fetch(message.content.split(" ")[1]);
+
+				if (member == undefined) {
+					await message.reply("ユーザーが見つかりませんでした。");
+					return;
+				}
+
+				const channel = await client.channels.fetch(message.content.split(" ")[2]);
+
+				if (channel == undefined) {
+					await message.reply("チャンネルが見つかりませんでした。");
+					return;
+				}
+
+				await member.voice.setChannel(channel)
+					.then(() => {
+						const embed = new EmbedBuilder()
+							.setColor("Green")
+							.setTitle("ユーザーの移動")
+							.setDescription(`ユーザー: ${member.displayName}(${member.id})を${channel.name}に移動しました。`)
+							.setTimestamp();
+						message.channel.send({ embeds: [embed] });
+					})
+					.catch(() => {
+						const embed = new EmbedBuilder()
+							.setColor("Red")
+							.setTitle("ユーザーの移動")
+							.setDescription(`ユーザー: ${member.displayName}(${member.id})の移動に失敗しました。`)
+							.setTimestamp();
+						message.channel.send({ embeds: [embed] });
+					});
+				return;
 			}
 
 			if (message.content.split(" ")[0] == "!tdw") {
