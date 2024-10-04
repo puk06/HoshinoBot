@@ -254,23 +254,10 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			commandLogs(interaction, interaction.commandName, 0);
 
 			if (interaction.commandName == "movevc") {
-				const allowedUser = [
-					"246950299397390337",
-					"716907056283779123",
-					"1123185120715735042",
-					"1149391812050550835",
-					"953878610035499069",
-					"762649215897567262"
-				];
 				const allowedServer = "1149985859106521109";
 
 				const member = interaction.options.getMember("user");
 				const channel = interaction.options.getChannel("channel");
-
-				if (!allowedUser.includes(interaction.user.id)) {
-					await message.reply("このコマンドは管理者のみ実行できます。");
-					return;
-				}
 
 				if (interaction.guildId != allowedServer) {
 					await message.reply("このコマンドはこのサーバーでは使用できません。");
@@ -305,7 +292,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 							.setTitle("ユーザーの移動")
 							.setDescription(`ユーザー: ${username}の移動に失敗しました。`)
 							.setTimestamp();
-							await interaction.reply({ embeds: [embed] });
+						await interaction.reply({ embeds: [embed] });
 					});
 				return;
 			}
