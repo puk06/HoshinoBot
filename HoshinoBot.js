@@ -5368,9 +5368,10 @@ function checkqualified() {
 							if (channel == undefined) continue;
 							await channel.send({ embeds: [embed] });
 							const membersdata = await channel.guild.members.fetch();
+							const guildId = channel.guild.id;
 							let mentionstring = [];
 							let allUser = fs.readJsonSync(`./ServerDatas/MentionUser.json`);
-							const mentionUser = allUser["Qualified"][element]?.[mode];
+							const mentionUser = allUser["Qualified"][guildId]?.[mode];
 							allUser = null;
 							if (mentionUser == undefined) continue;
 							for (const user of mentionUser) {
@@ -5531,9 +5532,10 @@ function checkranked() {
 							if (channel == undefined) continue;
 							await channel.send({ embeds: [embed] });
 							const membersdata = await channel.guild.members.fetch();
+							const guildId = channel.guild.id;
 							let mentionstring = [];
 							let allUser = fs.readJsonSync(`./ServerDatas/MentionUser.json`);
-							const mentionUser = allUser["Ranked"][element]?.[mode];
+							const mentionUser = allUser["Ranked"][guildId]?.[mode];
 							allUser = null;
 							if (mentionUser == undefined) continue;
 							for (const user of mentionUser) {
@@ -5639,9 +5641,10 @@ function checkloved() {
 							if (channel == undefined) continue;
 							await channel.send({ embeds: [embed] });
 							const membersdata = await channel.guild.members.fetch();
+							const guildId = channel.guild.id;
 							let mentionstring = [];
 							let allUser = fs.readJsonSync(`./ServerDatas/MentionUser.json`);
-							const mentionUser = allUser["Loved"][element]?.[mode];
+							const mentionUser = allUser["Loved"][guildId]?.[mode];
 							allUser = null;
 							if (mentionUser == undefined) continue;
 							for (const user of mentionUser) {
