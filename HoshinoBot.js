@@ -5306,7 +5306,7 @@ function checkqualified() {
 					const BPM = `${mapMaxInfo.bpm}BPM (DT ${Math.round(Number(mapMaxInfo.bpm) * 1.5)}BPM)`;
 					const maxCombo = mapMaxInfo.max_combo;
 					const minCombo = mapMinInfo.max_combo;
-					let Objectstring = minCombo == maxCombo ? `${maxCombo}` : `${minCombo} ~ ${maxCombo}`;
+					let Objectstring = minCombo == maxCombo ? maxCombo : `${minCombo} ~ ${maxCombo}`;
 					const lengthsec = mapMaxInfo.hit_length;
 					const lengthsecDT = Math.round(Number(mapMaxInfo.hit_length) / 1.5);
 					const maptime = Tools.formatTime(lengthsec);
@@ -5491,7 +5491,7 @@ function checkranked() {
 					const BPM = `${mapMaxInfo.bpm}BPM (DT ${Math.round(Number(mapMaxInfo.bpm) * 1.5)}BPM)`;
 					const maxCombo = mapMaxInfo.max_combo;
 					const minCombo = mapMinInfo.max_combo;
-					let Objectstring = minCombo == maxCombo ? `${maxCombo}` : `${minCombo} ~ ${maxCombo}`;
+					let Objectstring = minCombo == maxCombo ? maxCombo : `${minCombo} ~ ${maxCombo}`;
 					const lengthsec = mapMaxInfo.hit_length;
 					const lengthsecDT = Math.round(Number(mapMaxInfo.hit_length) / 1.5);
 					const maptime = Tools.formatTime(lengthsec);
@@ -5608,7 +5608,7 @@ function checkloved() {
 					const BPM = `${mapMaxInfo.bpm}BPM (DT ${Math.round(Number(mapMaxInfo.bpm) * 1.5)}BPM)`;
 					const maxCombo = mapMaxInfo.max_combo;
 					const minCombo = mapMinInfo.max_combo;
-					let Objectstring = minCombo == maxCombo ? `${maxCombo}` : `${minCombo} ~ ${maxCombo}`;
+					let Objectstring = minCombo == maxCombo ? maxCombo : `${minCombo} ~ ${maxCombo}`;
 					const lengthsec = mapMaxInfo.hit_length;
 					const lengthsecDT = Math.round(Number(mapMaxInfo.hit_length) / 1.5);
 					const formattedTime = Tools.formatTime(lengthsec);
