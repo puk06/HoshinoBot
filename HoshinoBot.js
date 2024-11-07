@@ -3939,8 +3939,8 @@ client.on(Events.MessageCreate, async (message) =>
 				await message.channel.send({ embeds: [embed] });
 				return;
 			}
-
-			if (/^https:\/\/booth\.pm\/ja\/items\/\d+$/.test(message.content)) {
+			
+			if (/^https:\/\/booth\.pm\/ja\/items\/\d+$/.test(message.content) || /^https:\/\/.+\.booth\.pm\/items\/\d+$/.test(message.content)) {
 				const ItemData = await Tools.getBoothItemInfo(message.content)
 					.catch(() => null);
 
