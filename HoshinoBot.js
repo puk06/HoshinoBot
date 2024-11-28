@@ -1,18 +1,18 @@
 //必要となるライブラリ
-const { Client, EmbedBuilder, Events, GatewayIntentBits, ActivityType } = require("./node_modules/discord.js");
-require("./node_modules/dotenv").config();
-const fs = require("./node_modules/fs-extra");
-const { tools, auth, v2 } = require("./node_modules/osu-api-extended");
-const rosu = require("./node_modules/rosu-pp-js");
-const axios = require("./node_modules/axios");
+const { Client, EmbedBuilder, Events, GatewayIntentBits, ActivityType, ChannelType } = require("discord.js");
+require("dotenv").config();
+const fs = require("fs-extra");
+const { tools, auth, v2 } = require("osu-api-extended");
+const rosu = require("rosu-pp-js");
+const axios = require("axios");
 const { Readable } = require("node:stream");
 const path = require("node:path");
-const asciify = require("node:util").promisify(require("./node_modules/asciify"));
+const asciify = require("node:util").promisify(require("asciify"));
 const osuLibrary = require("./src/osuLibrary.js");
 const { Tools, ImJugglerEX, RatChecker, TwitterDownloader, YoutubeDownloader } = require("./src/Utils.js");
 const { ScoreDecoder } = require("osu-parsers");
-const AdmZip = require("./node_modules/adm-zip");
-const MathJS = require("./node_modules/mathjs");
+const AdmZip = require("adm-zip");
+const MathJS = require("mathjs");
 
 const apikey = process.env.APIKEY;
 const token = process.env.TOKEN;
@@ -2684,7 +2684,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					stream.on("error", reject);
 				});
 				const zip = new AdmZip(`./temp/${modulefile.name}`);
-				await zip.extractAllToAsync(moduleUnzippedName, true);
+				zip.extractAllToAsync(moduleUnzippedName, true);
 				const ratChecker = new RatChecker();
 				const result = await ratChecker.searchDirectory(moduleUnzippedName);
 				if (result.length == 0) {
@@ -3066,7 +3066,7 @@ client.on(Events.MessageCreate, async (message) =>
 		try {
 			try {
 				if (message.author.bot) return;
-				if (message.channel.type === "DM") {
+				if (message.channel.type === ChannelType.DM) {
 					console.log(`DM受信: ${message.author.username}(${message.author.id}): ${message.content}`);
 				}
 
@@ -3940,7 +3940,6 @@ client.on(Events.MessageCreate, async (message) =>
 				return;
 			}
 			
-			//TODO: /^https:\/\/.+\.booth\.pm\/items\/\d+$/.test(message.content)に対応させる
 			if (/^https:\/\/booth\.pm\/ja\/items\/\d+$/.test(message.content)) {
 				const ItemData = await Tools.getBoothItemInfo(message.content)
 					.catch(() => null);

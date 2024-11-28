@@ -1,9 +1,9 @@
 const path = require("node:path");
-const fs = require("../node_modules/fs-extra");
-const axios = require("../node_modules/axios");
-const cheerio = require("../node_modules/cheerio");
-const ytdl = require("../node_modules/@distube/ytdl-core");
-const ffmpeg = require("../node_modules/fluent-ffmpeg");
+const fs = require("fs-extra");
+const axios = require("axios");
+const cheerio = require("cheerio");
+const ytdl = require("@distube/ytdl-core");
+const ffmpeg = require("fluent-ffmpeg");
 const readline = require("node:readline");
 
 /**
