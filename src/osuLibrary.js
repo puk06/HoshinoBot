@@ -292,7 +292,8 @@ class CalculatePPSR {
                 map.convert(this.mode);
 
                 const Difficulty = new rosu.Difficulty({
-                    mods: this.mods
+                    mods: this.mods,
+                    lazer: false
                 }).calculate(map);
 
                 const PP = new rosu.Performance({
@@ -330,7 +331,8 @@ class CalculatePPSR {
                 map.convert(this.mode);
     
                 const Difficulty = new rosu.Difficulty({
-                    mods: 64
+                    mods: 64,
+                    lazer: false
                 }).calculate(map);
 
                 const SR = Difficulty.stars;
@@ -370,7 +372,8 @@ class CalculatePPSR {
                 map.convert(this.mode);
 
                 const difficultyObject = {
-                    mods: this.mods
+                    mods: this.mods,
+                    lazer: false
                 };
 
                 params.mods = this.mods;
@@ -979,7 +982,8 @@ class CalculateIfFC {
             case 0: {
                 map.convert(0);
                 const difficulty = new rosu.Difficulty({
-                    mods: calcmods
+                    mods: calcmods,
+                    lazer: false
                 }).calculate(map);
 
                 let n300 = score.n300 + Math.max(0, objects - passedObjects);
@@ -1011,7 +1015,8 @@ class CalculateIfFC {
             case 1: {
                 map.convert(1);
                 const difficulty = new rosu.Difficulty({
-                    mods: calcmods
+                    mods: calcmods,
+                    lazer: false
                 }).calculate(map);
 
                 let n300 = score.n300 + Math.max(0, objects - passedObjects);
@@ -1039,7 +1044,8 @@ class CalculateIfFC {
             case 2: {
                 map.convert(2);
                 const difficulty = new rosu.Difficulty({
-                    mods: calcmods
+                    mods: calcmods,
+                    lazer: false
                 }).calculate(map);
 
                 const passedObjectsforCatch = score.n300 + score.n100 + score.misses;
@@ -1183,7 +1189,9 @@ function calculateStarRating(beatmap, Mode) {
         try {
             let srdata = [];
             beatmap.convert(Mode);
-            let gradualDiff = new rosu.Difficulty().gradualDifficulty(beatmap);
+            let gradualDiff = new rosu.Difficulty({
+                lazer: false
+            }).gradualDifficulty(beatmap);
             let i = 1;
 
             while (gradualDiff.nRemaining > 0) {

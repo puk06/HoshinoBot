@@ -2345,7 +2345,8 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					map.convert(mode);
 
 					let difficulty = new rosu.Difficulty({
-						mods: mod.calc
+						mods: mod.calc,
+						lazer: false
 					}).calculate(map);
 
 					const PP98 = ppDigits(new rosu.Performance({
@@ -2370,7 +2371,8 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					.calculate(difficulty).pp.toFixed(2));
 
 					const maxcombo = new rosu.Difficulty({
-						mods: mod.calc
+						mods: mod.calc,
+						lazer: false
 					}).calculate(map).maxCombo;
 					Mapinfo.BPM = Math.max(...BPM) == Math.min(...BPM) ? Math.max(...BPM).toString() : `${Math.min(...BPM)} - ${Math.max(...BPM)}`;
 					function ppDigits(ppstring) {
@@ -3939,7 +3941,7 @@ client.on(Events.MessageCreate, async (message) =>
 				await message.channel.send({ embeds: [embed] });
 				return;
 			}
-			
+
 			if (/^https:\/\/booth\.pm\/ja\/items\/\d+$/.test(message.content)) {
 				const ItemData = await Tools.getBoothItemInfo(message.content)
 					.catch(() => null);
