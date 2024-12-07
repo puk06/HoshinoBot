@@ -2351,22 +2351,26 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 					const PP98 = ppDigits(new rosu.Performance({
 						accuracy: 98,
-						mods: mod.calc
+						mods: mod.calc,
+						lazer: false
 					}).calculate(difficulty).pp.toFixed(2));
 
 					const PP99 = ppDigits(new rosu.Performance({
 						accuracy: 99,
-						mods: mod.calc
+						mods: mod.calc,
+						lazer: false
 					}).calculate(difficulty).pp.toFixed(2));
 
 					const PP995 = ppDigits(new rosu.Performance({
 						accuracy: 99.5,
-						mods: mod.calc
+						mods: mod.calc,
+						lazer: false
 					}).calculate(difficulty).pp.toFixed(2));
 
 					const PP100 = ppDigits(new rosu.Performance({
 						accuracy: 100,
-						mods: mod.calc
+						mods: mod.calc,
+						lazer: false
 					})
 					.calculate(difficulty).pp.toFixed(2));
 

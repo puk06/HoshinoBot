@@ -298,7 +298,8 @@ class CalculatePPSR {
 
                 const PP = new rosu.Performance({
                     accuracy: this.acc,
-                    mods: this.mods
+                    mods: this.mods,
+                    lazer: false
                 }).calculate(Difficulty).pp;
 
                 const param = {
@@ -337,7 +338,8 @@ class CalculatePPSR {
 
                 const SR = Difficulty.stars;
                 const PP = new rosu.Performance({
-                    mods: 64
+                    mods: 64,
+                    lazer: false
                 }).calculate(Difficulty).pp;
 
                 const param = {
@@ -377,6 +379,7 @@ class CalculatePPSR {
                 };
 
                 params.mods = this.mods;
+                params.lazer = false;
 
                 if (passedObjects) difficultyObject.passedObjects = passedObjects;
                 const difficulty = new rosu.Difficulty(difficultyObject).calculate(map);
@@ -999,7 +1002,8 @@ class CalculateIfFC {
                     n50: n50,
                     misses: 0,
                     combo: difficulty.maxCombo,
-                    mods: calcmods
+                    mods: calcmods,
+                    lazer: false
                 };
     
                 ifFCHits.n300 = n300;
@@ -1029,7 +1033,8 @@ class CalculateIfFC {
                     n300: n300,
                     n100: n100,
                     misses: 0,
-                    mods: calcmods
+                    mods: calcmods,
+                    lazer: false
                 };
     
                 ifFCHits.n300 = n300;
@@ -1064,7 +1069,8 @@ class CalculateIfFC {
                     nKatu: score.nKatu,
                     misses: 0,
                     combo: difficulty.maxCombo,
-                    mods: calcmods
+                    mods: calcmods,
+                    lazer: false
                 };
     
                 ifFCHits.n300 = nFruits;
