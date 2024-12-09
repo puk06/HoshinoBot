@@ -3945,7 +3945,7 @@ client.on(Events.MessageCreate, async (message) =>
 				await message.channel.send({ embeds: [embed] });
 				return;
 			}
-			
+
 			if (/^https:\/\/booth\.pm\/ja\/items\/\d+$/.test(message.content) || /^https:\/\/.+\.booth\.pm\/items\/\d+$/.test(message.content)) {
 				const ItemData = await Tools.getBoothItemInfo(message.content.split("/")[message.content.split("/").length - 1])
 					.catch(() => null);
@@ -3955,12 +3955,27 @@ client.on(Events.MessageCreate, async (message) =>
 					return;
 				}
 
+				//PriceArrayで、最安値 - 最高値、１つだけだとその価格を表示する
+				let priceString = "";
+				const PriceArray = ItemData.priceArray;
+				if (PriceArray.length == 1) {
+					priceString = `${PriceArray[0].toLocaleString()}円`;
+				} else {
+					let minPrice;
+					let maxPrice;
+					for (const element of PriceArray) {
+						if (minPrice == undefined || element < minPrice) minPrice = element;
+						if (maxPrice == undefined || element > maxPrice) maxPrice = element;
+					}
+					priceString = `${minPrice.toLocaleString()}円 - ${maxPrice.toLocaleString()}円`;
+				}
+
 				const embed = new EmbedBuilder()
 					.setColor("Blue")
 					.setTitle(ItemData.title)
 					.setURL(message.content)
 					.setAuthor({ name: ItemData.author, iconURL: ItemData.authorIcon, url: ItemData.authorUrl })
-					.addFields({ name: "価格", value: `${ItemData.priceString}`, inline: true })
+					.addFields({ name: "価格", value: `${priceString}`, inline: true })
 					.addFields({ name: "購入ページ", value: `[Booth](${message.content})`, inline: true })
 					.setImage(ItemData.imageUrl)
 					.setFooter({ text: `Booth item by ${ItemData.author}` });
