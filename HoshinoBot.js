@@ -3950,12 +3950,8 @@ client.on(Events.MessageCreate, async (message) =>
 				const ItemData = await Tools.getBoothItemInfo(message.content.split("/")[message.content.split("/").length - 1])
 					.catch(() => null);
 
-				if (ItemData == null) {
-					await message.reply("商品情報が取得できませんでした。");
-					return;
-				}
-
-				//PriceArrayで、最安値 - 最高値、１つだけだとその価格を表示する
+				if (ItemData == null) return;
+				
 				let priceString = "";
 				const PriceArray = ItemData.priceArray;
 				if (PriceArray.length == 1) {
