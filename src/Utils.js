@@ -344,7 +344,8 @@ class Tools {
         return passedObjects;
     }
 
-    static async getBoothItemInfo(url) {
+    static async getBoothItemInfo(id) {
+        const url = `https://booth.pm/ja/items/${id}`;
         const ItemData = await this.getAPIResponse(url)
             .then(res => {
                 const $ = cheerio.load(res);
