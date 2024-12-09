@@ -5392,7 +5392,6 @@ function checkqualified() {
 							allUser = null;
 							if (mentionUser == undefined) continue;
 							for (const user of mentionUser) {
-								console.log(user);
 								if (membersdata.get(user) == undefined) continue;
 								mentionstring.push(`<@${user}>`);
 							}
@@ -5556,7 +5555,6 @@ function checkranked() {
 							allUser = null;
 							if (mentionUser == undefined) continue;
 							for (const user of mentionUser) {
-								console.log(user);
 								if (membersdata.get(user) == undefined) continue;
 								mentionstring.push(`<@${user}>`);
 							}
@@ -5665,7 +5663,6 @@ function checkloved() {
 							allUser = null;
 							if (mentionUser == undefined) continue;
 							for (const user of mentionUser) {
-								console.log(user);
 								if (membersdata.get(user) == undefined) continue;
 								mentionstring.push(`<@${user}>`);
 							}
