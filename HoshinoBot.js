@@ -254,13 +254,13 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			commandLogs(interaction, interaction.commandName, 0);
 
 			if (interaction.commandName == "movevc") {
-				const allowedServer = "1149985859106521109";
+				const allowedServer = ["1149985859106521109", "1302289567415533658"];
 
 				const member = interaction.options.getMember("user");
 				const channel = interaction.options.getChannel("channel");
 
-				if (interaction.guildId != allowedServer) {
-					await message.reply("このコマンドはこのサーバーでは使用できません。");
+				if (!allowedServer.includes(interaction.guildId)) {
+					await interaction.reply("このコマンドはこのサーバーでは使用できません。");
 					return;
 				}
 
