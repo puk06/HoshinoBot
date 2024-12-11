@@ -266,6 +266,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 				await member.voice.setChannel(channel)
 					.then(async () => {
+						const username = member?.displayName;
 						const channelname = channel?.name;
 						const embed = new EmbedBuilder()
 							.setColor("Green")
