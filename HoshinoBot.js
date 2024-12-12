@@ -5088,6 +5088,68 @@ client.on(Events.MessageCreate, async (message) =>
 				}
 			}
 
+			//欲しいものリスト
+			if (message.content.split(" ")[0] == "!listadd") {
+				commandLogs(message, "欲しいものリスト", 1);
+				const item = message.content.split(" ").slice(1).join(" ");
+				if (item == "") {
+					await message.reply("アイテムが入力されていません。");
+					return;
+				}
+				let allLists = fs.readJsonSync("./ServerDatas/WishList.json");
+				if (!allLists[message.author.id]) {
+					allLists[message.author.id] = [];
+				}
+				allLists[message.author.id].push(item);
+				fs.writeJsonSync("./ServerDatas/WishList.json", allLists, { spaces: 4, replacer: null });
+				await message.reply(`アイテムをリストに追加しました。`);
+				allLists = null;
+				return;
+			}
+
+			if (message.content.split(" ")[0] == "!listremove") {
+				commandLogs(message, "欲しいものリスト", 1);
+				const item = message.content.split(" ").slice(1).join(" ");
+				if (item == "") {
+					await message.reply("アイテムが入力されていません。");
+					return;
+				}
+
+				let allLists = fs.readJsonSync("./ServerDatas/WishList.json");
+				if (!allLists[message.author.id]) {
+					await message.reply("リストが存在しません。");
+					return;
+				}
+				if (!allLists[message.author.id].includes(item)) {
+					await message.reply("そのアイテムはリストに存在しません。");
+					return;
+				}
+
+				allLists[message.author.id].splice(allLists[message.author.id].indexOf(item), 1);
+				fs.writeJsonSync("./ServerDatas/WishList.json", allLists, { spaces: 4, replacer: null });
+				await message.reply("アイテムをリストから削除しました。");
+				allLists = null;
+				return;
+			}
+
+			if (message.content.split(" ")[0] == "!list") {
+				commandLogs(message, "欲しいものリスト", 1);
+				let allLists = fs.readJsonSync("./ServerDatas/WishList.json");
+				if (!allLists[message.author.id]) {
+					await message.reply("リストが存在しません。");
+					return;
+				}
+
+				let listMessage = `__\*\*${message.author.username}さんの欲しいものリスト\*\*\__\n`;
+				for (let i = 0; i < allLists[message.author.id].length; i++) {
+					listMessage += `${i + 1}: ${allLists[message.author.id][i]}\n`;
+				}
+				await message.reply(listMessage);
+				allLists = null;
+				return;
+			}
+
+
 			if (/^\d+\.\d+時間$/.test(message.content)) {
 				commandLogs(message, "時間計算", 1);
 				const totalHours = Number(RegExp(/^\d+\.\d+/).exec(message.content)[0]);
