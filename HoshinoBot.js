@@ -514,6 +514,7 @@ client.on(Events.InteractionCreate, async (interaction) =>
 
 				const Type = interaction.options.get("type").value;
 				let Auto = interaction.options.get("auto")?.value;
+				if (typeof Auto != "number") return;
 				if (Auto) Auto = Math.ceil(Auto);
 				if (Auto && Auto < 0) {
 					await interaction.reply("Auto欄には0以上の回数を入力してください。");
@@ -591,7 +592,9 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					return;
 				}
 
-				const Coin = Math.ceil(interaction.options.get("coin").value);
+				let coin = interaction.options.get("coin").value;
+				if (typeof coin != "number") return;
+				const Coin = Math.ceil(coin);
 				const Type = interaction.options.get("type").value;
 
 				if (Coin <= 0) {
@@ -631,7 +634,10 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					return;
 				}
 
-				const Medal = Math.ceil(interaction.options.get("medal").value);
+				let medal = interaction.options.get("medal").value;
+
+				if (typeof medal != "number") return;
+				const Medal = Math.ceil(medal);
 				const Type = interaction.options.get("type").value;
 
 				if (Medal <= 0) {
@@ -682,17 +688,15 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					return;
 				}
 
-				switch (casinoData[interaction.channel.id].game) {
-					case "コインフリップ": {
-						if (bankData[interaction.user.id].rank < casinoData[interaction.channel.id].rank) {
-							await interaction.reply("あなたのランクが指定されたランク以下のため、このゲームに参加できません。");
-							return;
-						}
+				if (casinoData[interaction.channel.id].game === "コインフリップ") {
+					if (bankData[interaction.user.id].rank < casinoData[interaction.channel.id].rank) {
+						await interaction.reply("あなたのランクが指定されたランク以下のため、このゲームに参加できません。");
+						return;
+					}
 
-						if (casinoData[interaction.channel.id].players.length == 2) {
-							await interaction.reply("このゲームは既に2人揃っています。");
-							return;
-						}
+					if (casinoData[interaction.channel.id].players.length == 2) {
+						await interaction.reply("このゲームは既に2人揃っています。");
+						return;
 					}
 				}
 
@@ -720,37 +724,35 @@ client.on(Events.InteractionCreate, async (interaction) =>
 					await interaction.reply(`${casinoData[interaction.channel.id].game}ゲームに参加しました。`);
 				}
 
-				switch (casinoData[interaction.channel.id].game) {
-					case "コインフリップ": {
-						if (casinoData[interaction.channel.id].players.length == 2) {
-							await interaction.followUp("コインを投げています...");
-							setTimeout(async () => {
-								const result = Math.floor(Math.random() * 2);
-								const winner = casinoData[interaction.channel.id].players[result];
-								const loser = casinoData[interaction.channel.id].players[result == 0 ? 1 : 0];
-								const bet = casinoData[interaction.channel.id].bet;
-								if (winner.id != 0) bankData[winner.id].balance += bet;
-								if (loser.id != 0) bankData[loser.id].balance -= bet;
-								fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
-								const Embed = new EmbedBuilder()
-									.setTitle("コインフリップ")
-									.setDescription(`賭け金: **${bet}**コイン`)
-									.setColor("Blue")
-									.addFields({ name: "Winner", value: `${Tools.rankConverterForCasino(bankData[winner.id]?.rank)}**${winner.username}**`, inline: true })
-									.addFields({ name: "Loser", value: `**${Tools.rankConverterForCasino(bankData[loser.id]?.rank)}${loser.username}**`, inline: true })
-									.addFields({ name: "Result", value: `${Tools.rankConverterForCasino(bankData[winner.id]?.rank)}**${winner.username}**さんが勝利しました。(+ ${bet * 2}コイン)`, inline: false })
-									.setTimestamp();
-								await interaction.followUp({ embeds: [Embed] });
-								delete casinoData[interaction.channel.id];
-								fs.writeJsonSync("./ServerDatas/CasinoStatus.json", casinoData, { spaces: 4, replacer: null });
-								bankData = null;
-								casinoData = null;
-							}, 2000);
-						} else {
-							await interaction.followUp(`他のプレイヤーを待っています...(${casinoData[interaction.channel.id].players.length}/2)`);
+				if (casinoData[interaction.channel.id].game === "コインフリップ") {
+					if (casinoData[interaction.channel.id].players.length == 2) {
+						await interaction.followUp("コインを投げています...");
+						setTimeout(async () => {
+							const result = Math.floor(Math.random() * 2);
+							const winner = casinoData[interaction.channel.id].players[result];
+							const loser = casinoData[interaction.channel.id].players[result == 0 ? 1 : 0];
+							const bet = casinoData[interaction.channel.id].bet;
+							if (winner.id != 0) bankData[winner.id].balance += bet;
+							if (loser.id != 0) bankData[loser.id].balance -= bet;
+							fs.writeJsonSync("./ServerDatas/UserBankData.json", bankData, { spaces: 4, replacer: null });
+							const Embed = new EmbedBuilder()
+								.setTitle("コインフリップ")
+								.setDescription(`賭け金: **${bet}**コイン`)
+								.setColor("Blue")
+								.addFields({ name: "Winner", value: `${Tools.rankConverterForCasino(bankData[winner.id]?.rank)}**${winner.username}**`, inline: true })
+								.addFields({ name: "Loser", value: `**${Tools.rankConverterForCasino(bankData[loser.id]?.rank)}${loser.username}**`, inline: true })
+								.addFields({ name: "Result", value: `${Tools.rankConverterForCasino(bankData[winner.id]?.rank)}**${winner.username}**さんが勝利しました。(+ ${bet * 2}コイン)`, inline: false })
+								.setTimestamp();
+							await interaction.followUp({ embeds: [Embed] });
+							delete casinoData[interaction.channel.id];
+							fs.writeJsonSync("./ServerDatas/CasinoStatus.json", casinoData, { spaces: 4, replacer: null });
 							bankData = null;
 							casinoData = null;
-						}
+						}, 2000);
+					} else {
+						await interaction.followUp(`他のプレイヤーを待っています...(${casinoData[interaction.channel.id].players.length}/2)`);
+						bankData = null;
+						casinoData = null;
 					}
 				}
 
@@ -906,7 +908,9 @@ client.on(Events.InteractionCreate, async (interaction) =>
 			}
 
 			if (interaction.commandName == "send") {
-				const Amount = Math.ceil(interaction.options.get("amount").value);
+				let amount = interaction.options.get("amount").value
+				if (typeof amount != "number") return;
+				const Amount = Math.ceil(amount);
 				const OBJECTIVE_USERNAME = interaction.options.get("username").value;
 				if (OBJECTIVE_USERNAME == interaction.user.username) {
 					await interaction.reply("自分自身に送ることは許されていません！");
