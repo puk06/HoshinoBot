@@ -345,20 +345,18 @@ class Tools {
     }
 
     static async getBoothItemInfo(id) {
-        const url = `https://booth.pm/ja/items/${id}`;
+        const url = `https://booth.pm/ja/items/${id}.json`;
         const ItemData = await this.getAPIResponse(url)
-            .then(res => {
-                const $ = cheerio.load(res);
-                const title = $('title').text();
-                const author = $('a[data-product-list="from market_show via market_item_detail to shop_index"]').text();
-                const authorUrl = $().attr('href');
-                const authorIcon = $(`img[alt=${author}]`).attr('src');
-                const imageUrl = $('meta[name="twitter:image"]').attr('content');
-                const priceString = $('.variation-price.u-text-right').text();
-                const priceArray = priceString
-                    .split('¥')
-                    .filter((price) => price !== '')
-                    .map((price) => Number(price.trim().replace(/,/g, '')))
+            .then(data => {
+                const title = data.name;
+                const author = data.shop.name;
+                const authorUrl = data.shop.url;
+                const authorIcon = data.shop.thumbnail_url;
+                const imageUrl = data.images[0].original;
+                const priceArray = [];
+                for (const variations of data.variations) {
+                    priceArray.push(variations.price);
+                }
                 return { title, author, authorUrl, authorIcon, imageUrl, priceArray };
             });
         return ItemData;
