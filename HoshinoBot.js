@@ -3968,7 +3968,11 @@ client.on(Events.MessageCreate, async (message) =>
 						if (minPrice == undefined || element < minPrice) minPrice = element;
 						if (maxPrice == undefined || element > maxPrice) maxPrice = element;
 					}
-					priceString = `${minPrice.toLocaleString()}円 - ${maxPrice.toLocaleString()}円`;
+					if (minPrice == maxPrice) {
+						priceString = `${minPrice.toLocaleString()}円`;
+					} else {
+						priceString = `${minPrice.toLocaleString()}円 - ${maxPrice.toLocaleString()}円`;
+					}
 				}
 
 				const embed = new EmbedBuilder()
@@ -3976,8 +3980,11 @@ client.on(Events.MessageCreate, async (message) =>
 					.setTitle(ItemData.title)
 					.setURL(message.content)
 					.setAuthor({ name: ItemData.author, iconURL: ItemData.authorIcon, url: ItemData.authorUrl })
-					.addFields({ name: "価格", value: `${priceString}`, inline: true })
-					.addFields({ name: "購入ページ", value: `[Booth](${message.content})`, inline: true })
+					.addFields({ name: "スキ数", value: ItemData.wishListCount.toLocaleString(), inline: true })
+					.addFields({ name: "カテゴリ", value: ItemData.category, inline: true })
+					.addFields({ name: "R-18", value: ItemData.isAdult ? "Yes" : "No", inline: true })
+					.addFields({ name: "価格", value: priceString, inline: true })
+					.addFields({ name: "商品数", value: ItemData.variationsCount.toLocaleString(), inline: true })
 					.setImage(ItemData.imageUrl)
 					.setFooter({ text: `Booth item by ${ItemData.author}` });
 

@@ -351,13 +351,17 @@ class Tools {
                 const title = data.name;
                 const author = data.shop.name;
                 const authorUrl = data.shop.url;
+                const wishListCount = data.wish_lists_count;
+                const isAdult = data.is_adult;
+                const category = data.category.name;
                 const authorIcon = data.shop.thumbnail_url;
+                const variationsCount = data.variations.length;
                 const imageUrl = data.images[0].original;
                 const priceArray = [];
                 for (const variations of data.variations) {
                     priceArray.push(variations.price);
                 }
-                return { title, author, authorUrl, authorIcon, imageUrl, priceArray };
+                return { title, author, authorUrl, authorIcon, imageUrl, priceArray, wishListCount, isAdult, category, variationsCount };
             });
         return ItemData;
     }
